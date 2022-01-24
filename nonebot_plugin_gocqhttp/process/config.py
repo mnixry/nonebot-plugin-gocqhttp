@@ -5,8 +5,8 @@ from typing import Any, Callable, Dict
 
 import yaml
 
-from ..config import AccountConfig, ExtraConfigType, driver_config
 from ..log import logger
+from ..plugin_config import AccountConfig, ExtraConfigType, driver_config
 
 CONFIG_TEMPLATE_PATH = Path(__file__).parent / "config-template.yml"
 CONFIG_REF_PREFIX, CONFIG_OVERRIDE_PREFIX = "ref:", "override:"

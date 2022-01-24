@@ -4,12 +4,11 @@ from tempfile import TemporaryDirectory
 
 from anyio import open_file
 from httpx import AsyncClient
-from nonebot import get_driver
 from nonebot.utils import run_sync
 from tqdm import tqdm
 
-from ..config import config
 from ..log import logger
+from ..plugin_config import config
 from .config import ACCOUNTS_DATA_PATH
 from .platform import ARCHIVE_EXT, EXECUTABLE_EXT, GOARCH, GOOS
 
@@ -35,9 +34,8 @@ def unarchive_file(path: Path):
     assert BINARY_PATH.exists(), "go-cqhttp binary not found"
 
 
-@get_driver().on_startup
-@logger.catch
-async def download():
+@logger.catch(reraise=True)
+async def download_gocq():
     with tqdm(leave=False) as progress, TemporaryDirectory() as tmpdir:
         logger.opt(colors=True).debug(f"Download go-cqhttp from <u>{DOWNLOAD_URL}</u>")
         download_path = Path(tmpdir) / ("temp" + ARCHIVE_EXT)
