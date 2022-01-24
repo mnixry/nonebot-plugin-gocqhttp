@@ -2,6 +2,7 @@ import asyncio
 import re
 import subprocess
 import threading
+from itertools import count
 from typing import Optional
 
 import psutil
@@ -13,7 +14,6 @@ from ..plugin_config import AccountConfig
 from .config import ACCOUNTS_DATA_PATH, generate_config, generate_device
 from .download import BINARY_PATH
 
-ANSI_ESCAPE_PATTERN = re.compile(r"\x1b[^m]*m")
 LOG_REGEX = re.compile(
     r"^"
     r"\[(?P<time>\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)\] "
@@ -38,20 +38,36 @@ class GoCQProcess:
         account: AccountConfig,
         kill_timeout: float = 5,
         stop_timeout: float = 6,
-        wait_interval: float = 0.1,
+        max_restarts: int = -1,
         loop: Optional[asyncio.AbstractEventLoop] = None,
     ):
         self.account = account
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
 
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
-        self.wait_interval = wait_interval
+        self.max_restarts = max_restarts
+
         self.loop = loop or asyncio.get_running_loop()
         self.output_queue = asyncio.Queue[str]()
 
         def daemon_thread_runner():
-            while self.daemon_thread_running:
-                self._daemon_thread_runner()
+            for restarted in count():
+                if not self.daemon_thread_running:
+                    break
+                if self.max_restarts >= 0 and restarted >= self.max_restarts:
+                    break
+                code = 0
+                try:
+                    self._daemon_thread_runner()
+                except Exception:
+                    logger.exception(
+                        f"Thread {self.daemon_thread.name!r} raised unknown exception:"
+                    )
+                logger.warning(
+                    f"<b>Process for <e>{self.account.uin}</e> exited</b> with code "
+                    f"<r>{code}</r>, retrying to restart... "
+                    f"<y>({restarted}/{self.max_restarts})</y>"
+                )
             return
 
         self.daemon_thread = threading.Thread(
@@ -60,7 +76,6 @@ class GoCQProcess:
             daemon=True,
         )
 
-    @logger.catch
     def _daemon_thread_runner(self):
         self.process = subprocess.Popen(
             [BINARY_PATH.absolute(), "faststart"],
@@ -72,15 +87,13 @@ class GoCQProcess:
         assert self.process.stdout is not None
         for output in iter(self.process.stdout.readline, ""):
             output = output.strip()
-            replaced_output = ANSI_ESCAPE_PATTERN.sub("", output.strip())
-
-            if "アトリは、高性能ですから!" in replaced_output:
+            if "アトリは、高性能ですから!" in output:
                 logger.info(
                     "go-cqhttp for "
                     f"<e>{self.account.uin}</e> has successfully started."
                 )
 
-            log_matched = LOG_REGEX.match(replaced_output)
+            log_matched = LOG_REGEX.match(output)
             if log_matched is not None:
                 logger.log(
                     log_matched.group("level"),
@@ -93,12 +106,6 @@ class GoCQProcess:
         if self.process.returncode is None:
             self.process.terminate()
             self.process.wait(timeout=self.kill_timeout)
-
-        if self.process.returncode != 0:
-            logger.error(
-                f"go-cqhttp process {self.process.pid} for account "
-                f"{self.account.uin} exited with code {self.process.returncode}."
-            )
 
         return self.process.returncode
 
