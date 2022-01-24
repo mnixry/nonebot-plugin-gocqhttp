@@ -37,7 +37,7 @@ def unarchive_file(path: Path):
 @logger.catch(reraise=True)
 async def download_gocq():
     with tqdm(leave=False) as progress, TemporaryDirectory() as tmpdir:
-        logger.opt(colors=True).debug(f"Download go-cqhttp from <u>{DOWNLOAD_URL}</u>")
+        logger.debug(f"Begin to Download go-cqhttp from <u>{DOWNLOAD_URL}</u>")
         download_path = Path(tmpdir) / ("temp" + ARCHIVE_EXT)
         BINARY_DIR.mkdir(parents=True, exist_ok=True)
         async with (
@@ -53,6 +53,6 @@ async def download_gocq():
             async for chunk in response.aiter_bytes():
                 size = await file.write(chunk)
                 progress.update(size)
-        logger.debug(f"Unarchive go-cqhttp binary file to {BINARY_PATH!r}")
+        logger.debug(f"Unarchive go-cqhttp binary file to <e>{BINARY_PATH!r}</e>")
         await unarchive_file(download_path)
     return
