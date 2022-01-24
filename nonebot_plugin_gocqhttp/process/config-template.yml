@@ -1,0 +1,50 @@
+account:
+  uin:
+  password:
+  encrypt: false
+
+  relogin:
+    disabled: false
+    delay: 3
+    interval: 0
+    max-times: 0
+
+  use-sso-address: true
+
+heartbeat:
+  disabled: false
+  interval: 10
+
+message:
+  post-format: array
+  ignore-invalid-cqcode: false
+  force-fragment: false
+  fix-url: false
+  proxy-rewrite: ""
+  report-self-message: false
+  remove-reply-at: false
+  extra-reply-data: false
+
+output:
+  log-level: warn
+  log-colorful: false
+  debug: false
+
+default-middlewares: &default
+  access-token: ""
+  filter: ""
+  rate-limit:
+    enabled: false
+    frequency: 1
+    bucket: 1
+
+servers:
+  - ws-reverse:
+      universal: "ws://localhost:8080/onebot/v11/ws"
+      reconnect-interval: 3000
+      middlewares:
+        <<: *default
+
+database:
+  leveldb:
+    enable: true
