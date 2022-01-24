@@ -57,9 +57,13 @@ def generate_config(account: AccountConfig) -> None:
         config_template = yaml.safe_load(f)
     config_template["account"]["uin"] = account.uin
     config_template["account"]["password"] = account.password
-    config_template["servers"][0][
-        "ws-reverse"
-    ] = f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws"
+    config_template["servers"][0]["ws-reverse"].update(
+        {
+            "universal": f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws",
+            "api": None,
+            "event": None,
+        },
+    )
     loaded_config = (
         load_extra_config(config_template, account.config_extra, yaml.safe_load)
         if account.config_extra is not None

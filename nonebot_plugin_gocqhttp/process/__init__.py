@@ -1,17 +1,26 @@
 import asyncio
+import re
 import subprocess
 import threading
-from time import sleep
 from typing import Optional
 
 import psutil
-from nonebot.utils import run_sync
+from nonebot.utils import escape_tag, run_sync
 from pydantic import BaseModel
 
-from ..plugin_config import AccountConfig
 from ..log import logger
+from ..plugin_config import AccountConfig
 from .config import ACCOUNTS_DATA_PATH, generate_config, generate_device
 from .download import BINARY_PATH
+
+ANSI_ESCAPE_PATTERN = re.compile(r"\x1b[^m]*m")
+LOG_REGEX = re.compile(
+    r"^"
+    r"\[(?P<time>\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)\] "
+    r"\[(?P<level>[A-Z]+?)\]: "
+    r"(?P<message>.*)"
+    r"$"
+)
 
 
 class ProcessInfo(BaseModel):
@@ -38,53 +47,53 @@ class GoCQProcess:
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
         self.wait_interval = wait_interval
         self.loop = loop or asyncio.get_running_loop()
-        self.stdout_queue = asyncio.Queue[str]()
-        self.stderr_queue = asyncio.Queue[str]()
+        self.output_queue = asyncio.Queue[str]()
+
+        def daemon_thread_runner():
+            while self.daemon_thread_running:
+                self._daemon_thread_runner()
+            return
 
         self.daemon_thread = threading.Thread(
-            target=(
-                logger.catch(
-                    onerror=lambda e: self.process.kill()
-                    if self.process and self.process.returncode
-                    else None,
-                    message=f"Fatal error occurred for {self.daemon_thread.name!r}",
-                )(self._daemon_thread_runner)
-            ),
+            target=daemon_thread_runner,
             name=f"{self.account.uin}-Daemon",
             daemon=True,
         )
 
+    @logger.catch
     def _daemon_thread_runner(self):
         self.process = subprocess.Popen(
-            [str(BINARY_PATH.absolute()), "faststart"],
-            encoding="utf-8",
+            [BINARY_PATH.absolute(), "faststart"],
             cwd=self.cwd.absolute(),
+            encoding="utf-8",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
         )
-        assert self.process.stdout and self.process.stderr
-        while self.daemon_thread_running:
-            stdout, stderr = (
-                self.process.stderr.readline(1),
-                self.process.stderr.readline(1),
-            )
-            if stdout and stdout.endswith("\n"):
-                asyncio.run_coroutine_threadsafe(
-                    self.stdout_queue.put(stdout), loop=self.loop
-                )
-            if stderr and stderr.endswith("\n"):
-                asyncio.run_coroutine_threadsafe(
-                    self.stderr_queue.put(stderr), loop=self.loop
-                )
-            sleep(self.wait_interval)
-        self.process.terminate()
+        assert self.process.stdout is not None
+        for output in iter(self.process.stdout.readline, ""):
+            output = output.strip()
+            replaced_output = ANSI_ESCAPE_PATTERN.sub("", output.strip())
 
-        try:
-            self.process.wait(self.kill_timeout)
-        except subprocess.TimeoutExpired:
-            self.process.kill()
-            logger.error(
-                f"go-cqhttp process {self.process.pid} for account "
-                f"{self.account.uin} terminate failed, killed."
-            )
+            if "アトリは、高性能ですから!" in replaced_output:
+                logger.info(
+                    "go-cqhttp for "
+                    f"<e>{self.account.uin}</e> has successfully started."
+                )
+
+            log_matched = LOG_REGEX.match(replaced_output)
+            if log_matched is not None:
+                logger.log(
+                    log_matched.group("level"),
+                    f"<d>[{self.account.uin}]</d> "
+                    + escape_tag(log_matched.group("message")),
+                )
+            else:
+                logger.info(f"<d>[{self.account.uin}]</d> " + escape_tag(output))
+
+        if self.process.returncode is None:
+            self.process.terminate()
+            self.process.wait(timeout=self.kill_timeout)
+
         if self.process.returncode != 0:
             logger.error(
                 f"go-cqhttp process {self.process.pid} for account "
@@ -103,13 +112,17 @@ class GoCQProcess:
 
     @run_sync
     def stop(self):
+        if self.process is None:
+            raise RuntimeError("Process is not running.")
         self.daemon_thread_running = False
+        self.process.terminate()
         self.daemon_thread.join(self.stop_timeout)
 
     @run_sync
     def status(self):
         if self.process is None:
-            raise ValueError("Process not started yet.")
+            raise RuntimeError("Process not started yet.")
+
         process_status = psutil.Process(self.process.pid)
         with process_status.oneshot():
             cpu = process_status.cpu_percent()

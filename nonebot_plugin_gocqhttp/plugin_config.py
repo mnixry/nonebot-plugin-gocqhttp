@@ -33,11 +33,11 @@ class AccountConfig(Config):
 
 
 class PluginConfig(Config):
-    ACCOUNTS: List[AccountConfig] = Field(default_factory=list, env="gocq_accounts")
-    DOWNLOAD_REPO: str = Field("Mrs4s/go-cqhttp", env="gocq_repo")
-    DOWNLOAD_VERSION: str = Field("latest", env="gocq_version")
-    DOWNLOAD_URL: str = Field(DEFAULT_DOWNLOAD_URL, env="gocq_url")
-    FORCE_DOWNLOAD: bool = Field(False, env="gocq_force_download")
+    ACCOUNTS: List[AccountConfig] = Field(default_factory=list, alias="gocq_accounts")
+    DOWNLOAD_REPO: str = Field("Mrs4s/go-cqhttp", alias="gocq_repo")
+    DOWNLOAD_VERSION: str = Field("latest", alias="gocq_version")
+    DOWNLOAD_URL: str = Field(DEFAULT_DOWNLOAD_URL, alias="gocq_url")
+    FORCE_DOWNLOAD: bool = Field(False, alias="gocq_force_download")
 
 
 driver_config = driver.config
