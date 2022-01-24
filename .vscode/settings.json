@@ -1,0 +1,42 @@
+{
+    "python.pythonPath": ".venv/bin/python",
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportPrivateImportUsage": "warning"
+    },
+    "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
+    "python.linting.flake8Enabled": true,
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.fixAll": true
+        }
+    },
+    "editor.formatOnSave": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/.hg/store/**": true,
+        "**/.venv/**": true,
+        "**/.mypy_cache/**": true,
+    },
+    "git.autofetch": true,
+    "git.enableSmartCommit": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "cSpell.words": [
+        "aarch",
+        "armv",
+        "bssid",
+        "cqhttp",
+        "GOARCH",
+        "gocq",
+        "gocqhttp",
+        "imei",
+        "imsi",
+        "pydantic",
+        "ssid"
+    ],
+}
