@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "nonebot-plugin-gocqhttp"
+version = "0.1.0"
+description = "A plugin to run go-cqhttp directly in NoneBot2, without additional download and installation."
+authors = ["Mix <mnixry@users.noreply.github.com>"]
+license = "AGPL-3.0"
+packages = [{ include = 'nonebot_plugin_gocqhttp' }]
+readme = "README.md"
+repository = "https://github.com/mnixry/nonebot-plugin-gocqhttp"
+
+[tool.poetry.dependencies]
+python = "^3.7.3"
+nonebot2 = "^2.0.0-beta.1"
+PyYAML = "^6.0"
+httpx = {extras = ["http2"], version = "^0.21.3"}
+tqdm = "^4.62.3"
+
+[tool.poetry.dev-dependencies]
+black = "^21.12b0"
+flake8 = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
