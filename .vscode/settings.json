@@ -36,6 +36,7 @@
         "gocqhttp",
         "imei",
         "imsi",
+        "psutil",
         "pydantic",
         "ssid"
     ],
