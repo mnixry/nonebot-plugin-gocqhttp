@@ -127,7 +127,7 @@ class GoCQProcess:
 
     @run_sync
     def status(self):
-        if self.process is None:
+        if self.process is None or self.process.returncode is not None:
             raise RuntimeError("Process not started yet.")
 
         process_status = psutil.Process(self.process.pid)

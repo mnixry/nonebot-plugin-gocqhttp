@@ -2,13 +2,14 @@ from typing import Dict
 
 from nonebot import get_driver
 
+import nonebot_plugin_gocqhttp.plugin  # noqa:F401
+
 from .log import logger
 from .plugin_config import config
 from .process import GoCQProcess
 from .process.download import BINARY_PATH, download_gocq
 
 PROCESSES: Dict[int, GoCQProcess] = {}
-
 
 driver = get_driver()
 
