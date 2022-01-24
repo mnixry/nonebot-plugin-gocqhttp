@@ -10,7 +10,10 @@ from .process.download import BINARY_PATH, download_gocq
 PROCESSES: Dict[int, GoCQProcess] = {}
 
 
-@get_driver().on_startup
+driver = get_driver()
+
+
+@driver.on_startup
 async def startup():
     if config.FORCE_DOWNLOAD or not BINARY_PATH.is_file():
         await download_gocq()
