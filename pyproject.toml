@@ -15,6 +15,7 @@ PyYAML = "^6.0"
 httpx = {extras = ["http2"], version = "^0.21.3"}
 tqdm = "^4.62.3"
 psutil = "^5.9.0"
+nonebot-adapter-onebot = "^2.0.0-beta.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b0"
