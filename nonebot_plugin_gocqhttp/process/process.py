@@ -2,19 +2,24 @@ import asyncio
 import re
 import subprocess
 import threading
-from datetime import datetime
 from itertools import count
 from time import sleep
-from typing import Any, Awaitable, Callable, Dict, Optional, Set, TypeVar, Union
+from typing import Any, Awaitable, Callable, Dict, Optional, Set, TypeVar
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
-from pydantic import BaseModel, Field
 
 from ..log import STDOUT, logger
 from ..plugin_config import AccountConfig
 from .config import ACCOUNTS_DATA_PATH, generate_config, generate_device
 from .download import BINARY_PATH
+from .models import (
+    ProcessInfo,
+    ProcessLog,
+    ProcessStatus,
+    RunningProcessDetail,
+    StoppedProcessDetail,
+)
 
 LOG_REGEX = re.compile(
     r"^"
@@ -26,34 +31,6 @@ LOG_REGEX = re.compile(
 LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "FATAL"}
 
 REGISTERED_PROCESSES: Dict[int, "GoCQProcess"] = {}
-
-
-class BaseProcessInfo(BaseModel):
-    status: str
-    total_logs: int
-    restarts: int
-
-
-class RunningProcessInfo(BaseProcessInfo):
-    pid: int
-    memory_used: int
-    swap_used: int
-    cpu_percent: float
-    start_time: float
-
-
-class StoppedProcessInfo(BaseProcessInfo):
-    code: int
-
-
-ProcessInfo = Union[RunningProcessInfo, StoppedProcessInfo]
-
-
-class ProcessLog(BaseModel):
-    raw: str
-    time: datetime = Field(default_factory=datetime.now)
-    level: Optional[str] = None
-    message: Optional[str] = None
 
 
 LogListener = Callable[[ProcessLog], Awaitable[Any]]
@@ -73,7 +50,7 @@ class GoCQProcess:
         print_process_log: bool = True,
     ):
         if account.uin not in REGISTERED_PROCESSES:
-            REGISTERED_PROCESSES[self.account.uin] = self
+            REGISTERED_PROCESSES[account.uin] = self
         else:
             raise ValueError(f"Account {account.uin} process is already registered.")
 
@@ -177,30 +154,32 @@ class GoCQProcess:
     def status(self) -> ProcessInfo:
         if self.process is None:
             raise RuntimeError("Process not started yet.")
-        process_status = psutil.Process(self.process.pid)
         if self.process.returncode is None:
-            with process_status.oneshot():
-                cpu = process_status.cpu_percent()
-                memory = process_status.memory_info()
-                create_time = process_status.create_time()
-                status = process_status.status()
-                pid = process_status.pid
-            return RunningProcessInfo(
-                pid=pid,
-                memory_used=memory.rss,
-                swap_used=memory.vms,
-                cpu_percent=cpu,
-                start_time=create_time,
-                status=status,
+            process = psutil.Process(self.process.pid)
+            with process.oneshot():
+                cpu = process.cpu_percent()
+                status = process.status()
+                memory = process.memory_info()
+                create_time = process.create_time()
+            return ProcessInfo(
+                status=ProcessStatus.running,
                 total_logs=self.log_counter,
                 restarts=self.restarted,
+                details=RunningProcessDetail(
+                    pid=self.process.pid,
+                    status=status,
+                    memory_used=memory.rss,
+                    swap_used=memory.vms,
+                    cpu_percent=cpu,
+                    start_time=create_time,
+                ),
             )
         else:
-            return StoppedProcessInfo(
-                status=process_status.status(),
+            return ProcessInfo(
+                status=ProcessStatus.stopped,
                 total_logs=self.log_counter,
                 restarts=self.restarted,
-                code=self.process.returncode,
+                details=StoppedProcessDetail(code=self.process.returncode),
             )
         return
 
