@@ -5,7 +5,7 @@ import threading
 from datetime import datetime
 from itertools import count
 from time import sleep
-from typing import Any, Awaitable, Callable, Optional, Set, TypeVar, Union
+from typing import Any, Awaitable, Callable, Dict, Optional, Set, TypeVar, Union
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
@@ -24,6 +24,8 @@ LOG_REGEX = re.compile(
     r"$"
 )
 LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "FATAL"}
+
+REGISTERED_PROCESSES: Dict[int, "GoCQProcess"] = {}
 
 
 class BaseProcessInfo(BaseModel):
@@ -70,6 +72,11 @@ class GoCQProcess:
         restart_interval: float = 3,
         print_process_log: bool = True,
     ):
+        if account.uin not in REGISTERED_PROCESSES:
+            REGISTERED_PROCESSES[self.account.uin] = self
+        else:
+            raise ValueError(f"Account {account.uin} process is already registered.")
+
         self.account = account
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
         self.loop = asyncio.get_running_loop()

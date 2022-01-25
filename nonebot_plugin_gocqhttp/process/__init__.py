@@ -1,2 +1,2 @@
 # flake8:noqa:F401
-from .process import GoCQProcess
+from .process import REGISTERED_PROCESSES, GoCQProcess
