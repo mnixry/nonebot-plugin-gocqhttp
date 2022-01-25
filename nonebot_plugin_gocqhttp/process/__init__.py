@@ -5,13 +5,13 @@ import threading
 from datetime import datetime
 from itertools import count
 from time import sleep
-from typing import Optional
+from typing import Any, Awaitable, Callable, Optional, Set, TypeVar, Union
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
 from pydantic import BaseModel, Field
 
-from ..log import logger
+from ..log import STDOUT, logger
 from ..plugin_config import AccountConfig
 from .config import ACCOUNTS_DATA_PATH, generate_config, generate_device
 from .download import BINARY_PATH
@@ -23,20 +23,28 @@ LOG_REGEX = re.compile(
     r"(?P<message>.*)"
     r"$"
 )
-LOG_LEVEL_MAP = {
-    "DEBUG": logger.debug,
-    "INFO": logger.info,
-    "WARNING": logger.warning,
-    "ERROR": logger.error,
-    "FATAL": logger.error,
-}
+LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "FATAL"}
 
 
-class ProcessInfo(BaseModel):
+class BaseProcessInfo(BaseModel):
+    status: str
+    total_logs: int
+    restarts: int
+
+
+class RunningProcessInfo(BaseProcessInfo):
+    pid: int
     memory_used: int
     swap_used: int
     cpu_percent: float
     start_time: float
+
+
+class StoppedProcessInfo(BaseProcessInfo):
+    code: int
+
+
+ProcessInfo = Union[RunningProcessInfo, StoppedProcessInfo]
 
 
 class ProcessLog(BaseModel):
@@ -44,6 +52,10 @@ class ProcessLog(BaseModel):
     time: datetime = Field(default_factory=datetime.now)
     level: Optional[str] = None
     message: Optional[str] = None
+
+
+LogListener = Callable[[ProcessLog], Awaitable[Any]]
+LogListener_T = TypeVar("LogListener_T", bound=LogListener)
 
 
 class GoCQProcess:
@@ -56,17 +68,25 @@ class GoCQProcess:
         stop_timeout: float = 6,
         max_restarts: int = -1,
         restart_interval: float = 3,
-        process_log: bool = True,
+        print_process_log: bool = True,
     ):
         self.account = account
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.loop = asyncio.get_running_loop()
 
-        self.process_log = process_log
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
         self.max_restarts, self.restart_interval = max_restarts, restart_interval
 
-        self.loop = asyncio.get_running_loop()
-        self.log_queue = asyncio.Queue[ProcessLog]()
+        self.log_listeners: Set[LogListener] = set()
+        self.log_counter, self.restarted = 0, 0
+
+        async def process_log(log: ProcessLog):
+            message = log.message or log.raw
+            level = log.level if log.level in LOG_LEVELS else STDOUT.name
+            logger.log(level, f"<d>[{self.account.uin}]</d> {escape_tag(message)}")
+
+        if print_process_log:
+            self.listen_log(process_log)
 
         def daemon_thread_runner():
             for restarted in count():
@@ -86,6 +106,7 @@ class GoCQProcess:
                     f"<r>{code}</r>, retrying to restart... "
                     f"<y>({restarted}/{self.max_restarts})</y>"
                 )
+                self.restarted += 1
                 sleep(self.restart_interval)
             return
 
@@ -112,29 +133,15 @@ class GoCQProcess:
                     f"<e>{self.account.uin}</e> has successfully started."
                 )
 
+            self.log_counter += 1
             log_matched = LOG_REGEX.match(output)
             log_model = (
                 ProcessLog(raw=output, **log_matched.groupdict())
                 if log_matched
                 else ProcessLog(raw=output)
             )
-            asyncio.run_coroutine_threadsafe(
-                self.log_queue.put(log_model), loop=self.loop
-            )
-
-            if not self.process_log:
-                continue
-
-            if (
-                log_model.message
-                and log_model.level
-                and log_model.level in LOG_LEVEL_MAP
-            ):
-                LOG_LEVEL_MAP[log_model.level](
-                    f"<d>[{self.account.uin}]</d> " + escape_tag(log_model.message)
-                ),
-            else:
-                logger.info(f"<d>[{self.account.uin}]</d> " + escape_tag(output))
+            for listener in self.log_listeners:
+                asyncio.run_coroutine_threadsafe(listener(log_model), loop=self.loop)
 
         if self.process.returncode is None:
             self.process.terminate()
@@ -152,25 +159,44 @@ class GoCQProcess:
 
     @run_sync
     def stop(self):
-        if self.process is None:
-            raise RuntimeError("Process is not running.")
         self.daemon_thread_running = False
-        self.process.terminate()
-        self.daemon_thread.join(self.stop_timeout)
+        if self.process is not None:
+            self.process.terminate()
+        if self.daemon_thread.is_alive():
+            self.daemon_thread.join(self.stop_timeout)
+        return
 
     @run_sync
-    def status(self):
-        if self.process is None or self.process.returncode is not None:
+    def status(self) -> ProcessInfo:
+        if self.process is None:
             raise RuntimeError("Process not started yet.")
-
         process_status = psutil.Process(self.process.pid)
-        with process_status.oneshot():
-            cpu = process_status.cpu_percent()
-            memory = process_status.memory_info()
-            create_time = process_status.create_time()
-        return ProcessInfo(
-            memory_used=memory.rss,
-            swap_used=memory.vms,
-            cpu_percent=cpu,
-            start_time=create_time,
-        )
+        if self.process.returncode is None:
+            with process_status.oneshot():
+                cpu = process_status.cpu_percent()
+                memory = process_status.memory_info()
+                create_time = process_status.create_time()
+                status = process_status.status()
+                pid = process_status.pid
+            return RunningProcessInfo(
+                pid=pid,
+                memory_used=memory.rss,
+                swap_used=memory.vms,
+                cpu_percent=cpu,
+                start_time=create_time,
+                status=status,
+                total_logs=self.log_counter,
+                restarts=self.restarted,
+            )
+        else:
+            return StoppedProcessInfo(
+                status=process_status.status(),
+                total_logs=self.log_counter,
+                restarts=self.restarted,
+                code=self.process.returncode,
+            )
+        return
+
+    def listen_log(self, listener: LogListener_T) -> LogListener_T:
+        self.log_listeners.add(listener)
+        return listener
