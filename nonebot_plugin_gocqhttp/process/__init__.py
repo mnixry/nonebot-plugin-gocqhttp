@@ -2,12 +2,14 @@ import asyncio
 import re
 import subprocess
 import threading
+from datetime import datetime
 from itertools import count
+from time import sleep
 from typing import Optional
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from ..log import logger
 from ..plugin_config import AccountConfig
@@ -21,6 +23,13 @@ LOG_REGEX = re.compile(
     r"(?P<message>.*)"
     r"$"
 )
+LOG_LEVEL_MAP = {
+    "DEBUG": logger.debug,
+    "INFO": logger.info,
+    "WARNING": logger.warning,
+    "ERROR": logger.error,
+    "FATAL": logger.error,
+}
 
 
 class ProcessInfo(BaseModel):
@@ -28,6 +37,13 @@ class ProcessInfo(BaseModel):
     swap_used: int
     cpu_percent: float
     start_time: float
+
+
+class ProcessLog(BaseModel):
+    raw: str
+    time: datetime = Field(default_factory=datetime.now)
+    level: Optional[str] = None
+    message: Optional[str] = None
 
 
 class GoCQProcess:
@@ -39,16 +55,18 @@ class GoCQProcess:
         kill_timeout: float = 5,
         stop_timeout: float = 6,
         max_restarts: int = -1,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
+        restart_interval: float = 3,
+        process_log: bool = True,
     ):
         self.account = account
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
 
+        self.process_log = process_log
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
-        self.max_restarts = max_restarts
+        self.max_restarts, self.restart_interval = max_restarts, restart_interval
 
-        self.loop = loop or asyncio.get_running_loop()
-        self.output_queue = asyncio.Queue[str]()
+        self.loop = asyncio.get_running_loop()
+        self.log_queue = asyncio.Queue[ProcessLog]()
 
         def daemon_thread_runner():
             for restarted in count():
@@ -58,7 +76,7 @@ class GoCQProcess:
                     break
                 code = 0
                 try:
-                    self._daemon_thread_runner()
+                    code = self._daemon_thread_runner()
                 except Exception:
                     logger.exception(
                         f"Thread {self.daemon_thread.name!r} raised unknown exception:"
@@ -68,6 +86,7 @@ class GoCQProcess:
                     f"<r>{code}</r>, retrying to restart... "
                     f"<y>({restarted}/{self.max_restarts})</y>"
                 )
+                sleep(self.restart_interval)
             return
 
         self.daemon_thread = threading.Thread(
@@ -94,12 +113,26 @@ class GoCQProcess:
                 )
 
             log_matched = LOG_REGEX.match(output)
-            if log_matched is not None:
-                logger.log(
-                    log_matched.group("level"),
-                    f"<d>[{self.account.uin}]</d> "
-                    + escape_tag(log_matched.group("message")),
-                )
+            log_model = (
+                ProcessLog(raw=output, **log_matched.groupdict())
+                if log_matched
+                else ProcessLog(raw=output)
+            )
+            asyncio.run_coroutine_threadsafe(
+                self.log_queue.put(log_model), loop=self.loop
+            )
+
+            if not self.process_log:
+                continue
+
+            if (
+                log_model.message
+                and log_model.level
+                and log_model.level in LOG_LEVEL_MAP
+            ):
+                LOG_LEVEL_MAP[log_model.level](
+                    f"<d>[{self.account.uin}]</d> " + escape_tag(log_model.message)
+                ),
             else:
                 logger.info(f"<d>[{self.account.uin}]</d> " + escape_tag(output))
 

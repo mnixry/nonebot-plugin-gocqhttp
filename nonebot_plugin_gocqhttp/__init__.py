@@ -26,3 +26,13 @@ async def startup():
         await process.start()
 
     return
+
+
+@driver.on_shutdown
+async def shutdown():
+    for uin, process in PROCESSES.items():
+        try:
+            await process.stop()
+        except RuntimeError:
+            pass
+    return

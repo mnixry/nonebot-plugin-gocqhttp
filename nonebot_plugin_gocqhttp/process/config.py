@@ -7,6 +7,7 @@ import yaml
 
 from ..log import logger
 from ..plugin_config import AccountConfig, ExtraConfigType, driver_config, onebot_config
+from .device import random_device
 
 CONFIG_TEMPLATE_PATH = Path(__file__).parent / "config-template.yml"
 CONFIG_REF_PREFIX, CONFIG_OVERRIDE_PREFIX = "ref:", "override:"
@@ -83,7 +84,7 @@ def generate_device(account: AccountConfig) -> None:
     account_path = ACCOUNTS_DATA_PATH / str(account.uin)
     account_path.mkdir(parents=True, exist_ok=True)
     device_path = account_path / "device.json"
-    device_template = {"protocol": account.protocol.value}
+    device_template = random_device(account.uin, account.protocol).dict()
 
     loaded_device = (
         load_extra_config(device_template, account.device_extra, json.loads)
