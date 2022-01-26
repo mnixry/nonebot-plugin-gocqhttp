@@ -1,5 +1,5 @@
 from csv import DictReader
-from functools import cache
+from functools import lru_cache
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ class AndroidBuild(BaseModel):
     version: str
 
 
-@cache
+@lru_cache
 def load_devices_list(path: Path = DEVICES_DIR):
     with path.open("rt", encoding="utf-8") as f:
         reader = DictReader(f)
@@ -32,7 +32,7 @@ def load_devices_list(path: Path = DEVICES_DIR):
     ]
 
 
-@cache
+@lru_cache
 def load_builds_list(path: Path = BUILDS_DIR):
     with path.open("rt", encoding="utf-8") as f:
         reader = DictReader(f)
