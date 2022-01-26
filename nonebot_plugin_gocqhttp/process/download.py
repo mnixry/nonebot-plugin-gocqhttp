@@ -5,7 +5,6 @@ from tempfile import TemporaryDirectory
 from anyio import open_file
 from httpx import AsyncClient
 from nonebot.utils import run_sync
-from tqdm import tqdm
 
 from ..log import logger
 from ..plugin_config import config
@@ -36,8 +35,8 @@ def unarchive_file(path: Path):
 
 @logger.catch(reraise=True)
 async def download_gocq():
-    with tqdm(leave=False) as progress, TemporaryDirectory() as tmpdir:
-        logger.debug(f"Begin to Download go-cqhttp from <u>{DOWNLOAD_URL}</u>")
+    with TemporaryDirectory() as tmpdir:
+        logger.info(f"Begin to Download binary from <u>{DOWNLOAD_URL}</u>")
         download_path = Path(tmpdir) / ("temp" + ARCHIVE_EXT)
         BINARY_DIR.mkdir(parents=True, exist_ok=True)
         async with (
@@ -46,13 +45,13 @@ async def download_gocq():
             await open_file(download_path, "wb") as file,
         ):
             response.raise_for_status()
-            total_size = int(response.headers.get("content-length", 0))
-            progress.total = total_size
-            progress.clear()
-            progress.update()
+            total_size = int(response.headers["Content-Length"])
             async for chunk in response.aiter_bytes():
                 size = await file.write(chunk)
-                progress.update(size)
-        logger.debug(f"Unarchive go-cqhttp binary file to <e>{BINARY_PATH!r}</e>")
+                logger.debug(
+                    "Download progress: "
+                    f"{size/total_size:.2%} ({size}/{total_size} bytes)"
+                )
+        logger.debug(f"Unarchive binary file to <e>{BINARY_PATH!r}</e>")
         await unarchive_file(download_path)
     return
