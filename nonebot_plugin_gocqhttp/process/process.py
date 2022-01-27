@@ -4,23 +4,23 @@ import subprocess
 import threading
 from itertools import count
 from time import sleep
-from typing import Any, Awaitable, Callable, Dict, Optional, Set, TypeVar
+from typing import Any, Awaitable, Callable, Optional, Set, TypeVar, Union
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
 
-from ..log import STDOUT, logger
+from ..log import logger
 from ..plugin_config import AccountConfig
 from .config import generate_config, generate_device
 from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
 from .models import (
+    ProcessAccount,
     ProcessInfo,
     ProcessLog,
     ProcessStatus,
     RunningProcessDetail,
     StoppedProcessDetail,
 )
-
 
 LOG_REGEX = re.compile(
     r"^"
@@ -29,9 +29,7 @@ LOG_REGEX = re.compile(
     r"(?P<message>.*)"
     r"$"
 )
-LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "FATAL"}
-
-REGISTERED_PROCESSES: Dict[int, "GoCQProcess"] = {}
+STARTUP_FINISH_PROMPT = "アトリは、高性能ですから!"
 
 
 LogListener = Callable[[ProcessLog], Awaitable[Any]]
@@ -44,20 +42,31 @@ class GoCQProcess:
 
     def __init__(
         self,
-        account: AccountConfig,
+        account: Union[AccountConfig, ProcessAccount],
+        *,
         kill_timeout: float = 5,
         stop_timeout: float = 6,
         max_restarts: int = -1,
         restart_interval: float = 3,
         print_process_log: bool = True,
     ):
-        if account.uin not in REGISTERED_PROCESSES:
-            REGISTERED_PROCESSES[account.uin] = self
-        else:
-            raise ValueError(f"Account {account.uin} process is already registered.")
+        from .manager import ProcessesManager
 
-        self.account = account
+        ProcessesManager.add(self)
+
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.cwd.mkdir(parents=True, exist_ok=True)
+
+        self.account = (
+            ProcessAccount(
+                uin=account.uin,
+                password=account.password,  # type:ignore
+                config=generate_config(account, self.cwd),
+                device=generate_device(account, self.cwd),
+            )
+            if not isinstance(account, ProcessAccount)
+            else account
+        )
 
         self.loop = asyncio.get_running_loop()
 
@@ -68,12 +77,16 @@ class GoCQProcess:
         self.log_counter, self.restarted = 0, 0
 
         async def process_log(log: ProcessLog):
-            message = log.message or log.raw
-            level = log.level if log.level in LOG_LEVELS else STDOUT.name
-            logger.log(level, f"<d>[{self.account.uin}]</d> {escape_tag(message)}")
+            logger.log(
+                log.level.name,
+                f"<d>[{self.account.uin}]</d> {escape_tag(log.message)}",
+            )
 
         if print_process_log:
             self.listen_log(process_log)
+
+    def __repr__(self):
+        return f"<{type(self).__name__} {self.account} process={self.process}>"
 
     def _daemon_thread_runner(self):
         self.process = subprocess.Popen(
@@ -86,7 +99,7 @@ class GoCQProcess:
         assert self.process.stdout is not None
         for output in iter(self.process.stdout.readline, ""):
             output = output.strip()
-            if "アトリは、高性能ですから!" in output:
+            if STARTUP_FINISH_PROMPT in output:
                 logger.info(
                     "go-cqhttp for "
                     f"<e>{self.account.uin}</e> has successfully started."
@@ -94,11 +107,10 @@ class GoCQProcess:
 
             self.log_counter += 1
             log_matched = LOG_REGEX.match(output)
-            log_model = (
-                ProcessLog(raw=output, **log_matched.groupdict())
-                if log_matched
-                else ProcessLog(raw=output)
+            log_model = ProcessLog(
+                message=output, **log_matched.groupdict() if log_matched else {}
             )
+
             for listener in self.log_listeners:
                 asyncio.run_coroutine_threadsafe(listener(log_model), loop=self.loop)
 
@@ -110,10 +122,6 @@ class GoCQProcess:
 
     @run_sync
     def start(self):
-        self.cwd.mkdir(parents=True, exist_ok=True)
-        self.account.config_extra = generate_config(self.account, self.cwd)
-        self.account.device_extra = generate_device(self.account, self.cwd)
-
         def runner():
             for restarted in count():
                 if not self.daemon_thread_running:
@@ -136,9 +144,9 @@ class GoCQProcess:
                 sleep(self.restart_interval)
             return
 
+        self.daemon_thread_running = True
         self.daemon_thread = threading.Thread(target=runner, daemon=True)
         self.daemon_thread.name = f"daemon-thread-{self.account.uin}"
-        self.daemon_thread_running = True
         self.daemon_thread.start()
 
     @run_sync
