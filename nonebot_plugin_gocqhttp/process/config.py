@@ -12,8 +12,6 @@ from .device import random_device
 CONFIG_TEMPLATE_PATH = Path(__file__).parent / "config-template.yml"
 CONFIG_REF_PREFIX, CONFIG_OVERRIDE_PREFIX = "ref:", "override:"
 
-ACCOUNTS_DATA_PATH = Path(".") / "accounts"
-
 
 def merge_config(
     template: Dict[str, Any], extra_config: Dict[str, Any]
@@ -50,9 +48,7 @@ def load_extra_config(
     raise TypeError(f"Invalid extra config type: {extra_config.__class__!r}")
 
 
-def generate_config(account: AccountConfig) -> None:
-    account_path = ACCOUNTS_DATA_PATH / str(account.uin)
-    account_path.mkdir(parents=True, exist_ok=True)
+def generate_config(account: AccountConfig, account_path: Path):
     config_path = account_path / "config.yml"
     with open(CONFIG_TEMPLATE_PATH, "rt", encoding="utf-8") as f:
         config_template = yaml.safe_load(f)
@@ -77,12 +73,11 @@ def generate_config(account: AccountConfig) -> None:
     with open(config_path, "wt", encoding="utf-8") as f:
         yaml.safe_dump(loaded_config, f, default_flow_style=False)
     logger.info(f"Config file for account {account.uin} generated.")
-    return
+
+    return loaded_config
 
 
-def generate_device(account: AccountConfig) -> None:
-    account_path = ACCOUNTS_DATA_PATH / str(account.uin)
-    account_path.mkdir(parents=True, exist_ok=True)
+def generate_device(account: AccountConfig, account_path: Path):
     device_path = account_path / "device.json"
     device_template = random_device(account.uin, account.protocol).dict()
 
@@ -95,4 +90,5 @@ def generate_device(account: AccountConfig) -> None:
     with open(device_path, "wt", encoding="utf-8") as f:
         json.dump(loaded_device, f, indent=4, ensure_ascii=False)
     logger.info(f"Device file for account {account.uin} generated.")
-    return
+
+    return loaded_device

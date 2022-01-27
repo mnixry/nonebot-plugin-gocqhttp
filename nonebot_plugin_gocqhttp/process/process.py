@@ -11,8 +11,8 @@ from nonebot.utils import escape_tag, run_sync
 
 from ..log import STDOUT, logger
 from ..plugin_config import AccountConfig
-from .config import ACCOUNTS_DATA_PATH, generate_config, generate_device
-from .download import BINARY_PATH
+from .config import generate_config, generate_device
+from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
 from .models import (
     ProcessInfo,
     ProcessLog,
@@ -20,6 +20,7 @@ from .models import (
     RunningProcessDetail,
     StoppedProcessDetail,
 )
+
 
 LOG_REGEX = re.compile(
     r"^"
@@ -39,6 +40,7 @@ LogListener_T = TypeVar("LogListener_T", bound=LogListener)
 
 class GoCQProcess:
     process: Optional[subprocess.Popen] = None
+    daemon_thread: Optional[threading.Thread] = None
 
     def __init__(
         self,
@@ -56,6 +58,7 @@ class GoCQProcess:
 
         self.account = account
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
+
         self.loop = asyncio.get_running_loop()
 
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
@@ -71,34 +74,6 @@ class GoCQProcess:
 
         if print_process_log:
             self.listen_log(process_log)
-
-        def daemon_thread_runner():
-            for restarted in count():
-                if not self.daemon_thread_running:
-                    break
-                if self.max_restarts >= 0 and restarted >= self.max_restarts:
-                    break
-                code = 0
-                try:
-                    code = self._daemon_thread_runner()
-                except Exception:
-                    logger.exception(
-                        f"Thread {self.daemon_thread.name!r} raised unknown exception:"
-                    )
-                logger.warning(
-                    f"<b>Process for <e>{self.account.uin}</e> exited</b> with code "
-                    f"<r>{code}</r>, retrying to restart... "
-                    f"<y>({restarted}/{self.max_restarts})</y>"
-                )
-                self.restarted += 1
-                sleep(self.restart_interval)
-            return
-
-        self.daemon_thread = threading.Thread(
-            target=daemon_thread_runner,
-            name=f"{self.account.uin}-Daemon",
-            daemon=True,
-        )
 
     def _daemon_thread_runner(self):
         self.process = subprocess.Popen(
@@ -135,9 +110,34 @@ class GoCQProcess:
 
     @run_sync
     def start(self):
-        generate_config(self.account)
-        generate_device(self.account)
+        self.cwd.mkdir(parents=True, exist_ok=True)
+        self.account.config_extra = generate_config(self.account, self.cwd)
+        self.account.device_extra = generate_device(self.account, self.cwd)
 
+        def runner():
+            for restarted in count():
+                if not self.daemon_thread_running:
+                    break
+                if self.max_restarts >= 0 and restarted >= self.max_restarts:
+                    break
+                code = 0
+                try:
+                    code = self._daemon_thread_runner()
+                except Exception:
+                    logger.exception(
+                        f"Thread {self.daemon_thread!r} raised unknown exception:"
+                    )
+                logger.warning(
+                    f"<b>Process for <e>{self.account.uin}</e> exited</b> with code "
+                    f"<r>{code}</r>, retrying to restart... "
+                    f"<y>({restarted}/{self.max_restarts})</y>"
+                )
+                self.restarted += 1
+                sleep(self.restart_interval)
+            return
+
+        self.daemon_thread = threading.Thread(target=runner, daemon=True)
+        self.daemon_thread.name = f"daemon-thread-{self.account.uin}"
         self.daemon_thread_running = True
         self.daemon_thread.start()
 
@@ -146,7 +146,7 @@ class GoCQProcess:
         self.daemon_thread_running = False
         if self.process is not None:
             self.process.terminate()
-        if self.daemon_thread.is_alive():
+        if self.daemon_thread and self.daemon_thread.is_alive():
             self.daemon_thread.join(self.stop_timeout)
         return
 

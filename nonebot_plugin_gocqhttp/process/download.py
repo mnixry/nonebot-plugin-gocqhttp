@@ -8,7 +8,6 @@ from nonebot.utils import run_sync
 
 from ..log import logger
 from ..plugin_config import config
-from .config import ACCOUNTS_DATA_PATH
 from .platform import ARCHIVE_EXT, EXECUTABLE_EXT, GOARCH, GOOS
 
 DOWNLOAD_URL = config.DOWNLOAD_URL.format(
@@ -19,6 +18,7 @@ DOWNLOAD_URL = config.DOWNLOAD_URL.format(
     ext=ARCHIVE_EXT,
 )
 
+ACCOUNTS_DATA_PATH = Path(".") / "accounts"
 BINARY_DIR = ACCOUNTS_DATA_PATH / "binary"
 BINARY_PATH = BINARY_DIR / ("go-cqhttp" + EXECUTABLE_EXT)
 
