@@ -6,8 +6,7 @@ from nonebot.drivers import ReverseDriver
 
 from .log import logger
 from .plugin_config import config
-from .process import REGISTERED_PROCESSES, GoCQProcess
-from .process.download import BINARY_PATH, download_gocq
+from .process import BINARY_PATH, GoCQProcess, ProcessesManager, download_gocq
 from .web.routes import app
 
 driver = get_driver()
@@ -34,7 +33,7 @@ async def startup():
 @driver.on_shutdown
 async def shutdown():
     await asyncio.gather(
-        *map(lambda process: process.stop(), REGISTERED_PROCESSES.values()),
+        *map(lambda process: process.stop(), ProcessesManager.all()),
         return_exceptions=True,
     )
     return

@@ -40,7 +40,9 @@ class PluginConfig(BaseConfig):
     DOWNLOAD_URL: str = Field(DEFAULT_DOWNLOAD_URL, alias="gocq_url")
 
     FORCE_DOWNLOAD: bool = Field(False, alias="gocq_force_download")
-    PROCESS_RESTARTS: int = Field(-1, alias="gocq_process_restarts")
+    PROCESS_KWARGS: Dict[str, Any] = Field(
+        default_factory=dict, alias="gocq_process_kwargs"
+    )
 
 
 driver_config = driver.config

@@ -2,16 +2,14 @@ from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
 
-from ..process import REGISTERED_PROCESSES, GoCQProcess
-from ..process.models import ProcessInfo
-from ..process.device.models import ShortDeviceInfo
+from ..process import GoCQProcess, ProcessesManager, ProcessInfo
 
 app = FastAPI()
 
 
 def RunningProcess():
     async def dependency(uin: int):
-        process = REGISTERED_PROCESSES.get(uin)
+        process = ProcessesManager.get(uin)
         if not process:
             raise HTTPException(status_code=404, detail="Process not found")
         return process
@@ -19,9 +17,9 @@ def RunningProcess():
     return Depends(dependency)
 
 
-@app.get("/", response_model=list)
+@app.get("/", response_model=List[int])
 async def all_processes():
-    return [*REGISTERED_PROCESSES.keys()]
+    return [process.account.uin for process in ProcessesManager.all()]
 
 
 @app.get("/{uin}/status", response_model=ProcessInfo)
@@ -31,7 +29,7 @@ async def process_status(process: GoCQProcess = RunningProcess()) -> ProcessInfo
 
 @app.get("/{uin}/device")
 async def process_device(process: GoCQProcess = RunningProcess()):
-    return process.account.device_extra
+    return process.account.device
 
 
 @app.delete("/{uin}/", response_model=ProcessInfo)

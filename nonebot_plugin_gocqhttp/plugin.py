@@ -5,8 +5,7 @@ from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import on_command
 
-from .process import REGISTERED_PROCESSES
-from .process.models import RunningProcessDetail
+from .process import ProcessesManager, RunningProcessDetail
 
 handler = on_command("gocq", aliases={"gocq状态"}, permission=SUPERUSER)
 
@@ -32,7 +31,7 @@ STOPPED_MESSAGE_TEMPLATE = MessageTemplate(
 @handler.handle()
 async def _(bot: Bot, event: MessageEvent):
     messages = Message()
-    for process in REGISTERED_PROCESSES.values():
+    for process in ProcessesManager.all():
         try:
             status = await process.status()
         except RuntimeError:
