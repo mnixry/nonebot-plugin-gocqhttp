@@ -28,6 +28,7 @@
     "python.analysis.diagnosticMode": "workspace",
     "cSpell.words": [
         "aarch",
+        "anyio",
         "armv",
         "bssid",
         "cqhttp",
@@ -38,6 +39,7 @@
         "imsi",
         "psutil",
         "pydantic",
-        "ssid"
+        "ssid",
+        "starlette"
     ],
 }
