@@ -72,7 +72,7 @@ def generate_config(account: AccountConfig, account_path: Path):
 
     with open(config_path, "wt", encoding="utf-8") as f:
         yaml.safe_dump(loaded_config, f, default_flow_style=False)
-    logger.info(f"Config file for account {account.uin} generated.")
+    logger.debug(f"Config file for account {account.uin} generated.")
 
     return loaded_config
 
@@ -89,6 +89,6 @@ def generate_device(account: AccountConfig, account_path: Path):
 
     with open(device_path, "wt", encoding="utf-8") as f:
         json.dump(loaded_device, f, indent=4, ensure_ascii=False)
-    logger.info(f"Device file for account {account.uin} generated.")
+    logger.debug(f"Device file for account {account.uin} generated.")
 
     return loaded_device

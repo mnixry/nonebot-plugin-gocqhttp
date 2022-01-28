@@ -4,7 +4,7 @@ import subprocess
 import threading
 from itertools import count
 from time import sleep
-from typing import Any, Awaitable, Callable, Optional, Set, TypeVar, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, TypeVar, Union
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
@@ -36,6 +36,26 @@ LogListener = Callable[[ProcessLog], Awaitable[Any]]
 LogListener_T = TypeVar("LogListener_T", bound=LogListener)
 
 
+class LogStorage:
+    def __init__(self, rotation: float):
+        self.count, self.rotation = 0, rotation
+        self.logs: Dict[int, ProcessLog] = {}
+        self.loop = asyncio.get_running_loop()
+
+    def add(self, log: ProcessLog):
+        seq = self.count = self.count + 1
+        self.logs[seq] = log
+        self.loop.call_later(self.rotation, self.remove, seq)
+        return seq
+
+    def remove(self, seq: int):
+        del self.logs[seq]
+        return
+
+    def list(self, reverse: bool = False) -> List[ProcessLog]:
+        return [self.logs[seq] for seq in sorted(self.logs, reverse=reverse)]
+
+
 class GoCQProcess:
     process: Optional[subprocess.Popen] = None
     daemon_thread: Optional[threading.Thread] = None
@@ -49,10 +69,11 @@ class GoCQProcess:
         max_restarts: int = -1,
         restart_interval: float = 3,
         print_process_log: bool = True,
+        log_rotation: float = 5 * 60,
     ):
         from .manager import ProcessesManager
 
-        ProcessesManager.add(self)
+        ProcessesManager.add(self, account.uin)
 
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
         self.cwd.mkdir(parents=True, exist_ok=True)
@@ -74,7 +95,7 @@ class GoCQProcess:
         self.max_restarts, self.restart_interval = max_restarts, restart_interval
 
         self.log_listeners: Set[LogListener] = set()
-        self.log_counter, self.restarted = 0, 0
+        self.logs, self.restart_count = LogStorage(log_rotation), 0
 
         async def process_log(log: ProcessLog):
             logger.log(
@@ -105,11 +126,13 @@ class GoCQProcess:
                     f"<e>{self.account.uin}</e> has successfully started."
                 )
 
-            self.log_counter += 1
             log_matched = LOG_REGEX.match(output)
-            log_model = ProcessLog(
-                message=output, **log_matched.groupdict() if log_matched else {}
+            log_model = (
+                ProcessLog(**log_matched.groupdict())
+                if log_matched
+                else ProcessLog(message=output)
             )
+            self.logs.add(log_model)
 
             for listener in self.log_listeners:
                 asyncio.run_coroutine_threadsafe(listener(log_model), loop=self.loop)
@@ -140,7 +163,7 @@ class GoCQProcess:
                     f"<r>{code}</r>, retrying to restart... "
                     f"<y>({restarted}/{self.max_restarts})</y>"
                 )
-                self.restarted += 1
+                self.restart_count += 1
                 sleep(self.restart_interval)
             return
 
@@ -171,8 +194,8 @@ class GoCQProcess:
                 create_time = process.create_time()
             return ProcessInfo(
                 status=ProcessStatus.running,
-                total_logs=self.log_counter,
-                restarts=self.restarted,
+                total_logs=self.logs.count,
+                restarts=self.restart_count,
                 details=RunningProcessDetail(
                     pid=self.process.pid,
                     status=status,
@@ -185,8 +208,8 @@ class GoCQProcess:
         else:
             return ProcessInfo(
                 status=ProcessStatus.stopped,
-                total_logs=self.log_counter,
-                restarts=self.restarted,
+                total_logs=self.logs.count,
+                restarts=self.restart_count,
                 details=StoppedProcessDetail(code=self.process.returncode),
             )
         return

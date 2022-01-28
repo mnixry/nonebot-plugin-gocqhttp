@@ -10,8 +10,8 @@ from ..log import STDOUT
 class ProcessAccount(BaseModel):
     uin: int
     password: Optional[SecretStr] = None
-    config: Dict[str, Any]
-    device: Dict[str, Any]
+    config: Dict[str, Any] = Field(default_factory=dict)
+    device: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ProcessLogLevel(str, Enum):
