@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11.config import Config as OnebotConfig
-from nonebot.config import Config as BaseConfig
 from pydantic import BaseModel, Field
 
 driver = get_driver()
@@ -33,7 +32,7 @@ class AccountConfig(BaseModel):
     device_extra: Optional[ExtraConfigType] = None
 
 
-class PluginConfig(BaseConfig):
+class PluginConfig(BaseModel):
     ACCOUNTS: List[AccountConfig] = Field(default_factory=list, alias="gocq_accounts")
     DOWNLOAD_REPO: str = Field("Mrs4s/go-cqhttp", alias="gocq_repo")
     DOWNLOAD_VERSION: str = Field("latest", alias="gocq_version")
