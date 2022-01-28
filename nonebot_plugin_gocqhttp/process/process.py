@@ -59,6 +59,7 @@ class LogStorage:
 class GoCQProcess:
     process: Optional[subprocess.Popen] = None
     daemon_thread: Optional[threading.Thread] = None
+    daemon_thread_running = False
 
     def __init__(
         self,
@@ -145,6 +146,9 @@ class GoCQProcess:
 
     @run_sync
     def start(self):
+        if self.daemon_thread_running:
+            raise RuntimeError("Process is already running.")
+
         def runner():
             for restarted in count():
                 if not self.daemon_thread_running:
@@ -172,6 +176,9 @@ class GoCQProcess:
         self.daemon_thread.name = f"daemon-thread-{self.account.uin}"
         self.daemon_thread.start()
 
+        sleep(self.restart_interval)
+        return
+
     @run_sync
     def stop(self):
         self.daemon_thread_running = False
@@ -185,6 +192,7 @@ class GoCQProcess:
     def status(self) -> ProcessInfo:
         if self.process is None:
             raise RuntimeError("Process not started yet.")
+
         if self.process.returncode is None:
             process = psutil.Process(self.process.pid)
             with process.oneshot():
