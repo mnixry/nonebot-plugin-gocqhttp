@@ -1,4 +1,5 @@
 import shutil
+from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -35,23 +36,26 @@ def unarchive_file(path: Path):
 
 @logger.catch(reraise=True)
 async def download_gocq():
-    with TemporaryDirectory() as tmpdir:
-        logger.info(f"Begin to Download binary from <u>{DOWNLOAD_URL}</u>")
+    async with AsyncExitStack() as stack:
+        tmpdir = stack.enter_context(TemporaryDirectory())
         download_path = Path(tmpdir) / ("temp" + ARCHIVE_EXT)
         BINARY_DIR.mkdir(parents=True, exist_ok=True)
-        async with (
-            AsyncClient(follow_redirects=True, http2=True) as client,
-            client.stream("GET", DOWNLOAD_URL) as response,
-            await open_file(download_path, "wb") as file,
-        ):
-            response.raise_for_status()
-            total_size = int(response.headers["Content-Length"])
-            async for chunk in response.aiter_bytes():
-                size = await file.write(chunk)
-                logger.debug(
-                    "Download progress: "
-                    f"{size/total_size:.2%} ({size}/{total_size} bytes)"
-                )
+
+        logger.info(f"Begin to Download binary from <u>{DOWNLOAD_URL}</u>")
+
+        client = await stack.enter_async_context(AsyncClient(follow_redirects=True))
+        response = await stack.enter_async_context(client.stream("GET", DOWNLOAD_URL))
+        response.raise_for_status()
+
+        total_size, size = int(response.headers["Content-Length"]), 0
+        file = await stack.enter_async_context(await open_file(download_path, "wb"))
+        async for chunk in response.aiter_bytes():
+            size += await file.write(chunk)
+            logger.trace(
+                "Download progress: "
+                f"{size/total_size:.2%} ({size}/{total_size} bytes)"
+            )
         logger.debug(f"Unarchive binary file to <e>{BINARY_PATH!r}</e>")
+
         await unarchive_file(download_path)
     return
