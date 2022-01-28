@@ -4,9 +4,10 @@ from fastapi import FastAPI
 from nonebot import get_driver
 from nonebot.drivers import ReverseDriver
 
+from . import plugin  # noqa: F401
 from .plugin_config import config
 from .process import BINARY_DIR, BINARY_PATH, ProcessesManager, download_gocq
-from .web.routes import app
+from .web import app
 
 driver = get_driver()
 
@@ -43,6 +44,3 @@ async def shutdown():
         return_exceptions=True,
     )
     return
-
-
-from . import plugin  # noqa: F401,E402
