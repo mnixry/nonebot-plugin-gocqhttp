@@ -4,7 +4,7 @@ import subprocess
 import threading
 from itertools import count
 from time import sleep
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, TypeVar, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, TypeVar
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
@@ -63,7 +63,7 @@ class GoCQProcess:
 
     def __init__(
         self,
-        account: Union[AccountConfig, ProcessAccount],
+        account: AccountConfig,
         *,
         kill_timeout: float = 5,
         stop_timeout: float = 6,
@@ -79,15 +79,12 @@ class GoCQProcess:
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
         self.cwd.mkdir(parents=True, exist_ok=True)
 
-        self.account = (
-            ProcessAccount(
-                uin=account.uin,
-                password=account.password,  # type:ignore
-                config=generate_config(account, self.cwd),
-                device=generate_device(account, self.cwd),
-            )
-            if not isinstance(account, ProcessAccount)
-            else account
+        self.account = ProcessAccount(
+            source=account,
+            uin=account.uin,
+            password=account.password,  # type:ignore
+            config=generate_config(account, self.cwd),
+            device=generate_device(account, self.cwd),
         )
 
         self.loop = asyncio.get_running_loop()

@@ -2,13 +2,13 @@ import pickle
 import pickletools
 import zlib
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from anyio import open_file
 
 from ..plugin_config import AccountConfig
 from ..plugin_config import config as plugin_config
-from .models import ProcessAccount, ProcessAccountsStore
+from .models import ProcessAccountsStore
 from .process import GoCQProcess
 
 
@@ -25,7 +25,7 @@ class ProcessesManager:
         cls._processes[uin] = process
 
     @classmethod
-    def create(cls, account: Union[ProcessAccount, AccountConfig]):
+    def create(cls, account: AccountConfig):
         return GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
 
     @classmethod
@@ -41,7 +41,7 @@ class ProcessesManager:
     @classmethod
     async def save(cls, save_path: Path) -> int:
         store = ProcessAccountsStore(
-            accounts=[process.account for process in cls.all()]
+            accounts=[process.account.source for process in cls.all()]
         )
         dumped = pickle.dumps(store)
         dumped = pickletools.optimize(dumped)

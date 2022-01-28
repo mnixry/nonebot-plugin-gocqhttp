@@ -5,9 +5,11 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, SecretStr
 
 from ..log import STDOUT
+from ..plugin_config import AccountConfig
 
 
 class ProcessAccount(BaseModel):
+    source: AccountConfig
     uin: int
     password: Optional[SecretStr] = None
     config: Dict[str, Any] = Field(default_factory=dict)
@@ -15,7 +17,7 @@ class ProcessAccount(BaseModel):
 
 
 class ProcessAccountsStore(BaseModel):
-    accounts: List[ProcessAccount]
+    accounts: List[AccountConfig]
     created_at: datetime = Field(default_factory=datetime.now)
 
 
