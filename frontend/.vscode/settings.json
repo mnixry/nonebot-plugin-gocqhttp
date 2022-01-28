@@ -1,0 +1,8 @@
+{
+  "vetur.validation.template": false,
+  "vetur.format.enable": false,
+  "editor.formatOnSave": true,
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "vetur.experimental.templateInterpolationService": true
+}
