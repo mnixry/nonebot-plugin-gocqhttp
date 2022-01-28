@@ -200,7 +200,6 @@ class GoCQProcess:
                     pid=self.process.pid,
                     status=status,
                     memory_used=memory.rss,
-                    swap_used=memory.vms,
                     cpu_percent=cpu,
                     start_time=create_time,
                 ),

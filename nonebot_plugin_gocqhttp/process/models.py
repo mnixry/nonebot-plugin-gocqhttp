@@ -44,7 +44,6 @@ class RunningProcessDetail(BaseModel):
     pid: int
     status: str
     memory_used: int
-    swap_used: int
     cpu_percent: float
     start_time: float
 

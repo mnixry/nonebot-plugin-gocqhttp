@@ -18,7 +18,6 @@ RUNNING_MESSAGE_TEMPLATE = MessageTemplate(
     "进程状态:running\n"
     "➡️ CPU: {cpu_percent:.3%}\n"
     "➡️ 内存: {memory:.3f}MB\n"
-    "➡️ 虚拟内存: {virtual_memory:.3f}\n"
     "➡️ 在线时间: {uptime}\n",
     Message,
 )
@@ -45,7 +44,6 @@ async def _(bot: Bot, event: MessageEvent):
             RUNNING_MESSAGE_TEMPLATE.format(
                 cpu_percent=status.details.cpu_percent,
                 memory=status.details.memory_used / 1024 ** 2,
-                virtual_memory=status.details.swap_used / 1024 ** 2,
                 uptime=(
                     datetime.now() - datetime.fromtimestamp(status.details.start_time)
                 ),
