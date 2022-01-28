@@ -1,5 +1,5 @@
 # flake8:noqa:F401
-from .download import BINARY_PATH, download_gocq
+from .download import BINARY_DIR, BINARY_PATH, download_gocq
 from .manager import ProcessesManager
 from .models import (
     ProcessAccount,

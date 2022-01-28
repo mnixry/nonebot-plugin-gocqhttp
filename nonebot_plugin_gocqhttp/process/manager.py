@@ -2,10 +2,13 @@ import pickle
 import pickletools
 import zlib
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
+from anyio import open_file
+
+from ..plugin_config import AccountConfig
 from ..plugin_config import config as plugin_config
-from .models import ProcessAccount
+from .models import ProcessAccount, ProcessAccountsStore
 from .process import GoCQProcess
 
 
@@ -18,25 +21,33 @@ class ProcessesManager:
     def add(cls, process: GoCQProcess, uin: Optional[int] = None):
         uin = uin or process.account.uin
         if uin in cls._processes:
-            raise ValueError(f"Account {process.account.uin} is already initialized.")
+            raise ValueError(f"Account {uin} is already initialized.")
         cls._processes[uin] = process
 
     @classmethod
-    def create(cls, account: ProcessAccount):
+    def create(cls, account: Union[ProcessAccount, AccountConfig]):
         return GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
+
+    @classmethod
+    async def remove(cls, uin: int):
+        process = cls._processes.pop(uin)
+        await process.stop()
+        return
 
     @classmethod
     def all(cls) -> List[GoCQProcess]:
         return [*cls._processes.copy().values()]
 
     @classmethod
-    def save(cls, save_path: Path) -> int:
-        accounts = [process.account for process in cls.all()]
-        dumped = pickle.dumps(accounts)
+    async def save(cls, save_path: Path) -> int:
+        store = ProcessAccountsStore(
+            accounts=[process.account for process in cls.all()]
+        )
+        dumped = pickle.dumps(store)
         dumped = pickletools.optimize(dumped)
         compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
-        with open(save_path, "wb") as f:
-            size = f.write(compressed)
+        async with await open_file(save_path, "wb") as f:
+            size = await f.write(compressed)
         return size
 
     @classmethod
@@ -48,15 +59,15 @@ class ProcessesManager:
         ]
 
     @classmethod
-    def load_saved(
+    async def load_saved(
         cls, save_path: Path, *, ignore_loaded: bool = False
     ) -> List[GoCQProcess]:
-        with open(save_path, "rb") as f:
-            compressed = f.read()
+        async with await open_file(save_path, "rb") as f:
+            compressed = await f.read()
         decompressed = zlib.decompress(compressed)
-        accounts: List[ProcessAccount] = pickle.loads(decompressed)
+        store: ProcessAccountsStore = pickle.loads(decompressed)
         return [
             GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
-            for account in accounts
+            for account in store.accounts
             if not ignore_loaded or account.uin not in cls._processes
         ]

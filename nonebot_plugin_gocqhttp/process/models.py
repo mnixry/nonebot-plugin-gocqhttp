@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, SecretStr
 
@@ -12,6 +12,11 @@ class ProcessAccount(BaseModel):
     password: Optional[SecretStr] = None
     config: Dict[str, Any] = Field(default_factory=dict)
     device: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ProcessAccountsStore(BaseModel):
+    accounts: List[ProcessAccount]
+    created_at: datetime = Field(default_factory=datetime.now)
 
 
 class ProcessLogLevel(str, Enum):
