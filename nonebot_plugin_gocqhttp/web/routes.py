@@ -1,11 +1,24 @@
-from typing import List
+from typing import Any, Dict, List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from nonebot_plugin_gocqhttp.process.models import ProcessAccount
+from fastapi import Depends, FastAPI, HTTPException
+from nonebot.utils import escape_tag
+from pydantic import BaseModel
+from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from ..process import GoCQProcess, ProcessesManager, ProcessInfo, ProcessLog
+from ..log import logger
+from ..plugin_config import AccountConfig
+from ..process import (
+    GoCQProcess,
+    ProcessAccount,
+    ProcessesManager,
+    ProcessInfo,
+    ProcessLog,
+)
 
-app = FastAPI()
+app = FastAPI(
+    title="nonebot-plugin-gocqhttp",
+    description="go-cqhttp process manager API",
+)
 
 
 def RunningProcess():
@@ -23,9 +36,22 @@ async def all_processes():
     return [process.account.uin for process in ProcessesManager.all()]
 
 
-@app.put("/{uin}", response_model=ProcessAccount)
-async def create_process(account: ProcessAccount):
-    process = ProcessesManager.create(account)
+class AccountCreation(BaseModel):
+    password: Optional[str] = None
+    config_extra: Optional[Dict[str, Any]] = None
+    device_extra: Optional[Dict[str, Any]] = None
+
+
+@app.put(
+    "/{uin}",
+    response_model=ProcessAccount,
+    response_model_exclude={"config"},
+    status_code=201,
+)
+async def create_process(uin: int, account: Optional[AccountCreation] = None):
+    process = ProcessesManager.create(
+        account=AccountConfig(uin=uin, **account.dict() if account else {})
+    )
     return process.account
 
 
@@ -39,7 +65,7 @@ async def process_device(process: GoCQProcess = RunningProcess()):
     return process.account.device
 
 
-@app.get("/{uin}/logs/history", response_model=List[ProcessLog])
+@app.get("/{uin}/logs", response_model=List[ProcessLog])
 async def process_logs_history(
     reverse: bool = False,
     process: GoCQProcess = RunningProcess(),
@@ -47,7 +73,7 @@ async def process_logs_history(
     return process.logs.list(reverse=reverse)
 
 
-@app.websocket("/{uin}/logs/realtime")
+@app.websocket("/{uin}/logs")
 async def process_logs_realtime(
     websocket: WebSocket,
     process: GoCQProcess = RunningProcess(),
@@ -59,10 +85,11 @@ async def process_logs_realtime(
 
     process.log_listeners.add(log_listener)
     try:
-        while True:
-            await websocket.receive()
+        while websocket.client_state == WebSocketState.CONNECTED:
+            recv = await websocket.receive()
+            logger.trace(f"Websocket received <e>{escape_tag(repr(recv))}</e>")
     except WebSocketDisconnect:
-        await websocket.close()
+        pass
     finally:
         process.log_listeners.remove(log_listener)
     return
