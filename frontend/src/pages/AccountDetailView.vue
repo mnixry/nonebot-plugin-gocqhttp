@@ -1,5 +1,5 @@
 <template>
-  <div class="row q-pa-md justify-center">
+  <q-page class="row q-pa-md justify-center">
     <q-card class="col-12 col-md-4 shadow">
       <q-card-section class="text-h5 q-pa-md">
         <q-avatar>
@@ -58,7 +58,7 @@
       <p class="text-body1 text-grey"><strong>进程日志</strong></p>
       <logs-console :logs="logs" />
     </q-card>
-  </div>
+  </q-page>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
@@ -126,7 +126,7 @@ export default defineComponent({
     },
     logRealtime() {
       if (this.logWebsocket) this.logWebsocket.close();
-
+      if (Number.isNaN(this.uin)) return;
       const wsUrl = new URL(`api/${this.uin}/process/logs`, location.href);
       wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
@@ -135,14 +135,13 @@ export default defineComponent({
         const log = JSON.parse(<string>data) as ProcessLog;
         this.logs.push(log);
       };
-      this.logWebsocket.onclose = () => this.logRealtime();
+      this.logWebsocket.onclose = () => {
+        this.logWebsocket = null;
+      };
     },
   },
   created() {
-    this.updateTimer = setInterval(
-      () => void this.updateStatus(),
-      3000
-    ) as unknown as number;
+    this.updateTimer = window.setInterval(() => void this.updateStatus(), 3000);
 
     this.$watch(
       () => this.$route.params,
@@ -161,8 +160,9 @@ export default defineComponent({
       { immediate: true }
     );
   },
-  unmounted() {
-    if (this.updateTimer) clearInterval(this.updateTimer);
+  beforeUnmount() {
+    if (this.updateTimer) window.clearInterval(this.updateTimer);
+    if (this.logWebsocket) this.logWebsocket.close();
   },
 });
 </script>
