@@ -1,5 +1,4 @@
 import json
-from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Dict
 
@@ -16,10 +15,12 @@ CONFIG_REF_PREFIX, CONFIG_OVERRIDE_PREFIX = "ref:", "override:"
 def merge_config(
     template: Dict[str, Any], extra_config: Dict[str, Any]
 ) -> Dict[str, Any]:
-    template = deepcopy(template)
+    template = template.copy()
     for key, value in extra_config.items():
-        if isinstance(value, dict):
+        if isinstance(template.get(key), dict) and isinstance(value, dict):
             template[key] = merge_config(template[key], value)
+        elif isinstance(template.get(key), list) and isinstance(value, list):
+            template[key] = (template[key] + value).copy()
         else:
             template[key] = value
     return template
@@ -41,6 +42,7 @@ def load_extra_config(
             raise ValueError(f"Invalid extra config setting: {extra_config!r}")
         if not Path(path).is_file():
             raise ValueError(f"Extra config file not found: {path!r}")
+
         with open(path, "rt", encoding="utf-8") as f:
             loaded_config = loader(f.read())
         return loaded_config if override else merge_config(template, loaded_config)
@@ -50,7 +52,7 @@ def load_extra_config(
 
 def generate_config(account: AccountConfig, account_path: Path):
     config_path = account_path / "config.yml"
-    with open(CONFIG_TEMPLATE_PATH, "rt", encoding="utf-8") as f:
+    with CONFIG_TEMPLATE_PATH.open("rt", encoding="utf-8") as f:
         config_template = yaml.safe_load(f)
 
     config_template["account"]["uin"] = account.uin
@@ -60,7 +62,7 @@ def generate_config(account: AccountConfig, account_path: Path):
             "universal": f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws",
             "api": None,
             "event": None,
-            "middlewares": {"access_token": onebot_config.onebot_access_token or ""},
+            "middlewares": {"access-token": onebot_config.onebot_access_token or ""},
         },
     )
 
@@ -70,7 +72,7 @@ def generate_config(account: AccountConfig, account_path: Path):
         else config_template
     )
 
-    with open(config_path, "wt", encoding="utf-8") as f:
+    with config_path.open("wt", encoding="utf-8") as f:
         yaml.safe_dump(loaded_config, f, default_flow_style=False)
     logger.debug(f"Config file for account {account.uin} generated.")
 
@@ -87,7 +89,7 @@ def generate_device(account: AccountConfig, account_path: Path):
         else device_template
     )
 
-    with open(device_path, "wt", encoding="utf-8") as f:
+    with device_path.open("wt", encoding="utf-8") as f:
         json.dump(loaded_device, f, indent=4, ensure_ascii=False)
     logger.debug(f"Device file for account {account.uin} generated.")
 

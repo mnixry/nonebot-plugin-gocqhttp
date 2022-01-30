@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from ..log import logger
-from ..plugin_config import AccountConfig
+from ..plugin_config import AccountConfig, AccountProtocol
 from ..process import (
     GoCQProcess,
     ProcessAccount,
@@ -22,6 +22,7 @@ router = APIRouter(tags=["api"])
 
 class AccountCreation(BaseModel):
     password: Optional[str] = None
+    protocol: AccountProtocol = AccountProtocol.iPad
     config_extra: Optional[Dict[str, Any]] = None
     device_extra: Optional[Dict[str, Any]] = None
 
@@ -82,7 +83,6 @@ async def account_api(
     try:
         result = await cast(Bot, bot).call_api(name, **params)
     except ActionFailed as e:
-        print(e)
         result = e.info
     return result
 
