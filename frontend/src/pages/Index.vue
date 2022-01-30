@@ -1,49 +1,102 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="row items-center justify-evenly q-pa-md">
+    <q-card class="shadow window-width q-pa-sm">
+      <div class="text-h5 q-pa-md">系统状态</div>
+      <q-card-section class="row justify-center">
+        <div class="text-center q-pa-md col-6 col-sm-4">
+          <q-circular-progress
+            :value="status?.cpu_percent"
+            :thickness="0.2"
+            size="18vh"
+            show-value
+            color="green"
+            track-color="grey-3"
+            class="q-ma-md"
+            ><q-icon name="developer_board" size="20px" />
+          </q-circular-progress>
+          <div class="text-body1">CPU</div>
+          <div class="text-body2">{{ status?.cpu_percent }}%</div>
+        </div>
+        <div class="text-center q-pa-md col-4 col-sm-4">
+          <q-circular-progress
+            :value="status?.memory.percent"
+            size="18vh"
+            show-value
+            color="blue"
+            track-color="grey-3"
+            class="q-ma-md"
+            ><q-icon name="memory" size="20px" />
+          </q-circular-progress>
+          <div class="text-body1">内存</div>
+          <div class="text-body2">{{ status?.memory.percent }}%</div>
+          <div class="text-body2">
+            {{ formatBytes(status?.memory.available ?? 0) }}/
+            {{ formatBytes(status?.memory.total ?? 0) }}
+          </div>
+        </div>
+        <div class="col-12 col-sm-4">
+          <div class="text-body1">硬盘占用</div>
+          <q-linear-progress
+            :value="(status?.disk.percent ?? 0) / 100"
+            stripe
+            rounded
+            size="20px"
+            color="orange"
+            class="q-mt-sm"
+          >
+            <div class="absolute-full flex flex-center">
+              <q-badge>{{ status?.disk.percent }}%</q-badge>
+            </div>
+          </q-linear-progress>
+          <div class="text-body2 text-grey q-pt-sm q-pb-md">
+            {{ formatBytes(status?.disk.free ?? 0) }}/
+            {{ formatBytes(status?.disk.total ?? 0) }}
+          </div>
+          <q-separator />
+          <div class="text-body1 q-pt-md q-pb-sm">开机时间</div>
+          <div class="text-body2">
+            {{ new Date((status?.boot_time ?? 0) * 1000).toLocaleString() }}
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
-<script lang="ts">
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/CompositionComponent.vue';
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { api } from 'src/boot/axios';
+import type { SystemStatus } from 'src/api';
+import { ref } from '@vue/reactivity';
+import { onBeforeUnmount } from '@vue/runtime-core';
+import { useQuasar } from 'quasar';
 
-export default defineComponent({
-  name: 'PageIndex',
-  components: { ExampleComponent },
-  setup() {
-    const todos = ref<Todo[]>([
-      {
-        id: 1,
-        content: 'ct1'
-      },
-      {
-        id: 2,
-        content: 'ct2'
-      },
-      {
-        id: 3,
-        content: 'ct3'
-      },
-      {
-        id: 4,
-        content: 'ct4'
-      },
-      {
-        id: 5,
-        content: 'ct5'
-      }
-    ]);
-    const meta = ref<Meta>({
-      totalCount: 1200
-    });
-    return { todos, meta };
+const $q = useQuasar();
+
+const status = ref<SystemStatus>();
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return (bytes / Math.pow(k, i)).toFixed(dm) + sizes[i];
+}
+
+async function updateStatus() {
+  try {
+    $q.loadingBar.start();
+    const { data } = await api.systemStatusApiStatusGet();
+    status.value = data;
+  } finally {
+    $q.loadingBar.stop();
   }
-});
+}
+
+void updateStatus();
+const updateTimer = window.setInterval(() => void updateStatus(), 5000);
+onBeforeUnmount(() => window.clearInterval(updateTimer));
 </script>
