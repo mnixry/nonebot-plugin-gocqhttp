@@ -74,6 +74,8 @@ export default defineComponent({
 });
 </script>
 <style lang="scss">
+@import '~@fontsource/roboto-mono/index.css';
+
 :root {
   --terminal-bg: #24292f;
   --terminal-fg: #d0d7de;
@@ -96,8 +98,11 @@ export default defineComponent({
   background-color: var(--terminal-bg);
   .logs {
     padding: 1rem 1rem;
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-      Liberation Mono, monospace;
+    code {
+      font-family: Roboto Mono, Consolas, Menlo, Monaco, Lucida Console,
+        Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New,
+        monospace, serif;
+    }
   }
   .logs .line.start {
     margin-top: 1rem;
