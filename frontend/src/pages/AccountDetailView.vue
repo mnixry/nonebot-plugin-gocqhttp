@@ -1,17 +1,17 @@
 <template>
   <q-page class="row q-pa-md justify-center">
     <q-card class="col-12 col-md-4 shadow">
-      <q-card-section class="text-h5 q-pa-md">
+      <q-card-section class="q-pa-md row items-center justify-start">
         <q-avatar>
           <q-img :src="`https://q1.qlogo.cn/g?b=qq&nk=${uin}&s=640`" />
         </q-avatar>
-        进程状态
+        <div class="text-h5 q-px-md">进程状态</div>
         <q-chip color="green"> <q-icon name="person" />帐号: {{ uin }} </q-chip>
       </q-card-section>
       <q-separator />
 
       <q-slide-transition>
-        <q-card-section v-if="status" class="row justify-center">
+        <q-card-section v-if="status" class="row justify-center items-center">
           <running-process-status
             v-if="'pid' in status.details"
             :status="status.details"
@@ -33,6 +33,15 @@
               重启次数<code>{{ status.restarts }}次</code>
             </q-chip>
           </div>
+
+          <q-slide-transition v-if="status.qr_uri" class="q-ma-md">
+            <q-btn push icon="qr_code" color="accent">
+              显示登录二维码
+              <q-popup-proxy>
+                <q-img width="40vh" :src="status.qr_uri" />
+              </q-popup-proxy>
+            </q-btn>
+          </q-slide-transition>
         </q-card-section>
       </q-slide-transition>
 
@@ -55,7 +64,8 @@
       </q-card-actions>
     </q-card>
     <q-card class="col-12 col-md-8 q-pa-md">
-      <p class="text-body1 text-grey"><strong>进程日志</strong></p>
+      <div class="text-body1 text-grey"><strong>进程日志</strong></div>
+      <q-separator spaced />
       <logs-console :logs="logs" />
     </q-card>
   </q-page>
