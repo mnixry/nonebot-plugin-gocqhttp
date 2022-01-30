@@ -288,6 +288,93 @@ export interface StoppedProcessDetail {
 /**
  * 
  * @export
+ * @interface SystemDiskDetail
+ */
+export interface SystemDiskDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemDiskDetail
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemDiskDetail
+     */
+    'free': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemDiskDetail
+     */
+    'percent': number;
+}
+/**
+ * 
+ * @export
+ * @interface SystemMemoryDetail
+ */
+export interface SystemMemoryDetail {
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemMemoryDetail
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemMemoryDetail
+     */
+    'available': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemMemoryDetail
+     */
+    'percent': number;
+}
+/**
+ * 
+ * @export
+ * @interface SystemStatus
+ */
+export interface SystemStatus {
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemStatus
+     */
+    'cpu_percent': number;
+    /**
+     * 
+     * @type {SystemMemoryDetail}
+     * @memberof SystemStatus
+     */
+    'memory': SystemMemoryDetail;
+    /**
+     * 
+     * @type {SystemDiskDetail}
+     * @memberof SystemStatus
+     */
+    'disk': SystemDiskDetail;
+    /**
+     * 
+     * @type {number}
+     * @memberof SystemStatus
+     */
+    'boot_time': number;
+    /**
+     * 
+     * @type {RunningProcessDetail}
+     * @memberof SystemStatus
+     */
+    'process': RunningProcessDetail;
+}
+/**
+ * 
+ * @export
  * @interface ValidationError
  */
 export interface ValidationError {
@@ -641,6 +728,36 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary System Status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        systemStatusApiStatusGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/status`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -753,6 +870,16 @@ export const ApiApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.processStopApiUinProcessDelete(uin, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @summary System Status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async systemStatusApiStatusGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SystemStatus>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemStatusApiStatusGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -855,6 +982,15 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          */
         processStopApiUinProcessDelete(uin: number, options?: any): AxiosPromise<void> {
             return localVarFp.processStopApiUinProcessDelete(uin, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary System Status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        systemStatusApiStatusGet(options?: any): AxiosPromise<SystemStatus> {
+            return localVarFp.systemStatusApiStatusGet(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -975,6 +1111,17 @@ export class ApiApi extends BaseAPI {
      */
     public processStopApiUinProcessDelete(uin: number, options?: AxiosRequestConfig) {
         return ApiApiFp(this.configuration).processStopApiUinProcessDelete(uin, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary System Status
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public systemStatusApiStatusGet(options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).systemStatusApiStatusGet(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
