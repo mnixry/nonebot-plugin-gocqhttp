@@ -1,12 +1,13 @@
 from typing import Any, Dict, List, Optional, cast
 
 import psutil
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from nonebot import get_bots
 from nonebot.adapters.onebot.v11 import ActionFailed, Bot
 from nonebot.utils import escape_tag
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
+from ..exceptions import BotNotFound, ProcessNotFound, RemovePredefinedAccount
 from ..log import logger
 from ..plugin_config import AccountConfig
 from ..process import (
@@ -25,7 +26,7 @@ def RunningProcess():
     async def dependency(uin: int):
         process = ProcessesManager.get(uin)
         if not process:
-            raise HTTPException(status_code=404, detail="Process not found")
+            raise ProcessNotFound
         return process
 
     return Depends(dependency)
@@ -76,6 +77,8 @@ async def create_account(uin: int, account: Optional[models.AccountCreation] = N
 
 @router.delete("/{uin}", status_code=204)
 async def delete_account(process: GoCQProcess = RunningProcess()):
+    if ProcessesManager.is_predefined(process.account.uin):
+        raise RemovePredefinedAccount
     await ProcessesManager.remove(process.account.uin)
     return
 
@@ -98,7 +101,7 @@ async def account_api(
         None,
     )
     if not bot:
-        raise HTTPException(status_code=404, detail="Bot not found")
+        raise BotNotFound
     try:
         result = await cast(Bot, bot).call_api(name, **params)
     except ActionFailed as e:

@@ -1,11 +1,13 @@
 import pickle
 import pickletools
 import zlib
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from anyio import open_file
 
+from ..exceptions import AccountAlreadyExists
 from ..plugin_config import AccountConfig
 from ..plugin_config import config as plugin_config
 from .models import ProcessAccountsStore
@@ -15,13 +17,21 @@ from .process import GoCQProcess
 class ProcessesManager:
     _processes: Dict[int, GoCQProcess] = {}
 
+    @staticmethod
+    @lru_cache
+    def is_predefined(uin: int) -> Optional[AccountConfig]:
+        account = next(
+            (account for account in plugin_config.ACCOUNTS if account.uin == uin), None
+        )
+        return account
+
     get = _processes.get
 
     @classmethod
     def add(cls, process: GoCQProcess, uin: Optional[int] = None):
         uin = uin or process.account.uin
         if uin in cls._processes:
-            raise ValueError(f"Account {uin} is already initialized.")
+            raise AccountAlreadyExists
         cls._processes[uin] = process
 
     @classmethod
@@ -70,5 +80,9 @@ class ProcessesManager:
         return [
             GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
             for account in store.accounts
-            if not ignore_loaded or account.uin not in cls._processes
+            if (
+                not cls.is_predefined(account.uin)
+                or not ignore_loaded
+                or account.uin not in cls._processes
+            )
         ]
