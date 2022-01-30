@@ -58,4 +58,5 @@ class ProcessInfo(BaseModel):
     status: ProcessStatus
     total_logs: int
     restarts: int
+    qr_uri: Optional[str] = None
     details: Union[RunningProcessDetail, StoppedProcessDetail]

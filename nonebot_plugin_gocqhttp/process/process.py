@@ -1,7 +1,9 @@
 import asyncio
+import mimetypes
 import re
 import subprocess
 import threading
+from base64 import b64encode
 from itertools import count
 from time import sleep
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, TypeVar
@@ -11,6 +13,7 @@ from nonebot.utils import escape_tag, run_sync
 
 from ..log import logger
 from ..plugin_config import AccountConfig
+from ..exceptions import ProcessAlreadyStarted, ProcessNotStarted
 from .config import generate_config, generate_device
 from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
 from .models import (
@@ -144,7 +147,7 @@ class GoCQProcess:
     @run_sync
     def start(self):
         if self.daemon_thread_running:
-            raise RuntimeError("Process is already running.")
+            raise ProcessAlreadyStarted
 
         def runner():
             for restarted in count():
@@ -188,7 +191,15 @@ class GoCQProcess:
     @run_sync
     def status(self) -> ProcessInfo:
         if self.process is None:
-            raise RuntimeError("Process not started yet.")
+            raise ProcessNotStarted
+
+        qr_path = self.cwd / "qrcode.png"
+        if qr_path.exists():
+            mimetype, _ = mimetypes.guess_type(qr_path)
+            qr_data = qr_path.read_bytes()
+            qr_uri = f"data:{mimetype};base64,{b64encode(qr_data).decode()}"
+        else:
+            qr_uri = None
 
         if self.process.returncode is None:
             process = psutil.Process(self.process.pid)
@@ -201,6 +212,7 @@ class GoCQProcess:
                 status=ProcessStatus.running,
                 total_logs=self.logs.count,
                 restarts=self.restart_count,
+                qr_uri=qr_uri,
                 details=RunningProcessDetail(
                     pid=self.process.pid,
                     status=status,
