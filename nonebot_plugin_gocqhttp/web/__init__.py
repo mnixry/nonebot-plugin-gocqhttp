@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .api import router as api_router
@@ -11,6 +12,8 @@ app = FastAPI(
     title="nonebot-plugin-gocqhttp",
     description="go-cqhttp process manager API",
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(api_router, prefix="/api")
 
