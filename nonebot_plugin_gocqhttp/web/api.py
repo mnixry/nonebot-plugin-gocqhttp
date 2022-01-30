@@ -1,14 +1,14 @@
 from typing import Any, Dict, List, Optional, cast
 
+import psutil
 from fastapi import APIRouter, Depends, HTTPException
 from nonebot import get_bots
 from nonebot.adapters.onebot.v11 import ActionFailed, Bot
 from nonebot.utils import escape_tag
-from pydantic import BaseModel
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from ..log import logger
-from ..plugin_config import AccountConfig, AccountProtocol
+from ..plugin_config import AccountConfig
 from ..process import (
     GoCQProcess,
     ProcessAccount,
@@ -16,15 +16,9 @@ from ..process import (
     ProcessInfo,
     ProcessLog,
 )
+from . import models
 
 router = APIRouter(tags=["api"])
-
-
-class AccountCreation(BaseModel):
-    password: Optional[str] = None
-    protocol: AccountProtocol = AccountProtocol.iPad
-    config_extra: Optional[Dict[str, Any]] = None
-    device_extra: Optional[Dict[str, Any]] = None
 
 
 def RunningProcess():
@@ -42,13 +36,38 @@ async def all_accounts():
     return [process.account.uin for process in ProcessesManager.all()]
 
 
+@router.get("/status", response_model=models.SystemStatus)
+def system_status():
+    virtual_memory = psutil.virtual_memory()._asdict()
+    disk_usage = psutil.disk_usage(__file__)._asdict()
+    process = psutil.Process()
+    with process.oneshot():
+        cpu_percent = process.cpu_percent()
+        process_memory = process.memory_info()
+        process_start_time = process.create_time()
+        status = process.status()
+    return models.SystemStatus(
+        cpu_percent=psutil.cpu_percent(),
+        memory=models.SystemMemoryDetail(**virtual_memory),
+        disk=models.SystemDiskDetail(**disk_usage),
+        boot_time=psutil.boot_time(),
+        process=models.RunningProcessDetail(
+            pid=process.pid,
+            cpu_percent=cpu_percent,
+            status=status,
+            memory_used=process_memory.rss,
+            start_time=process_start_time,
+        ),
+    )
+
+
 @router.put(
     "/{uin}",
     response_model=ProcessAccount,
     response_model_exclude={"config"},
     status_code=201,
 )
-async def create_account(uin: int, account: Optional[AccountCreation] = None):
+async def create_account(uin: int, account: Optional[models.AccountCreation] = None):
     process = ProcessesManager.create(
         account=AccountConfig(uin=uin, **account.dict() if account else {})
     )
