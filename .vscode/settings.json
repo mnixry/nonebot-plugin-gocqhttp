@@ -30,6 +30,7 @@
         "aarch",
         "anyio",
         "armv",
+        "asdict",
         "bssid",
         "cqhttp",
         "GOARCH",
