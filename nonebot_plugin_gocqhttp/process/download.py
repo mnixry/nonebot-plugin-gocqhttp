@@ -1,4 +1,6 @@
+import hashlib
 import shutil
+from base64 import b64decode
 from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -48,14 +50,23 @@ async def download_gocq():
         response.raise_for_status()
 
         total_size, size = int(response.headers["Content-Length"]), 0
+        content_md5 = b64decode(response.headers["Content-MD5"]).hex()
+        hasher = hashlib.md5()
+
         file = await stack.enter_async_context(await open_file(download_path, "wb"))
         async for chunk in response.aiter_bytes():
             size += await file.write(chunk)
+            hasher.update(chunk)
             logger.trace(
                 "Download progress: "
                 f"{size/total_size:.2%} ({size}/{total_size} bytes)"
             )
-        logger.debug(f"Unarchive binary file to <e>{BINARY_PATH!r}</e>")
 
+        if size != total_size:
+            raise RuntimeError(f"Download size mismatch: {size}/{total_size} bytes")
+        elif hasher.hexdigest().casefold() != content_md5.casefold():
+            raise RuntimeError("Download content MD5 validation failed!")
+
+        logger.debug(f"Unarchive binary file to <e>{BINARY_PATH!r}</e>")
         await unarchive_file(download_path)
     return
