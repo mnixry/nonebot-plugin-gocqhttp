@@ -20,13 +20,12 @@
         <q-card-section class="q-gutter-md">
           <q-input
             v-model.number="uin"
-            type="number"
             autofocus
             filled
             counter
             clearable
             label="QQ号"
-            :rules="[(v) => Number.isInteger(v) || '请输入QQ号']"
+            :rules="[(v) => Number.isInteger(+v) || '请输入QQ号']"
           >
             <template v-slot:prepend><q-icon name="badge" /></template>
           </q-input>
@@ -75,7 +74,7 @@ export default defineComponent({
   data: () => ({
     uin: null as null | number,
     password: null as null | string,
-    protocol: null as null | AccountProtocol,
+    protocol: null as null | { value: AccountProtocol; label: string },
   }),
   computed: {
     protocols() {
@@ -91,13 +90,8 @@ export default defineComponent({
       try {
         this.$q.loading.show();
         await this.$api.createAccountApiUinPut(this.uin, {
-          password: this.password ?? undefined,
-          device_extra:
-            this.protocol !== null
-              ? {
-                  protocol: this.protocol,
-                }
-              : undefined,
+          password: this.password?.trim() ? this.password : undefined,
+          protocol: this.protocol?.value,
         });
         await this.$router.push('/');
       } catch (err) {
