@@ -72,6 +72,12 @@ export interface AccountCreation {
     'password'?: string;
     /**
      * 
+     * @type {AccountProtocol}
+     * @memberof AccountCreation
+     */
+    'protocol'?: AccountProtocol;
+    /**
+     * 
      * @type {object}
      * @memberof AccountCreation
      */

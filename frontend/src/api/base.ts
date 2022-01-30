@@ -21,7 +21,7 @@ import globalAxios, {
   AxiosRequestConfig,
 } from 'axios';
 
-export const BASE_PATH = '';
+export const BASE_PATH = '.';
 
 /**
  *
