@@ -35,6 +35,7 @@
         "GOARCH",
         "gocq",
         "gocqhttp",
+        "httpx",
         "imei",
         "imsi",
         "psutil",
