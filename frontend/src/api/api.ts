@@ -179,6 +179,12 @@ export interface ProcessInfo {
     'restarts': number;
     /**
      * 
+     * @type {string}
+     * @memberof ProcessInfo
+     */
+    'qr_uri'?: string;
+    /**
+     * 
      * @type {RunningProcessDetail | StoppedProcessDetail}
      * @memberof ProcessInfo
      */
