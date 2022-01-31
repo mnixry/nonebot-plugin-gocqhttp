@@ -43,6 +43,9 @@ class PluginConfig(BaseModel):
         default_factory=dict, alias="gocq_process_kwargs"
     )
 
+    WEBUI_USERNAME: Optional[str] = Field(None, alias="gocq_webui_username")
+    WEBUI_PASSWORD: Optional[str] = Field(None, alias="gocq_webui_password")
+
 
 driver_config = driver.config
 onebot_config = OnebotConfig.parse_obj(driver_config.dict())

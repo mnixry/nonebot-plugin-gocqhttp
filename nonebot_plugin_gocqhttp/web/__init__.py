@@ -1,18 +1,43 @@
+import secrets
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
 from ..exceptions import PluginGoCQException
+from ..plugin_config import config as plugin_config
 from .api import router as api_router
 
 DIST_PATH = Path(__file__).parent / "dist"
 
+
+async def security_dependency(
+    credentials: HTTPBasicCredentials = Depends(HTTPBasic()),
+):
+    assert plugin_config.WEBUI_USERNAME and plugin_config.WEBUI_PASSWORD
+    if not (
+        secrets.compare_digest(credentials.username, plugin_config.WEBUI_USERNAME)
+        and secrets.compare_digest(credentials.password, plugin_config.WEBUI_PASSWORD)
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials
+
+
 app = FastAPI(
     title="nonebot-plugin-gocqhttp",
     description="go-cqhttp process manager API",
+    dependencies=(
+        [Depends(security_dependency)]
+        if plugin_config.WEBUI_PASSWORD and plugin_config.WEBUI_USERNAME
+        else []
+    ),
 )
 
 
