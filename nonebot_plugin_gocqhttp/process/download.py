@@ -61,6 +61,7 @@ async def download_gocq():
                 "Download progress: "
                 f"{size/total_size:.2%} ({size}/{total_size} bytes)"
             )
+        await file.aclose()
 
         if size != total_size:
             raise RuntimeError(f"Download size mismatch: {size}/{total_size} bytes")
