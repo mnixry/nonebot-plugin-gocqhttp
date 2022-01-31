@@ -10,5 +10,8 @@
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "vetur.experimental.templateInterpolationService": true,
-  "browse-lite.startUrl": "http://127.0.0.1:8080"
+  "browse-lite.startUrl": "http://127.0.0.1:8080",
+  "cSpell.words": [
+    "apexcharts"
+  ]
 }
