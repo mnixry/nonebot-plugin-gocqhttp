@@ -91,6 +91,7 @@ export default defineComponent({
   },
   methods: {
     async updateStatus() {
+      if (this.logWebsocket) this.logWebsocket.send('heartbeat');
       try {
         this.$q.loadingBar.start();
         const { data: status } =
