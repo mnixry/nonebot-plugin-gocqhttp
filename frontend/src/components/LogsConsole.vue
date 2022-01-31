@@ -1,7 +1,7 @@
 <template>
-  <q-scroll-area class="page-logs frameless scroll">
+  <q-scroll-area class="page-logs">
     <!--Terminal component, thanks to @koishijs/plugin-logger and its creator @Shigma-->
-    <div ref="root" class="logs">
+    <div ref="root" class="logs rounded-borders">
       <div
         class="line"
         :class="{ start: isStartupLine(line) }"

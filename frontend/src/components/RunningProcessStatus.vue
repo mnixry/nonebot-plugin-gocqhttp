@@ -4,7 +4,9 @@
       <q-circular-progress
         show-value
         :value="status?.cpu_percent"
-        size="70px"
+        :track-color="$q.dark.isActive ? 'grey-8' : 'grey-3'"
+        :thickness="0.1"
+        size="90px"
         color="blue"
         class="q-ma-sm"
       >
