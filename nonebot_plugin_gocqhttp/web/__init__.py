@@ -1,4 +1,5 @@
 import secrets
+from importlib.metadata import version
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -38,6 +39,7 @@ app = FastAPI(
         if plugin_config.WEBUI_PASSWORD and plugin_config.WEBUI_USERNAME
         else []
     ),
+    version=version("nonebot-plugin-gocqhttp"),
 )
 
 

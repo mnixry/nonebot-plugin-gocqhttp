@@ -6,6 +6,12 @@ from ..plugin_config import AccountProtocol
 from ..process import RunningProcessDetail
 
 
+class AccountListItem(BaseModel):
+    uin: int
+    predefined: bool = False
+    process_created: bool = False
+
+
 class AccountCreation(BaseModel):
     password: Optional[str] = None
     protocol: AccountProtocol = AccountProtocol.iPad

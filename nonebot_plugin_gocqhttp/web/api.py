@@ -32,9 +32,16 @@ def RunningProcess():
     return Depends(dependency)
 
 
-@router.get("/", response_model=List[int])
+@router.get("/accounts", response_model=List[models.AccountListItem])
 async def all_accounts():
-    return [process.account.uin for process in ProcessesManager.all()]
+    return [
+        models.AccountListItem(
+            uin=process.account.uin,
+            predefined=not not ProcessesManager.is_predefined(process.account.uin),
+            process_created=not not process.process,
+        )
+        for process in ProcessesManager.all()
+    ]
 
 
 @router.get("/status", response_model=models.SystemStatus)
