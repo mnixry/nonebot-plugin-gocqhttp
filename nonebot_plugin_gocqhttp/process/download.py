@@ -50,7 +50,7 @@ async def download_gocq():
         response.raise_for_status()
 
         total_size, downloaded_size = int(response.headers["Content-Length"]), 0
-        content_md5 = b64decode(response.headers["Content-MD5"]).hex()
+        content_md5 = b64decode(response.headers["Content-MD5"]).hex().casefold()
         hasher = hashlib.md5()
 
         async with await open_file(download_path, "wb") as file:
@@ -62,12 +62,20 @@ async def download_gocq():
                     f"({downloaded_size}/{total_size} bytes)"
                 )
 
-        if downloaded_size != total_size or download_path.stat().st_size != total_size:
+        if downloaded_size != total_size:
             raise RuntimeError(
-                f"Download size mismatch: {downloaded_size}/{total_size} bytes"
+                f"Downloaded size mismatch: {downloaded_size}/{total_size} bytes"
             )
-        elif hasher.hexdigest().casefold() != content_md5.casefold():
-            raise RuntimeError("Download content MD5 validation failed!")
+        elif (file_size := download_path.stat().st_size) != total_size:
+            raise RuntimeError(
+                f"Downloaded file size mismatch: {file_size}/{total_size} bytes"
+            )
+        elif (actual_md5 := hasher.hexdigest().casefold()) != content_md5:
+            raise RuntimeError(
+                f"Content MD5 validation failed! "
+                f"Expected: {content_md5} "
+                f"Actual: {actual_md5}"
+            )
 
         logger.debug(f"Unarchive binary file to <e>{BINARY_PATH}</e>")
         await unarchive_file(download_path)
