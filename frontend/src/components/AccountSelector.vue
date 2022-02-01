@@ -15,22 +15,38 @@
     <q-separator />
     <q-item
       clickable
+      exact
       v-for="account in accounts"
-      :key="account"
-      :to="`/accounts/${account}`"
+      :key="account.uin"
+      :to="`/accounts/${account.uin}`"
     >
       <q-item-section avatar>
         <q-avatar>
-          <q-img :src="`https://q1.qlogo.cn/g?b=qq&nk=${account}&s=640`" />
+          <q-img :src="`https://q1.qlogo.cn/g?b=qq&nk=${account.uin}&s=640`" />
         </q-avatar>
       </q-item-section>
-      <q-item-section>{{ account }}</q-item-section>
+      <q-item-section>
+        <q-item-label>
+          <strong>
+            {{ account.uin }}
+          </strong>
+        </q-item-label>
+        <q-item-label caption>
+          <span v-if="account.predefined" class="text-orange q-pr-xs"
+            >来自配置文件</span
+          ><span v-else class="text-green q-pr-xs">手动添加</span
+          ><span v-if="!account.process_created" class="text-accent"
+            >未启动</span
+          >
+        </q-item-label>
+      </q-item-section>
       <q-item-section side>
         <q-btn
           flat
           color="grey"
           icon="delete"
-          @click="deleteAccount(account)"
+          :disable="account.predefined"
+          @click="deleteAccount(account.uin)"
         />
       </q-item-section>
     </q-item>
@@ -39,11 +55,12 @@
   </q-list>
 </template>
 <script lang="ts">
+import { AccountListItem } from 'src/api';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
   data: () => ({
-    accounts: [] as number[],
+    accounts: [] as AccountListItem[],
     updateTimer: null as number | null,
     loading: false,
   }),
@@ -53,10 +70,7 @@ export default defineComponent({
         this.$q
           .dialog({
             title: '确认删除',
-            message: '确认删除该帐号？',
-            ok: '确认',
-            cancel: '取消',
-            persistent: true,
+            message: `确认删除帐号${uin}?`,
           })
           .onOk(() => resolve(true))
           .onCancel(() => resolve(false));
@@ -78,7 +92,7 @@ export default defineComponent({
     async getAccounts() {
       try {
         this.loading = true;
-        const { data: accounts } = await this.$api.allAccountsApiGet();
+        const { data: accounts } = await this.$api.allAccountsApiAccountsGet();
         this.accounts = accounts;
       } finally {
         this.loading = false;
