@@ -54,59 +54,54 @@
     <q-inner-loading :showing="loading" />
   </q-list>
 </template>
-<script lang="ts">
+<script setup lang="ts">
+import { useQuasar } from 'quasar';
 import { AccountListItem } from 'src/api';
-import { defineComponent } from 'vue';
+import { api } from 'boot/axios';
+import { onBeforeUnmount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-export default defineComponent({
-  data: () => ({
-    accounts: [] as AccountListItem[],
-    updateTimer: null as number | null,
-    loading: false,
-  }),
-  methods: {
-    async deleteAccount(uin: number) {
-      const confirm = await new Promise<boolean>((resolve) => {
-        this.$q
-          .dialog({
-            title: '确认删除',
-            message: `确认删除帐号${uin}?`,
-          })
-          .onOk(() => resolve(true))
-          .onCancel(() => resolve(false));
-      });
-      if (!confirm) return;
-      await this.$router.push('/');
-      try {
-        this.$q.loading.show();
-        await this.$api.deleteAccountApiUinDelete(uin);
-      } catch (e) {
-        this.$q.notify({
-          color: 'negative',
-          message: (e as Error).message,
-        });
-      } finally {
-        this.$q.loading.hide();
-      }
-    },
-    async getAccounts() {
-      try {
-        this.loading = true;
-        const { data: accounts } = await this.$api.allAccountsApiAccountsGet();
-        this.accounts = accounts;
-      } finally {
-        this.loading = false;
-      }
-    },
-  },
-  created() {
-    void this.getAccounts();
-    this.updateTimer = window.setInterval(() => {
-      void this.getAccounts();
-    }, 10 * 1000);
-  },
-  beforeUnmount() {
-    if (this.updateTimer) window.clearInterval(this.updateTimer);
-  },
-});
+const $q = useQuasar(),
+  $router = useRouter();
+
+const accounts = ref<AccountListItem[]>([]),
+  loading = ref(false);
+
+async function deleteAccount(uin: number) {
+  const confirm = await new Promise<boolean>((resolve) => {
+    $q.dialog({
+      title: '确认删除',
+      message: `确认删除帐号${uin}?`,
+    })
+      .onOk(() => resolve(true))
+      .onCancel(() => resolve(false));
+  });
+  if (!confirm) return;
+  await $router.push('/');
+  try {
+    $q.loading.show();
+    await api.deleteAccountApiUinDelete(uin);
+  } catch (e) {
+    $q.notify({
+      color: 'negative',
+      message: (e as Error).message,
+    });
+  } finally {
+    $q.loading.hide();
+  }
+}
+
+async function getAccounts() {
+  try {
+    loading.value = true;
+    const { data } = await api.allAccountsApiAccountsGet();
+    accounts.value = data;
+  } finally {
+    loading.value = false;
+  }
+}
+
+void getAccounts();
+const updateTimer = window.setInterval(() => void getAccounts(), 5 * 1000);
+onBeforeUnmount(() => window.clearInterval(updateTimer));
 </script>

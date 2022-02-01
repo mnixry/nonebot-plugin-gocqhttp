@@ -33,11 +33,11 @@
     </q-chip>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
 import { RunningProcessDetail } from 'src/api';
+import { PropType } from 'vue';
 
-export default defineComponent({
-  props: { status: Object as PropType<RunningProcessDetail> },
+defineProps({
+  status: { type: Object as PropType<RunningProcessDetail>, required: true },
 });
 </script>

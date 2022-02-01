@@ -4,7 +4,7 @@
     <div ref="root" class="logs rounded-borders">
       <div
         class="line"
-        :class="{ start: isStartupLine(line) }"
+        :class="{ start: line.message.startsWith(START_LINE_MARK) }"
         :key="line.time"
         v-for="line in logs"
       >
@@ -17,61 +17,53 @@
     </div>
   </q-scroll-area>
 </template>
-<script lang="ts">
-import { defineComponent, PropType, nextTick } from 'vue';
+<script setup lang="ts">
+import { PropType, nextTick, watch, ref } from 'vue';
 import { ProcessLog, ProcessLogLevel } from 'src/api';
 import AnsiUp from 'ansi_up';
 
 const START_LINE_MARK = '当前版本:';
 const converter = new AnsiUp();
 
-export default defineComponent({
-  data: () => ({
-    start: START_LINE_MARK,
-  }),
-  props: {
-    logs: { type: Array as PropType<ProcessLog[]>, default: () => [] },
-  },
-  methods: {
-    renderLine(line: ProcessLog): string {
-      const text = converter.ansi_to_html(line.message);
-      return text;
-    },
-    lineLevel(line: ProcessLog) {
-      switch (line.level) {
-        case ProcessLogLevel.Debug:
-          return 'level-debug';
-        case ProcessLogLevel.Info:
-          return 'level-info';
-        case ProcessLogLevel.Warning:
-          return 'level-warn';
-        case ProcessLogLevel.Error:
-          return 'level-error';
-        case ProcessLogLevel.Fatal:
-          return 'level-fatal';
-        default:
-          return 'stdout';
-      }
-    },
-    isStartupLine(line: ProcessLog): boolean {
-      return line.message.startsWith(START_LINE_MARK);
-    },
-  },
-  created() {
-    this.$watch(
-      () => this.logs.length,
-      async () => {
-        const root = this.$refs.root as HTMLElement,
-          wrapper = root.parentElement?.parentElement as HTMLElement;
-        const { scrollTop, clientHeight, scrollHeight } = wrapper;
-        if (Math.abs(scrollTop + clientHeight - scrollHeight) <= 1) {
-          await nextTick();
-          wrapper.scrollTop = scrollHeight;
-        }
-      }
-    );
-  },
+const props = defineProps({
+  logs: { type: Array as PropType<ProcessLog[]>, default: () => [] },
 });
+const root = ref<HTMLElement>();
+
+function renderLine(line: ProcessLog): string {
+  const text = converter.ansi_to_html(line.message);
+  return text;
+}
+
+function lineLevel(line: ProcessLog) {
+  switch (line.level) {
+    case ProcessLogLevel.Debug:
+      return 'level-debug';
+    case ProcessLogLevel.Info:
+      return 'level-info';
+    case ProcessLogLevel.Warning:
+      return 'level-warn';
+    case ProcessLogLevel.Error:
+      return 'level-error';
+    case ProcessLogLevel.Fatal:
+      return 'level-fatal';
+    default:
+      return 'stdout';
+  }
+}
+
+watch(
+  () => props.logs.length,
+  async () => {
+    const wrapper = root.value?.parentElement?.parentElement;
+    if (!wrapper) return;
+    const { scrollTop, clientHeight, scrollHeight } = wrapper;
+    if (Math.abs(scrollTop + clientHeight - scrollHeight) <= 1) {
+      await nextTick();
+      wrapper.scrollTop = scrollHeight;
+    }
+  }
+);
 </script>
 <style lang="scss">
 @import '~@fontsource/roboto-mono/index.css';
