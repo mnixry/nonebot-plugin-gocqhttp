@@ -5,6 +5,7 @@ from nonebot import get_driver
 from nonebot.drivers import ReverseDriver
 
 from . import plugin  # noqa: F401
+from .log import logger
 from .plugin_config import config
 from .process import BINARY_DIR, BINARY_PATH, ProcessesManager, download_gocq
 from .web import app
@@ -31,6 +32,11 @@ async def startup():
     await asyncio.gather(
         *map(lambda process: process.start(), ProcessesManager.all()),
         return_exceptions=True,
+    )
+
+    logger.info(
+        "Startup complete, Web UI has served to "
+        f"<u><e>http://127.0.0.1:{driver.config.port}/go-cqhttp/</e></u>"
     )
     return
 
