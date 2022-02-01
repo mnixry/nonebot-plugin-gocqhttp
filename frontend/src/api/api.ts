@@ -90,6 +90,31 @@ export interface AccountCreation {
     'device_extra'?: object;
 }
 /**
+ * 
+ * @export
+ * @interface AccountListItem
+ */
+export interface AccountListItem {
+    /**
+     * 
+     * @type {number}
+     * @memberof AccountListItem
+     */
+    'uin': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AccountListItem
+     */
+    'predefined'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AccountListItem
+     */
+    'process_created'?: boolean;
+}
+/**
  * An enumeration.
  * @export
  * @enum {string}
@@ -497,8 +522,8 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        allAccountsApiGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/`;
+        allAccountsApiAccountsGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/accounts`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -804,8 +829,8 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async allAccountsApiGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<number>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.allAccountsApiGet(options);
+        async allAccountsApiAccountsGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AccountListItem>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.allAccountsApiAccountsGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -924,8 +949,8 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        allAccountsApiGet(options?: any): AxiosPromise<Array<number>> {
-            return localVarFp.allAccountsApiGet(options).then((request) => request(axios, basePath));
+        allAccountsApiAccountsGet(options?: any): AxiosPromise<Array<AccountListItem>> {
+            return localVarFp.allAccountsApiAccountsGet(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1041,8 +1066,8 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public allAccountsApiGet(options?: AxiosRequestConfig) {
-        return ApiApiFp(this.configuration).allAccountsApiGet(options).then((request) => request(this.axios, this.basePath));
+    public allAccountsApiAccountsGet(options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).allAccountsApiAccountsGet(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
