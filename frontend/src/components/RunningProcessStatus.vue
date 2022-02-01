@@ -34,7 +34,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { RunningProcessDetail } from 'src/api';
+import type { RunningProcessDetail } from 'src/api';
 import { PropType } from 'vue';
 
 defineProps({

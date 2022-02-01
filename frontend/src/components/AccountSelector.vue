@@ -56,7 +56,7 @@
 </template>
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { AccountListItem } from 'src/api';
+import type { AccountListItem } from 'src/api';
 import { api } from 'boot/axios';
 import { onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';

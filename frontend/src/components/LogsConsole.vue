@@ -19,7 +19,7 @@
 </template>
 <script setup lang="ts">
 import { PropType, nextTick, watch, ref } from 'vue';
-import { ProcessLog, ProcessLogLevel } from 'src/api';
+import { type ProcessLog, ProcessLogLevel } from 'src/api';
 import AnsiUp from 'ansi_up';
 
 const START_LINE_MARK = '当前版本:';
