@@ -14,7 +14,7 @@
     "@quasar/extras": "^1.0.0",
     "axios": "^0.25.0",
     "core-js": "^3.6.5",
-    "quasar": "^2.0.0",
+    "quasar": "^2.5.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0"
   },
