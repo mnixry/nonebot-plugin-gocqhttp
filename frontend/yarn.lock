@@ -1028,10 +1028,10 @@
   resolved "https://registry.npmmirror.com/@positron/stack-trace/download/@positron/stack-trace-1.0.0.tgz#14fcc712a530038ef9be1ce6952315a839f466a8"
   integrity sha1-FPzHEqUwA475vhzmlSMVqDn0Zqg=
 
-"@quasar/app@^3.0.0":
-  version "3.3.1"
-  resolved "https://registry.npmmirror.com/@quasar/app/download/@quasar/app-3.3.1.tgz#08240e96d5be0d15f66ae72c9962dcbafbbf62b1"
-  integrity sha512-KL3WkDDYpdPIYD7mZpLrTLzbR5lxEfEnn4BJ43nY3OwKNi9dLdxA0uRBabz3Sjqh2Dh8wMLc85490/4U7I/YxQ==
+"@quasar/app@^3.3.2":
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/@quasar/app/-/app-3.3.2.tgz#32fc75d63bbe0aa7b86b63667e9e0cda6b7852fe"
+  integrity sha512-pX2Fu4hz1n8x+/wMiUE1fBd9okMI2aCRZUkPNY0/cZG4hy1LWRtyd7HjrZL9XSVZSPoO3XeXeKXi7D6ztH/iHg==
   dependencies:
     "@quasar/babel-preset-app" "2.0.1"
     "@quasar/fastclick" "1.1.4"
