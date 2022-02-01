@@ -63,10 +63,16 @@ module.exports = configure(function (ctx) {
       // preloadChunks: true,
       // showProgress: false,
       // gzip: true,
-      // analyze: true,
+      analyze: {
+        openAnalyzer: false,
+        analyzerMode: 'static',
+        defaultSizes: 'gzip',
+      },
 
       // Options below are automatically set depending on the env, set them if you want to override
-      // extractCSS: false,
+      sourceMap: true,
+      extractCSS: true,
+      minify: true,
 
       distDir: '../nonebot_plugin_gocqhttp/web/dist',
 
@@ -98,7 +104,7 @@ module.exports = configure(function (ctx) {
       config: {},
 
       // iconSet: 'material-icons', // Quasar icon set
-      // lang: 'en-US', // Quasar language pack
+      lang: 'zh-CN', // Quasar language pack
 
       // For special cases outside of where the auto-import strategy can have an impact
       // (like functional components as one of the examples),
