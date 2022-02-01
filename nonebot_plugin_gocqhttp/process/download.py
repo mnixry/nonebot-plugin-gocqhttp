@@ -49,25 +49,26 @@ async def download_gocq():
         response = await stack.enter_async_context(client.stream("GET", DOWNLOAD_URL))
         response.raise_for_status()
 
-        total_size, size = int(response.headers["Content-Length"]), 0
+        total_size, downloaded_size = int(response.headers["Content-Length"]), 0
         content_md5 = b64decode(response.headers["Content-MD5"]).hex()
         hasher = hashlib.md5()
 
-        file = await stack.enter_async_context(await open_file(download_path, "wb"))
-        async for chunk in response.aiter_bytes():
-            size += await file.write(chunk)
-            hasher.update(chunk)
-            logger.trace(
-                "Download progress: "
-                f"{size/total_size:.2%} ({size}/{total_size} bytes)"
-            )
-        await file.aclose()
+        async with await open_file(download_path, "wb") as file:
+            async for chunk in response.aiter_bytes():
+                downloaded_size += await file.write(chunk)
+                hasher.update(chunk)
+                logger.trace(
+                    f"Download progress: {downloaded_size/total_size:.2%} "
+                    f"({downloaded_size}/{total_size} bytes)"
+                )
 
-        if size != total_size:
-            raise RuntimeError(f"Download size mismatch: {size}/{total_size} bytes")
+        if downloaded_size != total_size or download_path.stat().st_size != total_size:
+            raise RuntimeError(
+                f"Download size mismatch: {downloaded_size}/{total_size} bytes"
+            )
         elif hasher.hexdigest().casefold() != content_md5.casefold():
             raise RuntimeError("Download content MD5 validation failed!")
 
-        logger.debug(f"Unarchive binary file to <e>{BINARY_PATH!r}</e>")
+        logger.debug(f"Unarchive binary file to <e>{BINARY_PATH}</e>")
         await unarchive_file(download_path)
     return
