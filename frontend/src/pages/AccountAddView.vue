@@ -45,6 +45,7 @@
             :options="protocols"
             inline
             label="登录设备类型"
+            option-value="value"
           >
             <template v-slot:before><q-icon name="devices" /></template>
           </q-select>
@@ -58,56 +59,53 @@
     </q-card>
   </q-page>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { AccountProtocol } from 'src/api';
+import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
+import { api } from 'src/boot/axios';
 
-const PROTOCOL_MAP = {
+const $q = useQuasar(),
+  $router = useRouter();
+
+const protocols = Object.entries({
   iPad: AccountProtocol.NUMBER_0,
   Phone: AccountProtocol.NUMBER_1,
   Mac: AccountProtocol.NUMBER_2,
   Watch: AccountProtocol.NUMBER_3,
   QiDian: AccountProtocol.NUMBER_4,
-};
+}).map(([name, value]) => ({
+  label: name,
+  value,
+}));
 
-export default defineComponent({
-  data: () => ({
-    uin: null as null | number,
-    password: null as null | string,
-    protocol: null as null | { value: AccountProtocol; label: string },
-  }),
-  computed: {
-    protocols() {
-      return Object.entries(PROTOCOL_MAP).map(([label, value]) => ({
-        label,
-        value,
-      }));
-    },
-  },
-  methods: {
-    async addAccount() {
-      if (!this.uin) return;
-      try {
-        this.$q.loading.show();
-        await this.$api.createAccountApiUinPut(this.uin, {
-          password: this.password?.trim() ? this.password : undefined,
-          protocol: this.protocol?.value,
-        });
-        await this.$router.push('/');
-      } catch (err) {
-        this.$q.notify({
-          color: 'negative',
-          message: (err as Error).message,
-        });
-      } finally {
-        this.$q.loading.hide();
-      }
-    },
-    clearForm() {
-      this.uin = null;
-      this.password = null;
-      this.protocol = null;
-    },
-  },
-});
+const uin = ref<number>(),
+  password = ref<string>(),
+  protocol = ref<AccountProtocol>();
+
+async function addAccount() {
+  if (!uin.value) return;
+  try {
+    $q.loading.show();
+    await api.createAccountApiUinPut(uin.value, {
+      password: password.value?.trim() ? password.value : undefined,
+      protocol: protocol.value,
+    });
+    void $router.push(`/accounts/${uin.value}`);
+  } catch (err) {
+    $q.notify({
+      color: 'negative',
+      message: (err as Error).message,
+    });
+  } finally {
+    $q.loading.hide();
+  }
+}
+
+function clearForm() {
+  uin.value = undefined;
+  password.value = undefined;
+  protocol.value = undefined;
+}
 </script>

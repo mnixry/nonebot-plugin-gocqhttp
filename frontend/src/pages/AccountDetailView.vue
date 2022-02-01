@@ -80,111 +80,113 @@
     </q-card>
   </q-page>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { onBeforeUnmount, ref, watch } from 'vue';
 import RunningProcessStatus from 'components/RunningProcessStatus.vue';
 import LogsConsole from 'components/LogsConsole.vue';
-import { ProcessInfo, ProcessLog } from 'src/api';
+import type { ProcessInfo, ProcessLog } from 'src/api';
 import MessageSender from 'src/components/MessageSender.vue';
+import { useQuasar } from 'quasar';
+import { useRoute } from 'vue-router';
+import { api } from 'src/boot/axios';
 
-export default defineComponent({
-  data: () => ({
-    updateTimer: null as number | null,
-    logWebsocket: null as WebSocket | null,
-    status: null as ProcessInfo | null,
-    logs: [] as ProcessLog[],
-  }),
-  components: { RunningProcessStatus, LogsConsole, MessageSender },
-  computed: {
-    uin(): number {
-      return +this.$route.params.uin;
-    },
-  },
-  methods: {
-    async updateStatus() {
-      if (this.logWebsocket) this.logWebsocket.send('heartbeat');
-      try {
-        this.$q.loadingBar.start();
-        const { data: status } =
-          await this.$api.processStatusApiUinProcessStatusGet(this.uin);
-        this.status = status;
-      } catch (err) {
-        console.error(err);
-      } finally {
-        this.$q.loadingBar.stop();
-      }
-    },
-    async stopProcess() {
-      try {
-        this.$q.loading.show();
-        await this.$api.processStopApiUinProcessDelete(this.uin);
-        await this.updateStatus();
-      } catch (err) {
-        console.error(err);
-      } finally {
-        this.$q.loading.hide();
-      }
-    },
-    async startProcess() {
-      try {
-        this.$q.loading.show();
-        await this.$api.processStartApiUinProcessPut(this.uin);
-        await this.updateStatus();
-      } catch (err) {
-        console.error(err);
-      } finally {
-        this.$q.loading.hide();
-      }
-    },
-    async logHistory() {
-      try {
-        const { data: logs } =
-          await this.$api.processLogsHistoryApiUinProcessLogsGet(this.uin);
-        this.logs = logs;
-      } catch (err) {
-        console.error(err);
-      } finally {
-      }
-    },
-    logRealtime() {
-      if (this.logWebsocket) this.logWebsocket.close();
-      if (Number.isNaN(this.uin)) return;
-      const wsUrl = new URL(`api/${this.uin}/process/logs`, location.href);
-      wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+const $q = useQuasar(),
+  $route = useRoute();
 
-      this.logWebsocket = new WebSocket(wsUrl.href);
-      this.logWebsocket.onmessage = ({ data }) => {
-        const log = JSON.parse(<string>data) as ProcessLog;
-        this.logs.push(log);
-      };
-      this.logWebsocket.onclose = () => {
-        this.logWebsocket = null;
-      };
-    },
-  },
-  created() {
-    this.updateTimer = window.setInterval(() => void this.updateStatus(), 3000);
+const uin = +$route.params.uin;
 
-    this.$watch(
-      () => this.$route.params,
-      async () => {
-        this.status = null;
-        this.logs = [];
-        try {
-          this.$q.loading.show();
-          await this.updateStatus();
-          await this.logHistory();
-          this.logRealtime();
-        } finally {
-          this.$q.loading.hide();
-        }
-      },
-      { immediate: true }
-    );
+const status = ref<ProcessInfo>(),
+  logs = ref<ProcessLog[]>([]);
+
+let logWebsocket = undefined as WebSocket | undefined;
+
+async function updateStatus() {
+  logWebsocket?.send('heartbeat');
+  try {
+    $q.loadingBar.start();
+    const { data } = await api.processStatusApiUinProcessStatusGet(uin);
+    status.value = data;
+  } catch (err) {
+    console.error(err);
+  } finally {
+    $q.loadingBar.stop();
+  }
+}
+
+async function stopProcess() {
+  try {
+    $q.loading.show();
+    await api.processStopApiUinProcessDelete(uin);
+    await updateStatus();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    $q.loading.hide();
+  }
+}
+
+async function startProcess() {
+  try {
+    $q.loading.show();
+    await api.processStartApiUinProcessPut(uin);
+    await updateStatus();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    $q.loading.hide();
+  }
+}
+
+async function logHistory() {
+  try {
+    const { data } = await api.processLogsHistoryApiUinProcessLogsGet(uin);
+    logs.value = data;
+  } catch (err) {
+    console.error(err);
+  } finally {
+  }
+}
+
+function logRealtime() {
+  if (Number.isNaN(uin)) return;
+
+  logWebsocket?.close();
+
+  const wsUrl = new URL(`api/${uin}/process/logs`, location.href);
+  wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+
+  logWebsocket = new WebSocket(wsUrl.href);
+  logWebsocket.onmessage = ({ data }) => {
+    const log = JSON.parse(<string>data) as ProcessLog;
+    logs.value.push(log);
+  };
+  logWebsocket.onclose = () => {
+    logWebsocket = undefined;
+  };
+}
+
+void updateStatus();
+const updateTimer = window.setInterval(() => void updateStatus(), 3000);
+
+watch(
+  () => $route.params,
+  async () => {
+    status.value = undefined;
+    logs.value = [];
+    try {
+      $q.loading.show();
+      await updateStatus();
+      await logHistory();
+      logRealtime();
+    } finally {
+      $q.loading.hide();
+    }
   },
-  beforeUnmount() {
-    if (this.updateTimer) window.clearInterval(this.updateTimer);
-    if (this.logWebsocket) this.logWebsocket.close();
-  },
+  { immediate: true }
+);
+
+onBeforeUnmount(() => {
+  window.clearInterval(updateTimer);
+  logWebsocket?.close();
 });
 </script>
