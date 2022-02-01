@@ -1,6 +1,4 @@
 {
-  "vetur.validation.template": false,
-  "vetur.format.enable": false,
   "editor.formatOnSave": true,
   "eslint.validate": [
     "javascript",
@@ -8,10 +6,8 @@
     "typescript",
     "vue"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "vetur.experimental.templateInterpolationService": true,
   "browse-lite.startUrl": "http://127.0.0.1:8080",
   "cSpell.words": [
     "apexcharts"
-  ]
+  ],
 }
