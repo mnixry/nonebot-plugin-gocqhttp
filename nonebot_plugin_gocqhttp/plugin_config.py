@@ -3,14 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11.config import Config as OnebotConfig
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 driver = get_driver()
-
-DEFAULT_DOWNLOAD_URL = (
-    "https://download.fastgit.org/"
-    "{repo}/releases/{version}/download/go-cqhttp_{goos}_{goarch}{ext}"
-)
 
 
 class AccountProtocol(IntEnum):
@@ -34,11 +29,13 @@ class AccountConfig(BaseModel):
 
 class PluginConfig(BaseModel):
     ACCOUNTS: List[AccountConfig] = Field(default_factory=list, alias="gocq_accounts")
-    DOWNLOAD_REPO: str = Field("Mrs4s/go-cqhttp", alias="gocq_repo")
-    DOWNLOAD_VERSION: str = Field("latest", alias="gocq_version")
-    DOWNLOAD_URL: str = Field(DEFAULT_DOWNLOAD_URL, alias="gocq_url")
 
+    DOWNLOAD_DOMAIN: str = Field("download.fastgit.org", alias="gocq_download_domain")
+    DOWNLOAD_REPO: str = Field("Mrs4s/go-cqhttp", alias="gocq_repo")
+    DOWNLOAD_VERSION: Optional[str] = Field(None, alias="gocq_version")
+    DOWNLOAD_URL: Optional[HttpUrl] = Field(None, alias="gocq_url")
     FORCE_DOWNLOAD: bool = Field(False, alias="gocq_force_download")
+
     PROCESS_KWARGS: Dict[str, Any] = Field(
         default_factory=dict, alias="gocq_process_kwargs"
     )

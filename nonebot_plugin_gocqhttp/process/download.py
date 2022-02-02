@@ -13,14 +13,6 @@ from ..log import logger
 from ..plugin_config import config
 from .platform import ARCHIVE_EXT, EXECUTABLE_EXT, GOARCH, GOOS
 
-DOWNLOAD_URL = config.DOWNLOAD_URL.format(
-    repo=config.DOWNLOAD_REPO,
-    version=config.DOWNLOAD_VERSION,
-    goos=GOOS,
-    goarch=GOARCH,
-    ext=ARCHIVE_EXT,
-)
-
 ACCOUNTS_DATA_PATH = Path(".") / "accounts"
 BINARY_DIR = ACCOUNTS_DATA_PATH / "binary"
 BINARY_PATH = BINARY_DIR / ("go-cqhttp" + EXECUTABLE_EXT)
@@ -36,6 +28,19 @@ def unarchive_file(path: Path):
     assert BINARY_PATH.exists(), "go-cqhttp binary not found"
 
 
+def construct_download_url() -> str:
+    return config.DOWNLOAD_URL or (
+        f"https://{config.DOWNLOAD_DOMAIN}/"
+        + f"{config.DOWNLOAD_REPO}/releases/"
+        + (
+            f"download/{config.DOWNLOAD_VERSION}/"
+            if config.DOWNLOAD_VERSION
+            else "latest/download/"
+        )
+        + f"go-cqhttp_{GOOS}_{GOARCH}{ARCHIVE_EXT}"
+    )
+
+
 @logger.catch(reraise=True)
 async def download_gocq():
     async with AsyncExitStack() as stack:
@@ -43,10 +48,11 @@ async def download_gocq():
         download_path = Path(tmpdir) / ("temp" + ARCHIVE_EXT)
         BINARY_DIR.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Begin to Download binary from <u>{DOWNLOAD_URL}</u>")
-
         client = await stack.enter_async_context(AsyncClient(follow_redirects=True))
-        response = await stack.enter_async_context(client.stream("GET", DOWNLOAD_URL))
+
+        url = construct_download_url()
+        logger.info(f"Begin to Download binary from <u>{url}</u>")
+        response = await stack.enter_async_context(client.stream("GET", url))
         response.raise_for_status()
 
         total_size, downloaded_size = int(response.headers["Content-Length"]), 0
