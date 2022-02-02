@@ -10,8 +10,11 @@ from anyio import open_file
 from ..exceptions import AccountAlreadyExists
 from ..plugin_config import AccountConfig
 from ..plugin_config import config as plugin_config
+from .download import BINARY_DIR
 from .models import ProcessAccountsStore
 from .process import GoCQProcess
+
+ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.pkl"
 
 
 class ProcessesManager:
@@ -50,7 +53,7 @@ class ProcessesManager:
         return [*cls._processes.copy().values()]
 
     @classmethod
-    async def save(cls, save_path: Path) -> int:
+    async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH) -> int:
         store = ProcessAccountsStore(
             accounts=[process.account.source for process in cls.all()]
         )
@@ -71,7 +74,9 @@ class ProcessesManager:
 
     @classmethod
     async def load_saved(
-        cls, save_path: Path, *, ignore_loaded: bool = False
+        cls,
+        save_path: Path = ACCOUNTS_SAVE_PATH,
+        ignore_loaded: bool = False,
     ) -> List[GoCQProcess]:
         async with await open_file(save_path, "rb") as f:
             compressed = await f.read()

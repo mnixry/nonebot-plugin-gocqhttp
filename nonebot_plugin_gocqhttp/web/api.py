@@ -80,6 +80,7 @@ async def create_account(uin: int, account: Optional[models.AccountCreation] = N
     process = ProcessesManager.create(
         account=AccountConfig(uin=uin, **account.dict() if account else {})
     )
+    await ProcessesManager.save()
     return process.account
 
 

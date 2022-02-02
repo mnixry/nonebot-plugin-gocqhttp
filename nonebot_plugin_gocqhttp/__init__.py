@@ -7,17 +7,14 @@ from nonebot.drivers import ReverseDriver
 from . import plugin  # noqa: F401
 from .log import logger
 from .plugin_config import config
-from .process import BINARY_DIR, BINARY_PATH, ProcessesManager, download_gocq
+from .process import ACCOUNTS_SAVE_PATH, BINARY_PATH, ProcessesManager, download_gocq
 from .web import app
 
 driver = get_driver()
 
-if isinstance(driver, ReverseDriver) and isinstance(driver.asgi, FastAPI):
-    driver.asgi.mount("/go-cqhttp", app)
-else:
-    raise NotImplementedError("Support for FastAPI is only available.")
-
-ACCOUNTS_DATA = BINARY_DIR / "accounts.pkl"
+if not isinstance(driver, ReverseDriver) or not isinstance(driver.server_app, FastAPI):
+    raise NotImplementedError("Only FastAPI reverse driver is supported.")
+driver.server_app.mount("/go-cqhttp", app, name="go-cqhttp plugin")
 
 
 @driver.on_startup
@@ -26,8 +23,8 @@ async def startup():
         await download_gocq()
 
     ProcessesManager.load_config()
-    if ACCOUNTS_DATA.is_file():
-        await ProcessesManager.load_saved(ACCOUNTS_DATA, ignore_loaded=True)
+    if ACCOUNTS_SAVE_PATH.is_file():
+        await ProcessesManager.load_saved(ignore_loaded=True)
 
     await asyncio.gather(
         *map(lambda process: process.start(), ProcessesManager.all()),
@@ -43,7 +40,7 @@ async def startup():
 
 @driver.on_shutdown
 async def shutdown():
-    await ProcessesManager.save(ACCOUNTS_DATA)
+    await ProcessesManager.save()
 
     await asyncio.gather(
         *map(lambda process: process.stop(), ProcessesManager.all()),
