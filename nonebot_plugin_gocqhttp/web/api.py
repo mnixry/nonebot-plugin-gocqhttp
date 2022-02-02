@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, List, Optional, cast
 
 import psutil
@@ -47,7 +48,7 @@ async def all_accounts():
 @router.get("/status", response_model=models.SystemStatus)
 def system_status():
     virtual_memory = psutil.virtual_memory()._asdict()
-    disk_usage = psutil.disk_usage(__file__)._asdict()
+    disk_usage = psutil.disk_usage(path=os.getcwd())._asdict()
     process = psutil.Process()
     with process.oneshot():
         cpu_percent = process.cpu_percent()
@@ -103,7 +104,7 @@ async def account_api(
         (
             bot
             for bot in get_bots().values()
-            if bot.self_id.endswith(f"{process.account.uin}")
+            if isinstance(bot, Bot) and bot.self_id.endswith(f"{process.account.uin}")
         ),
         None,
     )
