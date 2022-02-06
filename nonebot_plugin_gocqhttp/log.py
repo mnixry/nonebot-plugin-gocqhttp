@@ -35,5 +35,6 @@ class LogStorage(Generic[_T]):
 STDOUT = _logger.level("STDOUT", no=logging.INFO)
 FATAL = _logger.level("FATAL", no=logging.FATAL)
 
+LOG_STORAGE = LogStorage[str]()
 
 logger = _logger.opt(colors=True)

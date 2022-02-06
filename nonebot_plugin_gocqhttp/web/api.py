@@ -9,7 +9,7 @@ from nonebot.utils import escape_tag
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from ..exceptions import BotNotFound, ProcessNotFound, RemovePredefinedAccount
-from ..log import logger
+from ..log import LOG_STORAGE, logger
 from ..plugin_config import AccountConfig
 from ..process import (
     GoCQProcess,
@@ -68,6 +68,33 @@ def system_status():
             start_time=process_start_time,
         ),
     )
+
+
+@router.get("/logs", response_model=List[str])
+async def system_logs_history(reverse: bool = False):
+    return LOG_STORAGE.list(reverse=reverse)
+
+
+@router.websocket("/logs")
+async def system_logs_realtime(websocket: WebSocket):
+    await websocket.accept()
+
+    async def log_listener(log: str):
+        await websocket.send_text(log)
+
+    LOG_STORAGE.listeners.add(log_listener)
+    try:
+        while websocket.client_state == WebSocketState.CONNECTED:
+            recv = await websocket.receive()
+            logger.trace(
+                f"{system_logs_realtime.__name__!r} received "
+                f"<e>{escape_tag(repr(recv))}</e>"
+            )
+    except WebSocketDisconnect:
+        pass
+    finally:
+        LOG_STORAGE.listeners.remove(log_listener)
+    return
 
 
 @router.put(
@@ -157,7 +184,10 @@ async def process_logs_realtime(
     try:
         while websocket.client_state == WebSocketState.CONNECTED:
             recv = await websocket.receive()
-            logger.trace(f"Websocket received <e>{escape_tag(repr(recv))}</e>")
+            logger.trace(
+                f"{process_logs_realtime.__name__!r} received "
+                f"<e>{escape_tag(repr(recv))}</e>"
+            )
     except WebSocketDisconnect:
         pass
     finally:

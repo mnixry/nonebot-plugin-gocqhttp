@@ -5,7 +5,7 @@ from nonebot import get_driver
 from nonebot.drivers import ReverseDriver
 
 from . import plugin  # noqa: F401
-from .log import logger
+from .log import LOG_STORAGE, logger
 from .plugin_config import config
 from .process import ACCOUNTS_SAVE_PATH, BINARY_PATH, ProcessesManager, download_gocq
 from .web import app
@@ -19,6 +19,15 @@ driver.server_app.mount("/go-cqhttp", app, name="go-cqhttp plugin")
 
 @driver.on_startup
 async def startup():
+    loop = asyncio.get_running_loop()
+
+    def log_sink(message: str):
+        asyncio.run_coroutine_threadsafe(
+            LOG_STORAGE.add(message.rstrip("\n")), loop=loop
+        )
+
+    logger.add(log_sink, colorize=True)
+
     if config.FORCE_DOWNLOAD or not BINARY_PATH.is_file():
         await download_gocq()
 
