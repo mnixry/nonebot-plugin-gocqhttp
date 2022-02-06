@@ -6,14 +6,15 @@ import threading
 from base64 import b64encode
 from itertools import count
 from time import sleep
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, TypeVar
+from typing import Any, Awaitable, Callable, Optional, TypeVar
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
 
+from ..exceptions import ProcessAlreadyStarted, ProcessNotStarted
+from ..log import LogStorage as BaseLogStorage
 from ..log import logger
 from ..plugin_config import AccountConfig
-from ..exceptions import ProcessAlreadyStarted, ProcessNotStarted
 from .config import generate_config, generate_device
 from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
 from .models import (
@@ -39,24 +40,8 @@ LogListener = Callable[[ProcessLog], Awaitable[Any]]
 LogListener_T = TypeVar("LogListener_T", bound=LogListener)
 
 
-class LogStorage:
-    def __init__(self, rotation: float):
-        self.count, self.rotation = 0, rotation
-        self.logs: Dict[int, ProcessLog] = {}
-        self.loop = asyncio.get_running_loop()
-
-    def add(self, log: ProcessLog):
-        seq = self.count = self.count + 1
-        self.logs[seq] = log
-        self.loop.call_later(self.rotation, self.remove, seq)
-        return seq
-
-    def remove(self, seq: int):
-        del self.logs[seq]
-        return
-
-    def list(self, reverse: bool = False) -> List[ProcessLog]:
-        return [self.logs[seq] for seq in sorted(self.logs, reverse=reverse)]
+class LogStorage(BaseLogStorage[ProcessLog]):
+    pass
 
 
 class GoCQProcess:
@@ -95,7 +80,6 @@ class GoCQProcess:
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
         self.max_restarts, self.restart_interval = max_restarts, restart_interval
 
-        self.log_listeners: Set[LogListener] = set()
         self.logs, self.restart_count = LogStorage(log_rotation), 0
 
         async def process_log(log: ProcessLog):
@@ -105,7 +89,7 @@ class GoCQProcess:
             )
 
         if print_process_log:
-            self.listen_log(process_log)
+            self.logs.listeners.add(process_log)
 
     def __repr__(self):
         return f"<{type(self).__name__} {self.account} process={self.process}>"
@@ -133,10 +117,7 @@ class GoCQProcess:
                 if log_matched
                 else ProcessLog(message=output)
             )
-            self.logs.add(log_model)
-
-            for listener in self.log_listeners:
-                asyncio.run_coroutine_threadsafe(listener(log_model), loop=self.loop)
+            asyncio.run_coroutine_threadsafe(self.logs.add(log_model), loop=self.loop)
 
         if self.process.returncode is None:
             self.process.terminate()
@@ -229,7 +210,3 @@ class GoCQProcess:
                 details=StoppedProcessDetail(code=self.process.returncode),
             )
         return
-
-    def listen_log(self, listener: LogListener_T) -> LogListener_T:
-        self.log_listeners.add(listener)
-        return listener

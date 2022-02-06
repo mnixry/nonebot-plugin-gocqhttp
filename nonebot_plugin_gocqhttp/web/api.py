@@ -153,7 +153,7 @@ async def process_logs_realtime(
     async def log_listener(log: ProcessLog):
         await websocket.send_text(log.json())
 
-    process.log_listeners.add(log_listener)
+    process.logs.listeners.add(log_listener)
     try:
         while websocket.client_state == WebSocketState.CONNECTED:
             recv = await websocket.receive()
@@ -161,5 +161,5 @@ async def process_logs_realtime(
     except WebSocketDisconnect:
         pass
     finally:
-        process.log_listeners.remove(log_listener)
+        process.logs.listeners.remove(log_listener)
     return

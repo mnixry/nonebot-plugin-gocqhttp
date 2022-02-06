@@ -44,7 +44,7 @@ class ProcessesManager:
     @classmethod
     async def remove(cls, uin: int):
         process = cls._processes.pop(uin)
-        process.log_listeners.clear()
+        process.logs.listeners.clear()
         await process.stop()
         return
 
