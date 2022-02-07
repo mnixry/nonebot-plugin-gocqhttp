@@ -978,10 +978,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@fontsource/roboto-mono@^4.5.1":
-  version "4.5.1"
-  resolved "https://registry.npmmirror.com/@fontsource/roboto-mono/-/roboto-mono-4.5.1.tgz#8b1b38ad7d2c202968ffd87bee3e471152b437e9"
-  integrity sha512-uP/GMF9N2XaxrB9flM1LiZUdcrG/3YdYpGJddY2d7rvsqqitZ8fWBckbdW717WMty4V96N+k1EArilYwQOvN3A==
+"@fontsource/roboto-mono@^4.5.2":
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/@fontsource/roboto-mono/-/roboto-mono-4.5.2.tgz#3462d720b7ba0530358dd748545523a711c7428a"
+  integrity sha512-MoWKypBXIyZMnvExDTmaRWJSBNLQvKNaWAk2rAwXCNP5AtIa7mzawx9Yfl1LxCY/kVjhMZHPPKtt75CNQQHzQA==
 
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.3"
