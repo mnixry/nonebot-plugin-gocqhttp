@@ -15,7 +15,7 @@
     "axios": "^0.25.0",
     "core-js": "^3.21.0",
     "quasar": "^2.5.3",
-    "vue": "^3.0.0",
+    "vue": "^3.2.30",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
