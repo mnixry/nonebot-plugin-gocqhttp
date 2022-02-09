@@ -120,13 +120,16 @@ export interface AccountListItem {
  * @enum {string}
  */
 
-export enum AccountProtocol {
-    NUMBER_0 = 0,
-    NUMBER_1 = 1,
-    NUMBER_2 = 2,
-    NUMBER_3 = 3,
-    NUMBER_4 = 4
-}
+export const AccountProtocol = {
+    NUMBER_0: 0,
+    NUMBER_1: 1,
+    NUMBER_2: 2,
+    NUMBER_3: 3,
+    NUMBER_4: 4
+} as const;
+
+export type AccountProtocol = typeof AccountProtocol[keyof typeof AccountProtocol];
+
 
 /**
  * 
@@ -246,14 +249,17 @@ export interface ProcessLog {
  * @enum {string}
  */
 
-export enum ProcessLogLevel {
-    Stdout = 'STDOUT',
-    Debug = 'DEBUG',
-    Info = 'INFO',
-    Warning = 'WARNING',
-    Error = 'ERROR',
-    Fatal = 'FATAL'
-}
+export const ProcessLogLevel = {
+    Stdout: 'STDOUT',
+    Debug: 'DEBUG',
+    Info: 'INFO',
+    Warning: 'WARNING',
+    Error: 'ERROR',
+    Fatal: 'FATAL'
+} as const;
+
+export type ProcessLogLevel = typeof ProcessLogLevel[keyof typeof ProcessLogLevel];
+
 
 /**
  * An enumeration.
@@ -261,10 +267,13 @@ export enum ProcessLogLevel {
  * @enum {string}
  */
 
-export enum ProcessStatus {
-    Running = 'running',
-    Stopped = 'stopped'
-}
+export const ProcessStatus = {
+    Running: 'running',
+    Stopped: 'stopped'
+} as const;
+
+export type ProcessStatus = typeof ProcessStatus[keyof typeof ProcessStatus];
+
 
 /**
  * 
@@ -761,6 +770,41 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
         },
         /**
          * 
+         * @summary System Logs History
+         * @param {boolean} [reverse] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        systemLogsHistoryApiLogsGet: async (reverse?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/logs`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (reverse !== undefined) {
+                localVarQueryParameter['reverse'] = reverse;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary System Status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -903,6 +947,17 @@ export const ApiApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary System Logs History
+         * @param {boolean} [reverse] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async systemLogsHistoryApiLogsGet(reverse?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.systemLogsHistoryApiLogsGet(reverse, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary System Status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1013,6 +1068,16 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          */
         processStopApiUinProcessDelete(uin: number, options?: any): AxiosPromise<void> {
             return localVarFp.processStopApiUinProcessDelete(uin, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary System Logs History
+         * @param {boolean} [reverse] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        systemLogsHistoryApiLogsGet(reverse?: boolean, options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.systemLogsHistoryApiLogsGet(reverse, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1142,6 +1207,18 @@ export class ApiApi extends BaseAPI {
      */
     public processStopApiUinProcessDelete(uin: number, options?: AxiosRequestConfig) {
         return ApiApiFp(this.configuration).processStopApiUinProcessDelete(uin, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary System Logs History
+     * @param {boolean} [reverse] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public systemLogsHistoryApiLogsGet(reverse?: boolean, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).systemLogsHistoryApiLogsGet(reverse, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
