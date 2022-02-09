@@ -9,6 +9,31 @@
 /* eslint-env node */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { configure } = require('quasar/wrappers');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * @param {string} src
+ * @param {string} dest
+ */
+function copyFolderRecursively(src, dest, cleanDest = true) {
+  console.log('Copy directory', src, 'to', dest);
+
+  if (cleanDest) fs.rmSync(dest, { recursive: true, force: true });
+  if (!fs.existsSync(dest)) fs.mkdirSync(dest);
+
+  fs.readdirSync(src).forEach((file) => {
+    const srcFile = path.join(src, file),
+      destFile = path.join(dest, file),
+      srcStat = fs.statSync(srcFile);
+    if (srcStat.isDirectory()) {
+      fs.mkdirSync(destFile);
+      copyFolderRecursively(srcFile, destFile);
+    } else {
+      fs.copyFileSync(srcFile, destFile);
+    }
+  });
+}
 
 module.exports = configure(function (ctx) {
   return {
@@ -74,7 +99,16 @@ module.exports = configure(function (ctx) {
       extractCSS: true,
       minify: true,
 
-      distDir: '../nonebot_plugin_gocqhttp/web/dist',
+      distDir: './dist',
+      targetDir: '../nonebot_plugin_gocqhttp/web/dist',
+
+      afterBuild(configs) {
+        copyFolderRecursively(
+          configs.quasarConf.build.distDir,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          configs.quasarConf.build.targetDir
+        );
+      },
 
       // https://quasar.dev/quasar-cli/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
