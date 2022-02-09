@@ -93,7 +93,7 @@ import { api } from 'src/boot/axios';
 const $q = useQuasar(),
   $route = useRoute();
 
-const uin = +$route.params.uin;
+const uin = ref<number>(+$route.params.uin);
 
 const status = ref<ProcessInfo>(),
   logs = ref<ProcessLog[]>([]);
@@ -104,7 +104,7 @@ async function updateStatus() {
   logWebsocket?.send('heartbeat');
   try {
     $q.loadingBar.start();
-    const { data } = await api.processStatusApiUinProcessStatusGet(uin);
+    const { data } = await api.processStatusApiUinProcessStatusGet(uin.value);
     status.value = data;
   } catch (err) {
     console.error(err);
@@ -116,7 +116,7 @@ async function updateStatus() {
 async function stopProcess() {
   try {
     $q.loading.show();
-    await api.processStopApiUinProcessDelete(uin);
+    await api.processStopApiUinProcessDelete(uin.value);
     await updateStatus();
   } catch (err) {
     console.error(err);
@@ -128,7 +128,7 @@ async function stopProcess() {
 async function startProcess() {
   try {
     $q.loading.show();
-    await api.processStartApiUinProcessPut(uin);
+    await api.processStartApiUinProcessPut(uin.value);
     await updateStatus();
   } catch (err) {
     console.error(err);
@@ -139,7 +139,9 @@ async function startProcess() {
 
 async function logHistory() {
   try {
-    const { data } = await api.processLogsHistoryApiUinProcessLogsGet(uin);
+    const { data } = await api.processLogsHistoryApiUinProcessLogsGet(
+      uin.value
+    );
     logs.value = data;
   } catch (err) {
     console.error(err);
@@ -152,7 +154,7 @@ function logRealtime() {
 
   logWebsocket?.close();
 
-  const wsUrl = new URL(`api/${uin}/process/logs`, location.href);
+  const wsUrl = new URL(`api/${uin.value}/process/logs`, location.href);
   wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
   logWebsocket = new WebSocket(wsUrl.href);
@@ -171,6 +173,7 @@ const updateTimer = window.setInterval(() => void updateStatus(), 3000);
 watch(
   () => $route.params,
   async () => {
+    uin.value = +$route.params.uin;
     status.value = undefined;
     logs.value = [];
     try {
