@@ -96,7 +96,7 @@ class GoCQProcess:
 
     def _daemon_thread_runner(self):
         self.process = subprocess.Popen(
-            [BINARY_PATH.absolute(), "faststart"],
+            [BINARY_PATH.absolute(), "-faststart"],
             cwd=self.cwd.absolute(),
             encoding="utf-8",
             stdout=subprocess.PIPE,
