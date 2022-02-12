@@ -66,7 +66,7 @@ watch(
 );
 </script>
 <style lang="scss">
-@import '~@fontsource/roboto-mono/index.css';
+@import '~@fontsource/source-code-pro/index.css';
 
 :root {
   --terminal-bg: #24292f;
@@ -91,7 +91,7 @@ watch(
   .logs {
     padding: 1rem 1rem;
     code {
-      font-family: Roboto Mono, Consolas, Menlo, Monaco, Lucida Console,
+      font-family: Source Code Pro, Consolas, Menlo, Monaco, Lucida Console,
         Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New,
         monospace, serif;
     }
