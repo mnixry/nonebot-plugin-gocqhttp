@@ -51,7 +51,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component }" :key="$route.fullPath">
         <transition
           appear
           enter-active-class="animated fadeIn"
@@ -67,6 +67,9 @@
 <script setup lang="ts">
 import AccountSelector from 'components/AccountSelector.vue';
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+const $route = useRoute();
 
 const leftDrawerOpen = ref(true);
 

@@ -150,9 +150,9 @@ async function logHistory() {
 }
 
 function logRealtime() {
-  if (Number.isNaN(uin)) return;
-
   logWebsocket?.close();
+
+  if (!Number.isInteger(uin)) return;
 
   const wsUrl = new URL(`api/${uin.value}/process/logs`, location.href);
   wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -167,7 +167,6 @@ function logRealtime() {
   };
 }
 
-void updateStatus();
 const updateTimer = window.setInterval(() => void updateStatus(), 3000);
 
 watch(
@@ -192,4 +191,6 @@ onBeforeUnmount(() => {
   window.clearInterval(updateTimer);
   logWebsocket?.close();
 });
+
+void updateStatus();
 </script>
