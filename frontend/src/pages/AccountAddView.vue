@@ -25,7 +25,7 @@
             counter
             clearable
             label="QQ号"
-            :rules="[(v) => Number.isInteger(+v) || '请输入QQ号']"
+            :rules="[(v) => +v >= 1e4 || '请输入QQ号']"
           >
             <template v-slot:prepend><q-icon name="badge" /></template>
           </q-input>
@@ -34,6 +34,7 @@
             type="password"
             counter
             outlined
+            :filled="(password?.length ?? 0) > 0"
             clearable
             label="密码"
             hint="留空以使用二维码登录"
@@ -44,8 +45,9 @@
             v-model="protocol"
             :options="protocols"
             inline
+            map-options
+            emit-value
             label="登录设备类型"
-            option-value="value"
           >
             <template v-slot:before><q-icon name="devices" /></template>
           </q-select>
@@ -75,10 +77,7 @@ const protocols = Object.entries({
   Mac: AccountProtocol.NUMBER_2,
   Watch: AccountProtocol.NUMBER_3,
   QiDian: AccountProtocol.NUMBER_4,
-}).map(([name, value]) => ({
-  label: name,
-  value,
-}));
+}).map(([label, value]) => ({ label, value }));
 
 const uin = ref<number>(),
   password = ref<string>(),
