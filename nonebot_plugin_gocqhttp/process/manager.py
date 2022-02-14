@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from anyio import open_file
+from pydantic import parse_obj_as
 
 from ..exceptions import AccountAlreadyExists
 from ..plugin_config import AccountConfig
@@ -78,10 +79,15 @@ class ProcessesManager:
         save_path: Path = ACCOUNTS_SAVE_PATH,
         ignore_loaded: bool = False,
     ) -> List[GoCQProcess]:
-        async with await open_file(save_path, "rb") as f:
-            compressed = await f.read()
-        decompressed = zlib.decompress(compressed)
-        store: ProcessAccountsStore = pickle.loads(decompressed)
+        try:
+            async with await open_file(save_path, "rb") as f:
+                compressed = await f.read()
+            decompressed = zlib.decompress(compressed)
+            store = parse_obj_as(ProcessAccountsStore, pickle.loads(decompressed))
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to load saved accounts from {save_path!r}"
+            ) from e
         return [
             GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
             for account in store.accounts
