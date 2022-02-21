@@ -106,12 +106,21 @@ class ProcessesManager:
 def kill_duplicated_processes():
     killed: List[int] = []
     for process in psutil.process_iter():
-        with process.oneshot():
-            pid = process.pid
-            cwd = process.cwd()
-            exe = Path(process.exe()).absolute()
-        if BINARY_PATH.samefile(exe) and ACCOUNTS_DATA_PATH in Path(cwd).parents:
+        try:
+            with process.oneshot():
+                pid = process.pid
+                cwd = process.cwd()
+                exe = process.exe()
+        except psutil.Error:
+            continue
+
+        if (
+            Path(exe).is_file()
+            and BINARY_PATH.samefile(exe)
+            and ACCOUNTS_DATA_PATH in Path(cwd).parents
+        ):
             process.terminate()
             killed.append(pid)
             logger.warning(f"Duplicate running process {pid=} detected, killed.")
+
     return killed
