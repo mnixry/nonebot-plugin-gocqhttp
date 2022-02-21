@@ -48,10 +48,12 @@ async def startup():
         return_exceptions=True,
     )
 
-    logger.info(
-        "Startup complete, Web UI has served to "
-        f"<u><e>http://127.0.0.1:{driver.config.port}/go-cqhttp/</e></u>"
-    )
+    if web.DIST_PATH.is_dir():
+        logger.info(
+            "Startup complete, Web UI has served to "
+            f"<u><e>http://127.0.0.1:{driver.config.port}/go-cqhttp/</e></u>"
+        )
+
     return
 
 

@@ -9,6 +9,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
 from ..exceptions import PluginGoCQException
+from ..log import logger
 from ..plugin_config import config as plugin_config
 from .api import router as api_router
 
@@ -52,4 +53,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(api_router, prefix="/api")
 
-app.mount("/", StaticFiles(directory=DIST_PATH, html=True), name="frontend")
+if DIST_PATH.is_dir():
+    app.mount("/", StaticFiles(directory=DIST_PATH, html=True), name="frontend")
+else:
+    logger.warning("WebUI dist directory not found, WebUI will not be available.")
