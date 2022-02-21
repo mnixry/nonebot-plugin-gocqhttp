@@ -88,7 +88,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "fastapi"
-version = "0.70.1"
+version = "0.73.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 category = "main"
 optional = false
@@ -96,12 +96,12 @@ python-versions = ">=3.6.1"
 
 [package.dependencies]
 pydantic = ">=1.6.2,<1.7 || >1.7,<1.7.1 || >1.7.1,<1.7.2 || >1.7.2,<1.7.3 || >1.7.3,<1.8 || >1.8,<1.8.1 || >1.8.1,<2.0.0"
-starlette = "0.16.0"
+starlette = "0.17.1"
 
 [package.extras]
 all = ["requests (>=2.24.0,<3.0.0)", "jinja2 (>=2.11.2,<4.0.0)", "python-multipart (>=0.0.5,<0.0.6)", "itsdangerous (>=1.1.0,<3.0.0)", "pyyaml (>=5.3.1,<6.0.0)", "ujson (>=4.0.1,<5.0.0)", "orjson (>=3.2.1,<4.0.0)", "email_validator (>=1.1.1,<2.0.0)", "uvicorn[standard] (>=0.12.0,<0.16.0)"]
 dev = ["python-jose[cryptography] (>=3.3.0,<4.0.0)", "passlib[bcrypt] (>=1.7.2,<2.0.0)", "autoflake (>=1.4.0,<2.0.0)", "flake8 (>=3.8.3,<4.0.0)", "uvicorn[standard] (>=0.12.0,<0.16.0)"]
-doc = ["mkdocs (>=1.1.2,<2.0.0)", "mkdocs-material (>=7.1.9,<8.0.0)", "mdx-include (>=1.4.1,<2.0.0)", "mkdocs-markdownextradata-plugin (>=0.1.7,<0.3.0)", "typer-cli (>=0.0.12,<0.0.13)", "pyyaml (>=5.3.1,<6.0.0)"]
+doc = ["mkdocs (>=1.1.2,<2.0.0)", "mkdocs-material (>=8.1.4,<9.0.0)", "mdx-include (>=1.4.1,<2.0.0)", "mkdocs-markdownextradata-plugin (>=0.1.7,<0.3.0)", "typer-cli (>=0.0.12,<0.0.13)", "pyyaml (>=5.3.1,<6.0.0)"]
 test = ["pytest (>=6.2.4,<7.0.0)", "pytest-cov (>=2.12.0,<4.0.0)", "mypy (==0.910)", "flake8 (>=3.8.3,<4.0.0)", "black (==21.9b0)", "isort (>=5.0.6,<6.0.0)", "requests (>=2.24.0,<3.0.0)", "httpx (>=0.14.0,<0.19.0)", "email_validator (>=1.1.1,<2.0.0)", "sqlalchemy (>=1.3.18,<1.5.0)", "peewee (>=3.13.3,<4.0.0)", "databases[sqlite] (>=0.3.2,<0.6.0)", "orjson (>=3.2.1,<4.0.0)", "ujson (>=4.0.1,<5.0.0)", "python-multipart (>=0.0.5,<0.0.6)", "flask (>=1.1.2,<3.0.0)", "anyio[trio] (>=3.2.1,<4.0.0)", "types-ujson (==0.1.1)", "types-orjson (==3.6.0)", "types-dataclasses (==0.1.7)"]
 
 [[package]]
@@ -215,7 +215,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "loguru"
-version = "0.5.3"
+version = "0.6.0"
 description = "Python logging made (stupidly) simple"
 category = "main"
 optional = false
@@ -226,7 +226,7 @@ colorama = {version = ">=0.3.4", markers = "sys_platform == \"win32\""}
 win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
 
 [package.extras]
-dev = ["codecov (>=2.0.15)", "colorama (>=0.3.4)", "flake8 (>=3.7.7)", "tox (>=3.9.0)", "tox-travis (>=0.12)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "Sphinx (>=2.2.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)", "black (>=19.10b0)", "isort (>=5.1.1)"]
+dev = ["colorama (>=0.3.4)", "docutils (==0.16)", "flake8 (>=3.7.7)", "tox (>=3.9.0)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "black (>=19.10b0)", "isort (>=5.1.1)", "Sphinx (>=4.1.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)"]
 
 [[package]]
 name = "mccabe"
@@ -265,26 +265,26 @@ nonebot2 = ">=2.0.0-beta.1,<3.0.0"
 
 [[package]]
 name = "nonebot2"
-version = "2.0.0b1"
+version = "2.0.0b2"
 description = "An asynchronous python bot framework."
 category = "main"
 optional = false
 python-versions = ">=3.7.3,<4.0.0"
 
 [package.dependencies]
-fastapi = ">=0.70.0,<0.71.0"
-loguru = ">=0.5.1,<0.6.0"
+fastapi = ">=0.73.0,<0.74.0"
+loguru = ">=0.6.0,<0.7.0"
 pydantic = {version = ">=1.9.0,<1.10.0", extras = ["dotenv"]}
 pygtrie = ">=2.4.1,<3.0.0"
-tomlkit = ">=0.7.0,<0.8.0"
+tomlkit = ">=0.9.0,<0.10.0"
 typing-extensions = ">=3.10.0,<5.0.0"
-uvicorn = {version = ">=0.15.0,<0.16.0", extras = ["standard"]}
+uvicorn = {version = ">=0.17.0,<0.18.0", extras = ["standard"]}
 yarl = ">=1.7.2,<2.0.0"
 
 [package.extras]
 quart = ["Quart (>=0.16.0,<0.17.0)"]
-all = ["Quart (>=0.16.0,<0.17.0)", "websockets (>=9.1)", "aiohttp[speedups] (>=3.7.4,<4.0.0)", "httpx[http2] (>=0.20.0,<1.0.0)"]
-websockets = ["websockets (>=9.1)"]
+all = ["Quart (>=0.16.0,<0.17.0)", "websockets (>=10.0,<11.0)", "aiohttp[speedups] (>=3.7.4,<4.0.0)", "httpx[http2] (>=0.20.0,<1.0.0)"]
+websockets = ["websockets (>=10.0,<11.0)"]
 aiohttp = ["aiohttp[speedups] (>=3.7.4,<4.0.0)"]
 httpx = ["httpx[http2] (>=0.20.0,<1.0.0)"]
 
@@ -418,7 +418,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "starlette"
-version = "0.16.0"
+version = "0.17.1"
 description = "The little ASGI library that shines."
 category = "main"
 optional = false
@@ -428,7 +428,7 @@ python-versions = ">=3.6"
 anyio = ">=3.0.0,<4"
 
 [package.extras]
-full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests", "graphene"]
+full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests"]
 
 [[package]]
 name = "tomli"
@@ -440,11 +440,11 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "tomlkit"
-version = "0.7.2"
+version = "0.9.2"
 description = "Style preserving TOML library"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+python-versions = ">=3.6,<4.0"
 
 [[package]]
 name = "typing-extensions"
@@ -456,26 +456,26 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "uvicorn"
-version = "0.15.0"
+version = "0.17.4"
 description = "The lightning-fast ASGI server."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 
 [package.dependencies]
 asgiref = ">=3.4.0"
 click = ">=7.0"
 colorama = {version = ">=0.4", optional = true, markers = "sys_platform == \"win32\" and extra == \"standard\""}
 h11 = ">=0.8"
-httptools = {version = ">=0.2.0,<0.3.0", optional = true, markers = "extra == \"standard\""}
+httptools = {version = ">=0.2.0,<0.4.0", optional = true, markers = "extra == \"standard\""}
 python-dotenv = {version = ">=0.13", optional = true, markers = "extra == \"standard\""}
 PyYAML = {version = ">=5.1", optional = true, markers = "extra == \"standard\""}
 uvloop = {version = ">=0.14.0,<0.15.0 || >0.15.0,<0.15.1 || >0.15.1", optional = true, markers = "sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\" and extra == \"standard\""}
 watchgod = {version = ">=0.6", optional = true, markers = "extra == \"standard\""}
-websockets = {version = ">=9.1", optional = true, markers = "extra == \"standard\""}
+websockets = {version = ">=10.0", optional = true, markers = "extra == \"standard\""}
 
 [package.extras]
-standard = ["websockets (>=9.1)", "httptools (>=0.2.0,<0.3.0)", "watchgod (>=0.6)", "python-dotenv (>=0.13)", "PyYAML (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "colorama (>=0.4)"]
+standard = ["websockets (>=10.0)", "httptools (>=0.2.0,<0.4.0)", "watchgod (>=0.6)", "python-dotenv (>=0.13)", "PyYAML (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "colorama (>=0.4)"]
 
 [[package]]
 name = "uvloop"
@@ -585,8 +585,8 @@ colorama = [
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
 ]
 fastapi = [
-    {file = "fastapi-0.70.1-py3-none-any.whl", hash = "sha256:5367226c7bcd7bfb2e17edaf225fd9a983095b1372281e9a3eb661336fb93748"},
-    {file = "fastapi-0.70.1.tar.gz", hash = "sha256:21d03979b5336375c66fa5d1f3126c6beca650d5d2166fbb78345a30d33c8d06"},
+    {file = "fastapi-0.73.0-py3-none-any.whl", hash = "sha256:f0a618aff5f6942862f2d3f20f39b1c037e33314d1b8207fd1c3a2cca76dfd8c"},
+    {file = "fastapi-0.73.0.tar.gz", hash = "sha256:dcfee92a7f9a72b5d4b7ca364bd2b009f8fc10d95ed5769be20e94f39f7e5a15"},
 ]
 flake8 = [
     {file = "flake8-4.0.1-py2.py3-none-any.whl", hash = "sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d"},
@@ -638,8 +638,8 @@ idna = [
     {file = "idna-3.3.tar.gz", hash = "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"},
 ]
 loguru = [
-    {file = "loguru-0.5.3-py3-none-any.whl", hash = "sha256:f8087ac396b5ee5f67c963b495d615ebbceac2796379599820e324419d53667c"},
-    {file = "loguru-0.5.3.tar.gz", hash = "sha256:b28e72ac7a98be3d28ad28570299a393dfcd32e5e3f6a353dec94675767b6319"},
+    {file = "loguru-0.6.0-py3-none-any.whl", hash = "sha256:4e2414d534a2ab57573365b3e6d0234dfb1d84b68b7f3b948e6fb743860a77c3"},
+    {file = "loguru-0.6.0.tar.gz", hash = "sha256:066bd06758d0a513e9836fd9c6b5a75bfb3fd36841f4b996bc60b547a309d41c"},
 ]
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
@@ -715,8 +715,8 @@ nonebot-adapter-onebot = [
     {file = "nonebot_adapter_onebot-2.0.0b1-py3-none-any.whl", hash = "sha256:ca1375de1dd503a5ab20440445026195b587e05a2b18ae8df9b6ab17c9e857b5"},
 ]
 nonebot2 = [
-    {file = "nonebot2-2.0.0b1-py3-none-any.whl", hash = "sha256:76ee4271a0ba9b1fbdcb34c50a23df391bed00d5d32d63b7fd018685de8130a4"},
-    {file = "nonebot2-2.0.0b1.tar.gz", hash = "sha256:e23b6656943738a9f8559e20ac51a8c3af799a2eea01e3e2188be01959f36455"},
+    {file = "nonebot2-2.0.0b2-py3-none-any.whl", hash = "sha256:8166490311b607f8fbf5e31934b005e29f6d39ff222a6771ec36c9456ec337ec"},
+    {file = "nonebot2-2.0.0b2.tar.gz", hash = "sha256:2950f27a62f2a98b2abf3128c19d898a24c2867e70fb5c6af231eadf558b18a8"},
 ]
 pathspec = [
     {file = "pathspec-0.9.0-py2.py3-none-any.whl", hash = "sha256:7d15c4ddb0b5c802d161efc417ec1a2558ea2653c2e8ad9c19098201dc1c993a"},
@@ -863,24 +863,24 @@ socksio = [
     {file = "socksio-1.0.0.tar.gz", hash = "sha256:f88beb3da5b5c38b9890469de67d0cb0f9d494b78b106ca1845f96c10b91c4ac"},
 ]
 starlette = [
-    {file = "starlette-0.16.0-py3-none-any.whl", hash = "sha256:38eb24bf705a2c317e15868e384c1b8a12ca396e5a3c3a003db7e667c43f939f"},
-    {file = "starlette-0.16.0.tar.gz", hash = "sha256:e1904b5d0007aee24bdd3c43994be9b3b729f4f58e740200de1d623f8c3a8870"},
+    {file = "starlette-0.17.1-py3-none-any.whl", hash = "sha256:26a18cbda5e6b651c964c12c88b36d9898481cd428ed6e063f5f29c418f73050"},
+    {file = "starlette-0.17.1.tar.gz", hash = "sha256:57eab3cc975a28af62f6faec94d355a410634940f10b30d68d31cb5ec1b44ae8"},
 ]
 tomli = [
     {file = "tomli-1.2.3-py3-none-any.whl", hash = "sha256:e3069e4be3ead9668e21cb9b074cd948f7b3113fd9c8bba083f48247aab8b11c"},
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 tomlkit = [
-    {file = "tomlkit-0.7.2-py2.py3-none-any.whl", hash = "sha256:173ad840fa5d2aac140528ca1933c29791b79a374a0861a80347f42ec9328117"},
-    {file = "tomlkit-0.7.2.tar.gz", hash = "sha256:d7a454f319a7e9bd2e249f239168729327e4dd2d27b17dc68be264ad1ce36754"},
+    {file = "tomlkit-0.9.2-py3-none-any.whl", hash = "sha256:daf4f9c5f2fbf6b861d6adfc51940b98dee36c13e1d88749a6dc9fb280fff304"},
+    {file = "tomlkit-0.9.2.tar.gz", hash = "sha256:ebd982d61446af95a1e082b103e250cb9e6d152eae2581d4a07d31a70b34ab0f"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.1-py3-none-any.whl", hash = "sha256:7f001e5ac290a0c0401508864c7ec868be4e701886d5b573a9528ed3973d9d3b"},
     {file = "typing_extensions-4.0.1.tar.gz", hash = "sha256:4ca091dea149f945ec56afb48dae714f21e8692ef22a395223bcd328961b6a0e"},
 ]
 uvicorn = [
-    {file = "uvicorn-0.15.0-py3-none-any.whl", hash = "sha256:17f898c64c71a2640514d4089da2689e5db1ce5d4086c2d53699bf99513421c1"},
-    {file = "uvicorn-0.15.0.tar.gz", hash = "sha256:d9a3c0dd1ca86728d3e235182683b4cf94cd53a867c288eaeca80ee781b2caff"},
+    {file = "uvicorn-0.17.4-py3-none-any.whl", hash = "sha256:e85872d84fb651cccc4c5d2a71cf7ead055b8fb4d8f1e78e36092282c0cf2aec"},
+    {file = "uvicorn-0.17.4.tar.gz", hash = "sha256:25850bbc86195a71a6477b3e4b3b7b4c861fb687fb96912972ce5324472b1011"},
 ]
 uvloop = [
     {file = "uvloop-0.16.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6224f1401025b748ffecb7a6e2652b17768f30b1a6a3f7b44660e5b5b690b12d"},
