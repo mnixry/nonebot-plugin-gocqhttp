@@ -4,17 +4,23 @@ from fastapi import FastAPI
 from nonebot import get_driver
 from nonebot.drivers import ReverseDriver
 
-from . import plugin  # noqa: F401
+from . import plugin, web  # noqa: F401
 from .log import LOG_STORAGE, logger
 from .plugin_config import config
-from .process import ACCOUNTS_SAVE_PATH, BINARY_PATH, ProcessesManager, download_gocq
-from .web import app
+from .process import (
+    ACCOUNTS_SAVE_PATH,
+    BINARY_PATH,
+    ProcessesManager,
+    download_gocq,
+    kill_duplicated_processes,
+)
 
 driver = get_driver()
 
 if not isinstance(driver, ReverseDriver) or not isinstance(driver.server_app, FastAPI):
     raise NotImplementedError("Only FastAPI reverse driver is supported.")
-driver.server_app.mount("/go-cqhttp", app, name="go-cqhttp plugin")
+else:
+    driver.server_app.mount("/go-cqhttp", web.app, name="go-cqhttp plugin")
 
 
 @driver.on_startup
@@ -30,6 +36,8 @@ async def startup():
 
     if config.FORCE_DOWNLOAD or not BINARY_PATH.is_file():
         await download_gocq()
+
+    await kill_duplicated_processes()
 
     ProcessesManager.load_config()
     if ACCOUNTS_SAVE_PATH.is_file():
