@@ -52,7 +52,8 @@ class GoCQProcess:
     def __init__(
         self,
         account: AccountConfig,
-        *,
+        predefined: bool = False,
+        /,
         kill_timeout: float = 5,
         stop_timeout: float = 6,
         max_restarts: int = -1,
@@ -67,6 +68,7 @@ class GoCQProcess:
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
         self.cwd.mkdir(parents=True, exist_ok=True)
 
+        self.predefined = predefined
         self.account = ProcessAccount(
             source=account,
             uin=account.uin,

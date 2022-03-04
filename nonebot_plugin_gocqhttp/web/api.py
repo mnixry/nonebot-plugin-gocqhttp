@@ -38,7 +38,7 @@ async def all_accounts():
     return [
         models.AccountListItem(
             uin=process.account.uin,
-            predefined=not not ProcessesManager.is_predefined(process.account.uin),
+            predefined=process.predefined,
             process_created=not not process.process,
         )
         for process in ProcessesManager.all()
@@ -113,7 +113,7 @@ async def create_account(uin: int, account: Optional[models.AccountCreation] = N
 
 @router.delete("/{uin}", status_code=204)
 async def delete_account(process: GoCQProcess = RunningProcess()):
-    if ProcessesManager.is_predefined(process.account.uin):
+    if process.predefined:
         raise RemovePredefinedAccount
     await ProcessesManager.remove(process.account.uin)
     return

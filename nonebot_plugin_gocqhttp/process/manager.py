@@ -1,7 +1,6 @@
 import pickle
 import pickletools
 import zlib
-from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -24,14 +23,6 @@ ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.pkl"
 class ProcessesManager:
     _processes: Dict[int, GoCQProcess] = {}
 
-    @staticmethod
-    @lru_cache
-    def is_predefined(uin: int) -> Optional[AccountConfig]:
-        account = next(
-            (account for account in plugin_config.ACCOUNTS if account.uin == uin), None
-        )
-        return account
-
     get = _processes.get
 
     @classmethod
@@ -42,8 +33,8 @@ class ProcessesManager:
         cls._processes[uin] = process
 
     @classmethod
-    def create(cls, account: AccountConfig):
-        return GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
+    def create(cls, account: AccountConfig, *, predefined: bool = False):
+        return GoCQProcess(account, predefined, **plugin_config.PROCESS_KWARGS)
 
     @classmethod
     async def remove(cls, uin: int):
@@ -53,13 +44,19 @@ class ProcessesManager:
         return
 
     @classmethod
-    def all(cls) -> List[GoCQProcess]:
-        return [*cls._processes.copy().values()]
+    def all(cls, include_predefined: bool = True):
+        return [
+            process
+            for process in cls._processes.values()
+            if include_predefined or not process.predefined
+        ]
 
     @classmethod
     async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH) -> int:
         store = ProcessAccountsStore(
-            accounts=[process.account.source for process in cls.all()]
+            accounts=[
+                process.account.source for process in cls.all(include_predefined=False)
+            ]
         )
         dumped = pickle.dumps(store)
         dumped = pickletools.optimize(dumped)
@@ -71,7 +68,7 @@ class ProcessesManager:
     @classmethod
     def load_config(cls, *, ignore_loaded: bool = False) -> List[GoCQProcess]:
         return [
-            GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
+            cls.create(account, predefined=True)
             for account in plugin_config.ACCOUNTS
             if not ignore_loaded or account.uin not in cls._processes
         ]
@@ -92,13 +89,9 @@ class ProcessesManager:
                 f"Failed to load saved accounts from {save_path!r}"
             ) from e
         return [
-            GoCQProcess(account, **plugin_config.PROCESS_KWARGS)
+            cls.create(account)
             for account in store.accounts
-            if (
-                not cls.is_predefined(account.uin)
-                or not ignore_loaded
-                or account.uin not in cls._processes
-            )
+            if not ignore_loaded or account.uin not in cls._processes
         ]
 
 
