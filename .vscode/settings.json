@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": ".venv/bin/python",
     "python.analysis.completeFunctionParens": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticSeverityOverrides": {
@@ -7,7 +6,6 @@
     },
     "python.formatting.provider": "black",
     "python.languageServer": "Pylance",
-    "python.linting.flake8Enabled": true,
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": true,
@@ -21,7 +19,6 @@
         "**/node_modules/**": true,
         "**/.hg/store/**": true,
         "**/.venv/**": true,
-        "**/.mypy_cache/**": true,
     },
     "git.autofetch": true,
     "git.enableSmartCommit": true,
@@ -45,4 +42,5 @@
         "starlette",
         "WEBUI"
     ],
+    "python.linting.flake8Enabled": true,
 }
