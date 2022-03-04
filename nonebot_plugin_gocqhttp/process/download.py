@@ -48,7 +48,9 @@ async def download_gocq():
         download_path = Path(tmpdir) / ("temp" + ARCHIVE_EXT)
         BINARY_DIR.mkdir(parents=True, exist_ok=True)
 
-        client = await stack.enter_async_context(AsyncClient(follow_redirects=True))
+        client: AsyncClient = await stack.enter_async_context(
+            AsyncClient(follow_redirects=True)  # type:ignore
+        )  # NOTE: see https://github.com/encode/httpx/pull/2096
 
         url = construct_download_url()
         logger.info(f"Begin to Download binary from <u>{url}</u>")
