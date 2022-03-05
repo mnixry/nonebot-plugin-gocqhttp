@@ -2,6 +2,7 @@ import asyncio
 
 from fastapi import FastAPI
 from nonebot import get_driver
+from nonebot.adapters.onebot.v11 import Adapter
 from nonebot.drivers import ReverseDriver
 
 from . import plugin, web  # noqa: F401
@@ -17,10 +18,12 @@ from .process import (
 
 driver = get_driver()
 
+if (adapter_name := Adapter.get_name()) not in driver._adapters:
+    raise ValueError(f"Adapter {adapter_name!r} is not registered yet.")
 if not isinstance(driver, ReverseDriver) or not isinstance(driver.server_app, FastAPI):
     raise NotImplementedError("Only FastAPI reverse driver is supported.")
-else:
-    driver.server_app.mount("/go-cqhttp", web.app, name="go-cqhttp plugin")
+
+driver.server_app.mount("/go-cqhttp", web.app, name="go-cqhttp plugin")
 
 
 @driver.on_startup
