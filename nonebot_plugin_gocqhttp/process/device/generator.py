@@ -78,4 +78,4 @@ class RandomDeviceInfoGenerator:
 
     def incremental(self):
         random = Random(self.seed)
-        return str(random.randint(0, 2 ** 32))
+        return str(random.randint(0, 2**32))

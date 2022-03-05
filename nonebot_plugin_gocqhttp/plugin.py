@@ -43,7 +43,7 @@ async def _(bot: Bot, event: MessageEvent):
         messages += (
             RUNNING_MESSAGE_TEMPLATE.format(
                 cpu_percent=status.details.cpu_percent,
-                memory=status.details.memory_used / 1024 ** 2,
+                memory=status.details.memory_used / 1024**2,
                 uptime=(
                     datetime.now() - datetime.fromtimestamp(status.details.start_time)
                 ),
