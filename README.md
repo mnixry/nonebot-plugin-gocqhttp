@@ -17,15 +17,38 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 ## 优势
 
-- ~~对标[`koishijs/koishi-plugin-gocqhttp`](https://github.com/koishijs/koishi-plugin-gocqhttp/)~~
+~~对标[`koishijs/koishi-plugin-gocqhttp`](https://github.com/koishijs/koishi-plugin-gocqhttp/)~~
 
-- **便于部署:** 部署时只需启动一个 Bot 进程即可, 无需其他附加工具
+**便于部署:** 部署时只需启动一个 Bot 进程即可, 无需其他附加工具
 
-- **易于使用:** 本插件提供一个简单的 WebUI, 可以直接在图形界面中添加账户
+**易于使用:** 本插件提供一个简单的 WebUI, 可以直接在图形界面中添加账户:
 
-  - 这个地方应该有两张截图, 但是我没有找到合适的图片, 如果你们觉得这个插件很赞, 欢迎返图
+<!-- markdownlint-disable MD033 -->
+<table>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/97567575/159159758-3f8b9165-ba23-43fd-bfa7-cdc27cd9d6c3.png"/>
+      <b>添加帐号</b>
+    </td>
+    <td>
+      <img src="https://user-images.githubusercontent.com/97567575/159159878-6928cda1-4745-4291-97c8-e24ccca5c6ae.png"/>
+      <b>控制进程</b>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/97567575/159159882-0238833a-8d16-4c8d-8d2a-74fb19cd16d6.png" />
+      <b>查看状态</b>
+    </td>
+    <td>
+      <b>还有更多...</b><br />
+      <em>如果你觉得这个插件很赞, 欢迎返图!</em>
+    </td>
+  </tr>
+</table>
+<!-- markdownlint-enable MD033 -->
 
-- **跨平台支持:** 根据反馈, 本插件已可以在`MacOS`/`Linux`/`Windows`上运行, 且不受[异步子进程调用带来的限制](https://github.com/nonebot/discussions/discussions/13#discussioncomment-1159147)
+**跨平台支持:** 根据反馈, 本插件已可以在`MacOS`/`Linux`/`Windows`上运行, 且不受[异步子进程调用带来的限制](https://github.com/nonebot/discussions/discussions/13#discussioncomment-1159147)
 
 ## 使用
 
@@ -40,8 +63,6 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 本项目提供以下**可选**配置项, 请在`.env`中自行进行配置
 
 如果想要获取更多配置文件相关信息, 请[阅读源代码](./nonebot_plugin_gocqhttp/plugin_config.py)
-
-<details>
 
 #### 账号配置
 
@@ -88,8 +109,6 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 `GOCQ_WEBUI_USERNAME`, `GOCQ_WEBUI_PASSWORD`: WebUI 的登录凭证, 不设置即不进行验证
 
-</details>
-
 ### 开始使用
 
 配置好了以后启动你的 Bot 即可
@@ -114,6 +133,8 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 由于`go-cqhttp`使用了[AGPL-3.0](https://github.com/Mrs4s/go-cqhttp/blob/master/LICENSE)许可证, 本项目也同样使用该许可
 
 **注意! 如果在您的项目中依赖了该插件, 您的项目必须以该许可开源!**
+
+<!-- markdownlint-disable MD046 -->
 
     A plugin to run go-cqhttp directly in NoneBot2, without additional download and installation.
     Copyright (C) 2022 Mix
