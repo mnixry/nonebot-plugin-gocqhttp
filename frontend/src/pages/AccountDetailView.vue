@@ -152,7 +152,7 @@ async function logHistory() {
 function logRealtime() {
   logWebsocket?.close();
 
-  if (!Number.isInteger(uin)) return;
+  if (!Number.isInteger(uin.value)) return;
 
   const wsUrl = new URL(`api/${uin.value}/process/logs`, location.href);
   wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
