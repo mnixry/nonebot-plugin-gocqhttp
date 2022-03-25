@@ -987,10 +987,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@fontsource/source-code-pro@^4.5.4":
-  version "4.5.4"
-  resolved "https://registry.npmmirror.com/@fontsource/source-code-pro/-/source-code-pro-4.5.4.tgz#8214d87227c94207854732fb00e5540a57e4fc84"
-  integrity sha512-kJ5MWWX1rw6dTc7t0EkpRajEKNUfWAERat4m1C/NPfR+7LqslXmtNbyizFnK8lm2NfDN52CzWe6dQXFaw3WXww==
+"@fontsource/source-code-pro@^4.5.6":
+  version "4.5.6"
+  resolved "https://registry.yarnpkg.com/@fontsource/source-code-pro/-/source-code-pro-4.5.6.tgz#f11e6dc9f0e4db8ff2c6cf5f6e294f18b16433ef"
+  integrity sha512-idYGw+8gEyec58O5LFkJecscaQDJmTMrrRBcmrYTbS2fhSyEuaq1xtTpG8QOQCvW5CA0XrSpWVfA/1HwJjm6Fw==
 
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.5"
