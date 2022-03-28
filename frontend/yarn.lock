@@ -4972,10 +4972,10 @@ qs@6.9.7:
   resolved "https://registry.npmmirror.com/qs/-/qs-6.9.7.tgz#4610846871485e1e048f44ae3b94033f0e675afe"
   integrity sha512-IhMFgUmuNpyRfxA90umL7ByLlgRXu6tIfKPpF5TmcfRLlLCckfP/g3IQmju6jjpu+Hh8rA+2p6A27ZSPOOHdKw==
 
-quasar@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/quasar/-/quasar-2.6.1.tgz#5d7a976ed0372ad9863883891bf16a73aee1eb4d"
-  integrity sha512-fMjWXaqqgVGFknsXeNblAmOWkV+GH3qZw0jGnI1f1EW4PRq+cz1YVkGvPc4wVc6Phy5kxE3icRhAkNpRloeP0A==
+quasar@^2.6.2:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/quasar/-/quasar-2.6.2.tgz#57b59ef388c55af2d42fd2bdc19a9508fb74dbdd"
+  integrity sha512-/MHiD4GwQ7g2yebAQhJo8JOu434tl0FB5+6QlCY8dua39ViGjJ6sNBLHMru+erWJWxGiRJuvr4VNlzh7Gs5qMQ==
 
 queue-microtask@^1.2.2:
   version "1.2.3"
