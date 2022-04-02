@@ -1,56 +1,72 @@
 <template>
-  <q-scroll-area class="page-logs">
-    <!--Terminal component, thanks to @koishijs/plugin-logger and its creator @Shigma-->
-    <div ref="root" class="logs rounded-borders">
-      <div
-        class="line"
-        :class="{ start: line.message.startsWith(START_LINE_MARK) }"
-        :key="line.time"
-        v-for="line in logs"
-      >
-        <code v-if="line.time" class="timestamp">{{
-          new Date(line.time).toUTCString()
-        }}</code>
-        <code v-if="line.level" class="level">{{ line.level }}</code>
-        <code v-html="renderLine(line)" :class="lineLevel(line)"></code>
+  <q-card>
+    <q-card-section>
+      <div class="text-h6">
+        进程日志
+        <q-chip
+          v-if="typeof connected === 'boolean'"
+          @click="(event) => reconnect('reconnect', event)"
+          :clickable="!connected"
+          :color="connected ? 'positive' : 'negative'"
+          :icon="connected ? 'link' : 'link_off'"
+        >
+          状态: {{ connected ? '实时' : '断开' }}
+        </q-chip>
       </div>
-    </div>
-  </q-scroll-area>
+    </q-card-section>
+    <q-scroll-area
+      class="page-logs"
+      :style="{ height: height ?? 'calc(100vh - 10rem)' }"
+    >
+      <!--Terminal component, thanks to @koishijs/plugin-logger and its creator @Shigma-->
+      <div ref="root" class="logs">
+        <div class="line" :key="index" v-for="(line, index) in logs">
+          <div v-if="typeof line === 'string'">
+            <code v-html="converter.ansi_to_html(line)"></code>
+          </div>
+          <div
+            v-else
+            :class="{ start: line.message.startsWith(START_LINE_MARK) }"
+          >
+            <code v-if="line.time" class="timestamp">
+              {{ new Date(line.time).toLocaleString() }}
+            </code>
+            <code v-if="line.level" class="level">{{ line.level }}</code>
+            <code
+              v-html="converter.ansi_to_html(line.message)"
+              :class="LOG_LEVEL_MAP[line.level ?? ProcessLogLevel.Stdout]"
+            />
+          </div>
+        </div>
+      </div>
+    </q-scroll-area>
+  </q-card>
 </template>
 <script setup lang="ts">
-import { PropType, nextTick, watch, ref } from 'vue';
-import { type ProcessLog, ProcessLogLevel } from 'src/api';
+import { nextTick, watch, ref } from 'vue';
 import AnsiUp from 'ansi_up';
 
-const START_LINE_MARK = '当前版本:';
+import { type ProcessLog, ProcessLogLevel } from 'src/api';
+
+const START_LINE_MARK = '当前版本:',
+  LOG_LEVEL_MAP = {
+    [ProcessLogLevel.Debug]: 'level-debug',
+    [ProcessLogLevel.Info]: 'level-info',
+    [ProcessLogLevel.Warning]: 'level-warn',
+    [ProcessLogLevel.Error]: 'level-error',
+    [ProcessLogLevel.Fatal]: 'level-fatal',
+    [ProcessLogLevel.Stdout]: 'stdout',
+  };
+
 const converter = new AnsiUp();
 
-const props = defineProps({
-  logs: { type: Array as PropType<ProcessLog[]>, default: () => [] },
-});
-const root = ref<HTMLElement>();
-
-function renderLine(line: ProcessLog): string {
-  const text = converter.ansi_to_html(line.message);
-  return text;
-}
-
-function lineLevel(line: ProcessLog) {
-  switch (line.level) {
-    case ProcessLogLevel.Debug:
-      return 'level-debug';
-    case ProcessLogLevel.Info:
-      return 'level-info';
-    case ProcessLogLevel.Warning:
-      return 'level-warn';
-    case ProcessLogLevel.Error:
-      return 'level-error';
-    case ProcessLogLevel.Fatal:
-      return 'level-fatal';
-    default:
-      return 'stdout';
-  }
-}
+const props = defineProps<{
+    logs: ProcessLog[] | string[];
+    connected?: boolean;
+    height?: string;
+  }>(),
+  reconnect = defineEmits(['reconnect']),
+  root = ref<HTMLElement>();
 
 watch(
   () => props.logs.length,
@@ -66,7 +82,7 @@ watch(
 );
 </script>
 <style lang="scss">
-@import '~@fontsource/source-code-pro/index.css';
+@import '~@fontsource/roboto-mono/index.css';
 
 :root {
   --terminal-bg: #24292f;
@@ -85,15 +101,12 @@ watch(
 }
 
 .page-logs {
-  height: calc(100vh - 10rem);
   color: var(--terminal-fg);
   background-color: var(--terminal-bg);
   .logs {
     padding: 1rem 1rem;
     code {
-      font-family: Source Code Pro, Consolas, Menlo, Monaco, Lucida Console,
-        Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New,
-        monospace, serif;
+      font-family: 'Roboto Mono', monospace, serif;
     }
   }
   .logs .line.start {
