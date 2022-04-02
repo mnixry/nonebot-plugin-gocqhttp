@@ -73,11 +73,12 @@
       </q-card>
       <message-sender class="col-12 shadow" :uin="uin" />
     </div>
-    <q-card class="col-12 col-md-8 q-pa-md">
-      <div class="text-body1 text-grey"><strong>进程日志</strong></div>
-      <q-separator spaced />
-      <logs-console :logs="logs" />
-    </q-card>
+    <logs-console
+      class="col-12 col-md-8"
+      @reconnect="processLog"
+      :logs="logs"
+      :connected="!!logConnection"
+    />
   </q-page>
 </template>
 <script setup lang="ts">
@@ -96,12 +97,11 @@ const $q = useQuasar(),
 const uin = ref<number>(+$route.params.uin);
 
 const status = ref<ProcessInfo>(),
-  logs = ref<ProcessLog[]>([]);
-
-let logWebsocket = undefined as WebSocket | undefined;
+  logs = ref<ProcessLog[]>([]),
+  logConnection = ref<WebSocket>();
 
 async function updateStatus() {
-  logWebsocket?.send('heartbeat');
+  logConnection.value?.send('heartbeat');
   try {
     $q.loadingBar.start();
     const { data } = await api.processStatusApiUinProcessStatusGet(uin.value);
@@ -137,34 +137,20 @@ async function startProcess() {
   }
 }
 
-async function logHistory() {
-  try {
-    const { data } = await api.processLogsHistoryApiUinProcessLogsGet(
-      uin.value
-    );
-    logs.value = data;
-  } catch (err) {
-    console.error(err);
-  } finally {
-  }
-}
-
-function logRealtime() {
-  logWebsocket?.close();
+async function processLog() {
+  const { data } = await api.processLogsHistoryApiUinProcessLogsGet(uin.value);
+  logs.value = data;
 
   if (!Number.isInteger(uin.value)) return;
+  logConnection.value?.close();
 
   const wsUrl = new URL(`api/${uin.value}/process/logs`, location.href);
   wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
-  logWebsocket = new WebSocket(wsUrl.href);
-  logWebsocket.onmessage = ({ data }) => {
-    const log = JSON.parse(<string>data) as ProcessLog;
-    logs.value.push(log);
-  };
-  logWebsocket.onclose = () => {
-    logWebsocket = undefined;
-  };
+  logConnection.value = new WebSocket(wsUrl.href);
+  logConnection.value.onmessage = ({ data }) =>
+    logs.value.push(JSON.parse(data as string) as ProcessLog);
+  logConnection.value.onclose = () => (logConnection.value = undefined);
 }
 
 const updateTimer = window.setInterval(() => void updateStatus(), 3000);
@@ -178,8 +164,7 @@ watch(
     try {
       $q.loading.show();
       await updateStatus();
-      await logHistory();
-      logRealtime();
+      await processLog();
     } finally {
       $q.loading.hide();
     }
@@ -189,7 +174,7 @@ watch(
 
 onBeforeUnmount(() => {
   window.clearInterval(updateTimer);
-  logWebsocket?.close();
+  logConnection.value?.close();
 });
 
 void updateStatus();
