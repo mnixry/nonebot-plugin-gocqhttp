@@ -21,7 +21,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",
     "@fontsource/dseg14": "^4.5.3",
-    "@fontsource/source-code-pro": "^4.5.4",
+    "@fontsource/roboto-mono": "^4.5.5",
     "@quasar/app": "^3.3.3",
     "@types/node": "^17.0.21",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
