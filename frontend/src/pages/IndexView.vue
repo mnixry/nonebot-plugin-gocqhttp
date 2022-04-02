@@ -1,72 +1,117 @@
 <template>
-  <q-page class="row items-center justify-evenly q-pa-md">
-    <q-card class="shadow window-width q-pa-sm">
-      <div class="text-h5 q-pa-md">系统状态</div>
-      <q-card-section class="row justify-evenly">
-        <div class="col-12 col-sm-8 row justify-evenly">
-          <div class="text-center col-6">
+  <q-page class="row items-center justify-evenly q-gutter-y-sm q-ma-sm">
+    <q-card class="shadow col-12 col-md-3 q-pa-md">
+      <q-card-section class="card-title">
+        <div class="text-h5">CPU占用</div>
+      </q-card-section>
+      <q-card-section horizontal>
+        <q-card-section>
+          <q-circular-progress
+            :value="status?.cpu_percent"
+            :track-color="$q.dark.isActive ? 'grey-8' : 'grey-3'"
+            :thickness="0.2"
+            size="16vh"
+            show-value
+            color="green"
+            class="q-ma-sm"
+          >
             <q-circular-progress
-              :value="status?.cpu_percent"
-              :track-color="$q.dark.isActive ? 'grey-8' : 'grey-3'"
-              :thickness="0.2"
-              size="16vh"
+              :value="status?.process.cpu_percent"
+              :track-color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
               show-value
-              color="green"
-              class="q-ma-sm"
-            >
-              <q-circular-progress
-                :value="status?.process.cpu_percent"
-                :track-color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-                show-value
-                size="15vh"
-                color="purple"
-              >
-                <q-icon name="developer_board" size="md" color="teal" />
-              </q-circular-progress>
-            </q-circular-progress>
-            <div class="text-body1 q-mr-sm">CPU</div>
-            <div class="text-body2">总计 {{ status?.cpu_percent }}%</div>
-            <div class="text-body2">
-              主进程 {{ status?.process.cpu_percent }}%
-            </div>
-          </div>
-          <div class="text-center col-6">
-            <q-circular-progress
-              :value="status?.memory.percent"
-              :track-color="$q.dark.isActive ? 'grey-8' : 'grey-3'"
               size="15vh"
-              show-value
-              color="blue"
-              class="q-ma-sm"
-              ><q-circular-progress
-                :value="
-                  ((status?.process.memory_used ?? 0) /
-                    (status?.memory.total ?? 0)) *
-                  100
-                "
-                :track-color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-                show-value
-                size="14vh"
-                color="purple"
-              >
-                <q-icon name="memory" size="md" color="light-green" />
-              </q-circular-progress>
+              color="purple"
+            >
+              <q-icon name="developer_board" size="md" color="teal" />
             </q-circular-progress>
-            <div class="text-body1">内存</div>
-            <div class="text-body2">{{ status?.memory.percent }}%</div>
-            <div class="text-body2">
-              {{
-                formatBytes(status?.memory.available ?? 0) +
-                '/' +
-                formatBytes(status?.memory.total ?? 0)
-              }}
+          </q-circular-progress>
+        </q-card-section>
+        <q-separator vertical />
+        <q-card-section>
+          <div class="text-body1 q-py-sm">
+            总计
+            <span class="digit-display q-mx-sm">
+              {{ status?.cpu_percent.toPrecision(3) }}%
+            </span>
+          </div>
+          <q-separator spaced />
+          <div class="text-body1 q-py-sm">
+            主进程
+            <span class="digit-display q-mx-sm">
+              {{ status?.process.cpu_percent.toPrecision(3) }}%
+            </span>
+          </div>
+        </q-card-section>
+      </q-card-section>
+    </q-card>
+    <q-card class="shadow col-12 col-md-3">
+      <q-card-section class="card-title">
+        <div class="text-h5">内存占用</div>
+      </q-card-section>
+      <q-card-section horizontal>
+        <q-card-section>
+          <q-circular-progress
+            :value="status?.memory.percent"
+            :track-color="$q.dark.isActive ? 'grey-8' : 'grey-3'"
+            :thickness="0.2"
+            size="16vh"
+            show-value
+            color="blue"
+            class="q-ma-sm"
+            ><q-circular-progress
+              :value="
+                ((status?.process.memory_used ?? 0) /
+                  (status?.memory.total ?? 0)) *
+                100
+              "
+              :track-color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+              show-value
+              size="15vh"
+              color="purple"
+            >
+              <q-icon name="memory" size="md" color="light-green" />
+            </q-circular-progress>
+          </q-circular-progress>
+        </q-card-section>
+        <q-separator vertical />
+        <q-card-section>
+          <div class="text-body1">
+            内存
+            <span class="digit-display q-mx-sm"
+              >{{ status?.memory.percent }}%</span
+            >
+          </div>
+          <q-separator spaced />
+          <div class="row text-body1">
+            <div class="q-mr-sm q-my-sm">
+              剩余
+              <span class="digit-display">
+                {{ formatBytes(status?.memory.available ?? 0) }}
+              </span>
             </div>
-            <div class="text-body2">
-              主进程 {{ formatBytes(status?.process.memory_used ?? 0) }}
+            <div class="q-my-sm">
+              总计
+              <span class="digit-display">
+                {{ formatBytes(status?.memory.total ?? 0) }}
+              </span>
             </div>
           </div>
-        </div>
-        <div class="col-12 col-sm-4">
+          <q-separator spaced />
+          <div class="text-body1 q-py-sm">
+            主进程
+            <span class="digit-display q-mx-sm">
+              {{ formatBytes(status?.process.memory_used ?? 0) }}
+            </span>
+          </div>
+        </q-card-section>
+      </q-card-section>
+    </q-card>
+    <q-card class="shadow col-12 col-md-4">
+      <q-card-section class="card-title">
+        <div class="text-h5">系统信息</div>
+      </q-card-section>
+      <q-card-section class="row justify-evenly">
+        <div class="col-12">
           <div class="text-body1">硬盘占用</div>
           <q-linear-progress
             :value="(status?.disk.percent ?? 0) / 100"
@@ -100,24 +145,17 @@
           </div>
         </div>
       </q-card-section>
-      <q-card-section class="q-pa-md">
-        <q-list bordered class="rounded-borders shadow">
-          <q-expansion-item
-            icon="insights"
-            expand-separator
-            label="资源使用量统计图"
-          >
-            <vue-apex-charts
-              class="col-12 q-pa-md"
-              type="area"
-              ref="chart"
-              height="400"
-              :options="chartOptions"
-              :series="chartSeries"
-            /> </q-expansion-item
-        ></q-list>
+    </q-card>
+    <q-card class="col-10">
+      <q-card-section>
+        <vue-apex-charts
+          type="area"
+          ref="chart"
+          height="250"
+          :options="chartOptions"
+          :series="chartSeries"
+        />
       </q-card-section>
-      <q-separator spaced />
       <q-card-section class="row justify-end items-center">
         <q-chip icon="refresh">数据更新间隔</q-chip>
         <q-slider
@@ -190,6 +228,7 @@ function formatBytes(bytes: number, decimals = 2) {
 }
 
 let updateTimer: number;
+
 async function updateStatus() {
   try {
     $q.loadingBar.start();
@@ -232,8 +271,25 @@ watch(
   () =>
     void chart.value?.updateOptions({
       theme: { mode: $q.dark.isActive ? 'dark' : 'light' },
-    })
+    }),
+  {
+    immediate: true,
+  }
 );
 
 void updateStatus();
 </script>
+<style scoped lang="scss">
+@import '@fontsource/dseg14/index.css';
+
+.digit-display {
+  font-family: DSEG14;
+  font-size: x-large;
+  text-shadow: $cyan 1px 2px 3px;
+}
+
+.card-title {
+  background-image: linear-gradient(90deg, $primary 0%, transparent 50%);
+  color: white;
+}
+</style>
