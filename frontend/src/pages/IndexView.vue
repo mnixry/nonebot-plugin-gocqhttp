@@ -1,9 +1,9 @@
 <template>
-  <q-page class="row items-start justify-start q-ma-md">
+  <q-page class="row items-stretch justify-start q-ma-md">
     <div
-      class="q-pa-sm col-12 col-xl-6 q-gutter-md row items-center justify-evenly"
+      class="q-pa-sm col-12 col-xl-4 q-gutter-y-sm items-baseline justify-evenly"
     >
-      <q-card class="col-12 col-md-5">
+      <q-card class="col-12 col-lg-6">
         <q-card-section class="card-title">
           <div class="text-h5">CPU占用</div>
         </q-card-section>
@@ -47,7 +47,7 @@
           </q-card-section>
         </q-card-section>
       </q-card>
-      <q-card class="col-12 col-md-6">
+      <q-card class="col-12 col-lg-6">
         <q-card-section class="card-title">
           <div class="text-h5">内存占用</div>
         </q-card-section>
@@ -109,7 +109,7 @@
           </q-card-section>
         </q-card-section>
       </q-card>
-      <q-card class="col-12 col-md-5">
+      <q-card class="col-12 col-md-6">
         <q-card-section class="card-title">
           <div class="text-h5">系统信息</div>
         </q-card-section>
@@ -150,6 +150,9 @@
         </q-card-section>
       </q-card>
       <q-card class="col-12 col-md-6">
+        <q-card-section class="card-title">
+          <div class="text-h5">资源统计</div>
+        </q-card-section>
         <q-card-section>
           <vue-apex-charts
             type="area"
@@ -175,10 +178,11 @@
     </div>
 
     <logs-console
-      class="col-12 col-xl-6"
+      class="col-12 col-xl-8"
       @reconnect="processLog"
       :logs="logs"
       :connected="!!logConnection"
+      height="100%"
     />
   </q-page>
 </template>
@@ -315,7 +319,7 @@ watch(
 
 .digit-display {
   font-family: DSEG14;
-  font-size: x-large;
+  font-size: larger;
   text-shadow: $cyan 1px 2px 3px;
 }
 
