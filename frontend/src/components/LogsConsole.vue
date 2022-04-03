@@ -1,20 +1,27 @@
 <template>
   <q-card>
-    <q-card-section>
-      <div class="text-h6">
-        进程日志
-        <q-chip
-          v-if="typeof connected === 'boolean'"
-          @click="(event) => reconnect('reconnect', event)"
-          :clickable="!connected"
-          :color="connected ? 'positive' : 'negative'"
-          :icon="connected ? 'link' : 'link_off'"
-        >
-          状态: {{ connected ? '实时' : '断开' }}
-        </q-chip>
-      </div>
+    <q-card-section class="row q-gutter-x-md items-center justify-start">
+      <div class="text-h5 self-start">进程日志</div>
+      <q-space />
+      <q-chip
+        v-if="typeof connected === 'boolean'"
+        @click="(event) => reconnect('reconnect', event)"
+        :clickable="!connected"
+        :color="connected ? 'positive' : 'negative'"
+        :icon="connected ? 'link' : 'link_off'"
+      >
+        状态: {{ connected ? '实时' : '断开' }}
+      </q-chip>
+      <q-btn
+        @click="scroll?.setScrollPercentage('vertical', 1, 300)"
+        flat
+        rounded
+        icon="move_down"
+        label="跳转底部"
+      />
     </q-card-section>
     <q-scroll-area
+      ref="scroll"
       class="page-logs"
       :style="{ height: height ?? 'calc(100vh - 10rem)' }"
     >
@@ -44,6 +51,7 @@
 </template>
 <script setup lang="ts">
 import { nextTick, watch, ref } from 'vue';
+import { QScrollArea } from 'quasar';
 import AnsiUp from 'ansi_up';
 
 import { type ProcessLog, ProcessLogLevel } from 'src/api';
@@ -67,13 +75,15 @@ const props = defineProps<{
     height?: string;
   }>(),
   reconnect = defineEmits(['reconnect']),
-  root = ref<HTMLElement>();
+  root = ref<HTMLElement>(),
+  scroll = ref<QScrollArea>();
 
 watch(
   () => props.logs.length,
   async () => {
-    const wrapper = root.value?.parentElement?.parentElement;
-    if (!wrapper) return;
+    if (!scroll.value) return;
+
+    const wrapper = scroll.value.getScrollTarget();
     const { scrollTop, clientHeight, scrollHeight } = wrapper;
     if (Math.abs(scrollTop + clientHeight - scrollHeight) <= 1) {
       await nextTick();
