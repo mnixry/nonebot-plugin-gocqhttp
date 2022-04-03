@@ -83,20 +83,19 @@
 </template>
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue';
+import { useQuasar } from 'quasar';
+
+import { api } from 'src/boot/axios';
+import type { ProcessInfo, ProcessLog } from 'src/api';
+
 import RunningProcessStatus from 'components/RunningProcessStatus.vue';
 import LogsConsole from 'components/LogsConsole.vue';
-import type { ProcessInfo, ProcessLog } from 'src/api';
 import MessageSender from 'src/components/MessageSender.vue';
-import { useQuasar } from 'quasar';
-import { useRoute } from 'vue-router';
-import { api } from 'src/boot/axios';
 
-const $q = useQuasar(),
-  $route = useRoute();
+const $q = useQuasar();
 
-const uin = ref<number>(+$route.params.uin);
-
-const status = ref<ProcessInfo>(),
+const props = defineProps<{ uin: number }>(),
+  status = ref<ProcessInfo>(),
   logs = ref<ProcessLog[]>([]),
   logConnection = ref<WebSocket>();
 
@@ -104,7 +103,7 @@ async function updateStatus() {
   logConnection.value?.send('heartbeat');
   try {
     $q.loadingBar.start();
-    const { data } = await api.processStatusApiUinProcessStatusGet(uin.value);
+    const { data } = await api.processStatusApiUinProcessStatusGet(props.uin);
     status.value = data;
   } catch (err) {
     console.error(err);
@@ -116,7 +115,7 @@ async function updateStatus() {
 async function stopProcess() {
   try {
     $q.loading.show();
-    await api.processStopApiUinProcessDelete(uin.value);
+    await api.processStopApiUinProcessDelete(props.uin);
     await updateStatus();
   } catch (err) {
     console.error(err);
@@ -128,7 +127,7 @@ async function stopProcess() {
 async function startProcess() {
   try {
     $q.loading.show();
-    await api.processStartApiUinProcessPut(uin.value);
+    await api.processStartApiUinProcessPut(props.uin);
     await updateStatus();
   } catch (err) {
     console.error(err);
@@ -138,13 +137,12 @@ async function startProcess() {
 }
 
 async function processLog() {
-  const { data } = await api.processLogsHistoryApiUinProcessLogsGet(uin.value);
+  const { data } = await api.processLogsHistoryApiUinProcessLogsGet(props.uin);
   logs.value = data;
 
-  if (!Number.isInteger(uin.value)) return;
   logConnection.value?.close();
 
-  const wsUrl = new URL(`api/${uin.value}/process/logs`, location.href);
+  const wsUrl = new URL(`api/${props.uin}/process/logs`, location.href);
   wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
   logConnection.value = new WebSocket(wsUrl.href);
@@ -156,9 +154,8 @@ async function processLog() {
 const updateTimer = window.setInterval(() => void updateStatus(), 3000);
 
 watch(
-  () => $route.params,
+  () => props.uin,
   async () => {
-    uin.value = +$route.params.uin;
     status.value = undefined;
     logs.value = [];
     try {

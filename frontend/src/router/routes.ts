@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/accounts/:uin(\\d+)',
         component: () => import('pages/AccountDetailView.vue'),
+        props: true,
       },
     ],
   },
