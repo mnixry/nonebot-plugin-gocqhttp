@@ -1,7 +1,7 @@
 import hashlib
-from typing import Tuple
+from typing import List, Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from ...plugin_config import AccountProtocol
 
@@ -24,7 +24,7 @@ class ShortDeviceInfo(BaseModel):
     boot_id: str
     proc_version: str
     mac_address: str
-    ip_address: Tuple[int, int, int, int]
+    ip_address: List[int] = Field(max_items=4, min_items=4)
     imei: str
     incremental: str
 

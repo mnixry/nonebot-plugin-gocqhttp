@@ -63,9 +63,7 @@ class RandomDeviceInfoGenerator:
         random = Random(self.seed)
         return ":".join(self.rand_str(random, hexdigits, 2) for _ in range(6)).upper()
 
-    def ip_address(
-        self, network: IPv4Network = IPv4Network("188.0.0.0/8")
-    ) -> Tuple[int, int, int, int]:
+    def ip_address(self, network: IPv4Network = IPv4Network("188.0.0.0/8")):
         random = Random(self.seed)
 
         address = IPv4Address(
@@ -74,7 +72,7 @@ class RandomDeviceInfoGenerator:
                 int(network.broadcast_address),
             )
         )
-        return tuple(int(i) for i in str(address).split("."))
+        return [int(i) for i in str(address).split(".")]
 
     def incremental(self):
         random = Random(self.seed)
