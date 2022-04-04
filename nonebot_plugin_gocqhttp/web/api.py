@@ -6,17 +6,13 @@ from fastapi import APIRouter, Depends
 from nonebot import get_bots
 from nonebot.adapters.onebot.v11 import ActionFailed, Bot
 from nonebot.utils import escape_tag
+from nonebot_plugin_gocqhttp.process.device.models import DeviceInfo
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from ..exceptions import BotNotFound, ProcessNotFound, RemovePredefinedAccount
 from ..log import LOG_STORAGE, logger
 from ..plugin_config import AccountConfig
-from ..process import (
-    GoCQProcess,
-    ProcessesManager,
-    ProcessInfo,
-    ProcessLog,
-)
+from ..process import GoCQProcess, ProcessesManager, ProcessInfo, ProcessLog
 from . import models
 
 router = APIRouter(tags=["api"])
@@ -111,16 +107,47 @@ async def create_account(uin: int, account: Optional[models.AccountCreation] = N
 
 
 @router.delete("/{uin}", status_code=204)
-async def delete_account(process: GoCQProcess = RunningProcess()):
+async def delete_account(
+    with_file: bool = False, process: GoCQProcess = RunningProcess()
+):
     if process.predefined:
         raise RemovePredefinedAccount
     await ProcessesManager.remove(process.account.uin)
     return
 
 
-@router.get("/{uin}/device")
-async def account_device(process: GoCQProcess = RunningProcess()):
+@router.get("/{uin}/config", response_model=models.AccountConfigFile)
+def account_config_read(process: GoCQProcess = RunningProcess()):
+    return models.AccountConfigFile(content=process.config.read())
+
+
+@router.patch("/{uin}/config", response_model=models.AccountConfigFile)
+def account_config_write(
+    data: models.AccountConfigFile, process: GoCQProcess = RunningProcess()
+):
+    process.config.write(data.content)
+    return models.AccountConfigFile(content=process.config.read())
+
+
+@router.delete("/{uin}/config", status_code=204)
+def account_config_delete(process: GoCQProcess = RunningProcess()):
+    process.config.delete()
+
+
+@router.get("/{uin}/device", response_model=DeviceInfo)
+def account_device_read(process: GoCQProcess = RunningProcess()):
     return process.device.read()
+
+
+@router.patch("/{uin}/device", response_model=DeviceInfo)
+def account_device_write(data: DeviceInfo, process: GoCQProcess = RunningProcess()):
+    process.device.write(data)
+    return process.device.read()
+
+
+@router.delete("/{uin}/device", status_code=204)
+def account_device_delete(process: GoCQProcess = RunningProcess()):
+    process.device.delete()
 
 
 @router.post("/{uin}/api")

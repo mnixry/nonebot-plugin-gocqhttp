@@ -130,7 +130,12 @@ class GoCQProcess:
         if self.daemon_thread_running:
             raise ProcessAlreadyStarted
 
+        if not self.config.exists:
+            self.config.generate()
         self.config.before_run()
+
+        if not self.device.exists:
+            self.device.generate()
         self.device.before_run()
 
         def runner():

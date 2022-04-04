@@ -15,8 +15,10 @@ class AccountListItem(BaseModel):
 class AccountCreation(BaseModel):
     password: Optional[str] = None
     protocol: AccountProtocol = AccountProtocol.iPad
-    config_extra: Optional[Dict[str, Any]] = None
-    device_extra: Optional[Dict[str, Any]] = None
+
+
+class AccountConfigFile(BaseModel):
+    content: str
 
 
 class SystemMemoryDetail(BaseModel):
