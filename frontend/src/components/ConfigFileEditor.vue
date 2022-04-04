@@ -2,15 +2,14 @@
   <div ref="dom" />
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { editor } from 'monaco-editor';
 
-interface Props
-  extends Omit<editor.IStandaloneEditorConstructionOptions, 'value'> {
-  modelValue: string;
-}
-
-const props = defineProps<Props>(),
+const props = defineProps<{
+    modelValue: string;
+    language: string;
+    theme?: string;
+  }>(),
   emit = defineEmits(['update:modelValue']),
   dom = ref<HTMLElement>();
 
@@ -20,7 +19,8 @@ onMounted(() => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   instance = editor.create(dom.value!, {
     value: props.modelValue,
-    ...props,
+    language: props.language,
+    theme: props.theme,
   });
 
   instance.onDidChangeModelContent(() => {
@@ -28,4 +28,13 @@ onMounted(() => {
     emit('update:modelValue', value);
   });
 });
+
+watch(
+  () => props.theme,
+  (value) => {
+    instance.updateOptions({
+      theme: value,
+    });
+  }
+);
 </script>
