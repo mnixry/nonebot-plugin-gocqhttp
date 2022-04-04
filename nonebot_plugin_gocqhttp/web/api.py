@@ -13,7 +13,6 @@ from ..log import LOG_STORAGE, logger
 from ..plugin_config import AccountConfig
 from ..process import (
     GoCQProcess,
-    ProcessAccount,
     ProcessesManager,
     ProcessInfo,
     ProcessLog,
@@ -99,7 +98,7 @@ async def system_logs_realtime(websocket: WebSocket):
 
 @router.put(
     "/{uin}",
-    response_model=ProcessAccount,
+    response_model=AccountConfig,
     response_model_exclude={"config"},
     status_code=201,
 )
@@ -121,7 +120,7 @@ async def delete_account(process: GoCQProcess = RunningProcess()):
 
 @router.get("/{uin}/device")
 async def account_device(process: GoCQProcess = RunningProcess()):
-    return process.account.device
+    return process.device.read()
 
 
 @router.post("/{uin}/api")

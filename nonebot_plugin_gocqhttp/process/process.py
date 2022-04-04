@@ -15,10 +15,9 @@ from ..exceptions import ProcessAlreadyStarted, ProcessNotStarted
 from ..log import LogStorage as BaseLogStorage
 from ..log import logger
 from ..plugin_config import AccountConfig
-from .config import generate_config, generate_device
+from .config import AccountConfigHelper, AccountDeviceHelper
 from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
 from .models import (
-    ProcessAccount,
     ProcessInfo,
     ProcessLog,
     ProcessStatus,
@@ -68,14 +67,13 @@ class GoCQProcess:
         self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
         self.cwd.mkdir(parents=True, exist_ok=True)
 
-        self.predefined = predefined
-        self.account = ProcessAccount(
-            source=account,
-            uin=account.uin,
-            password=account.password,  # type:ignore
-            config=generate_config(account, self.cwd),
-            device=generate_device(account, self.cwd),
-        )
+        self.config = AccountConfigHelper(account)
+        if not self.config.exists:
+            self.config.generate()
+        self.device = AccountDeviceHelper(account)
+        if not self.device.exists:
+            self.device.generate()
+        self.account, self.predefined = account, predefined
 
         self.loop = asyncio.get_running_loop()
 
@@ -131,6 +129,9 @@ class GoCQProcess:
     def start(self):
         if self.daemon_thread_running:
             raise ProcessAlreadyStarted
+
+        self.config.before_run()
+        self.device.before_run()
 
         def runner():
             for restarted in count():

@@ -54,9 +54,7 @@ class ProcessesManager:
     @classmethod
     async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH) -> int:
         store = ProcessAccountsStore(
-            accounts=[
-                process.account.source for process in cls.all(include_predefined=False)
-            ]
+            accounts=[process.account for process in cls.all(include_predefined=False)]
         )
         dumped = pickle.dumps(store)
         dumped = pickletools.optimize(dumped)

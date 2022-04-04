@@ -1,96 +1,91 @@
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict
 
-import yaml
+import chevron
+from httpx import delete
 
-from ..log import logger
-from ..plugin_config import AccountConfig, ExtraConfigType, driver_config, onebot_config
-from .device import random_device
-
-CONFIG_TEMPLATE_PATH = Path(__file__).parent / "config-template.yml"
-CONFIG_REF_PREFIX, CONFIG_OVERRIDE_PREFIX = "ref:", "override:"
+from ..plugin_config import AccountConfig, driver_config, onebot_config
+from .device import DeviceInfo, random_device
+from .download import ACCOUNTS_DATA_PATH
 
 
-def merge_config(
-    template: Dict[str, Any], extra_config: Dict[str, Any]
-) -> Dict[str, Any]:
-    template = template.copy()
-    for key, value in extra_config.items():
-        if isinstance(template.get(key), dict) and isinstance(value, dict):
-            template[key] = merge_config(template[key], value)
-        elif isinstance(template.get(key), list) and isinstance(value, list):
-            template[key] = (template[key] + value).copy()
-        else:
-            template[key] = value
-    return template
+class AccountConfigHelper:
+    CONFIG_TEMPLATE_PATH = Path(__file__).parent / "config-template.yml"
+
+    TEMPLATE_FILE_NAME = "config-template.yml"
+    CONFIG_FILE_NAME = "config.yml"
+
+    def __init__(self, account: AccountConfig):
+        self.account = account
+        self.account_path = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.account_path.mkdir(parents=True, exist_ok=True)
+
+        self.template_path = self.account_path / self.TEMPLATE_FILE_NAME
+        self.config_path = self.account_path / self.CONFIG_FILE_NAME
+
+    @property
+    def exists(self):
+        return self.config_path.is_file() and self.template_path.is_file()
+
+    def read(self) -> str:
+        return self.template_path.read_text(encoding="utf-8")
+
+    def write(self, content: str) -> int:
+        return self.template_path.write_text(content, encoding="utf-8")
+
+    def delete(self):
+        self.template_path.rmdir()
+
+    def generate(self):
+        return self.template_path.write_text(
+            self.CONFIG_TEMPLATE_PATH.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
+    def before_run(self):
+        template_string = self.read()
+        rendered_string = chevron.render(
+            template_string,
+            data={
+                "account": self.account,
+                "server_address": f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws",
+                "access_token": onebot_config.onebot_access_token or "",
+            },
+        )
+        return self.config_path.write_text(rendered_string, encoding="utf-8")
 
 
-def load_extra_config(
-    template: Dict[str, Any],
-    extra_config: ExtraConfigType,
-    loader: Callable[[str], Any],
-) -> Dict[str, Any]:
-    if isinstance(extra_config, dict):
-        return merge_config(template, extra_config)
-    elif isinstance(extra_config, str):
-        if extra_config.startswith(CONFIG_REF_PREFIX):
-            path, override = extra_config[len(CONFIG_REF_PREFIX) :], False
-        elif extra_config.startswith(CONFIG_OVERRIDE_PREFIX):
-            path, override = extra_config[len(CONFIG_OVERRIDE_PREFIX) :], True
-        else:
-            raise ValueError(f"Invalid extra config setting: {extra_config!r}")
-        if not Path(path).is_file():
-            raise ValueError(f"Extra config file not found: {path!r}")
+class AccountDeviceHelper:
+    DEVICE_FILE_NAME = "device.json"
 
-        with open(path, "rt", encoding="utf-8") as f:
-            loaded_config = loader(f.read())
-        return loaded_config if override else merge_config(template, loaded_config)
+    def __init__(self, account: AccountConfig):
+        self.account = account
+        self.account_path = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.account_path.mkdir(parents=True, exist_ok=True)
 
-    raise TypeError(f"Invalid extra config type: {extra_config.__class__!r}")
+        self.device_path = self.account_path / self.DEVICE_FILE_NAME
 
+    @property
+    def exists(self):
+        return self.device_path.is_file()
 
-def generate_config(account: AccountConfig, account_path: Path):
-    config_path = account_path / "config.yml"
-    with CONFIG_TEMPLATE_PATH.open("rt", encoding="utf-8") as f:
-        config_template = yaml.safe_load(f)
+    def read(self) -> DeviceInfo:
+        with self.device_path.open("rt", encoding="utf-8") as f:
+            content = json.load(f)
+        return DeviceInfo.parse_obj(content)
 
-    config_template["account"]["uin"] = account.uin
-    config_template["account"]["password"] = account.password
-    config_template["servers"][0]["ws-reverse"].update(
-        {
-            "universal": f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws",
-            "api": None,
-            "event": None,
-            "middlewares": {"access-token": onebot_config.onebot_access_token or ""},
-        },
-    )
+    def write(self, content: DeviceInfo) -> int:
+        return self.device_path.write_text(
+            content.json(indent=4, ensure_ascii=False), encoding="utf-8"
+        )
 
-    loaded_config = (
-        load_extra_config(config_template, account.config_extra, yaml.safe_load)
-        if account.config_extra is not None
-        else config_template
-    )
+    def delete(self):
+        self.device_path.rmdir()
 
-    with config_path.open("wt", encoding="utf-8") as f:
-        yaml.safe_dump(loaded_config, f, default_flow_style=False)
-    logger.debug(f"Config file for account {account.uin} generated.")
+    def generate(self):
+        generated_device = random_device(self.account.uin, self.account.protocol)
+        return self.write(generated_device)
 
-    return loaded_config
-
-
-def generate_device(account: AccountConfig, account_path: Path):
-    device_path = account_path / "device.json"
-    device_template = random_device(account.uin, account.protocol).dict()
-
-    loaded_device = (
-        load_extra_config(device_template, account.device_extra, json.loads)
-        if account.device_extra is not None
-        else device_template
-    )
-
-    with device_path.open("wt", encoding="utf-8") as f:
-        json.dump(loaded_device, f, indent=4, ensure_ascii=False)
-    logger.debug(f"Device file for account {account.uin} generated.")
-
-    return loaded_device
+    def before_run(self):
+        device_content = self.read()
+        device_content.protocol = self.account.protocol
+        return self.write(device_content)
