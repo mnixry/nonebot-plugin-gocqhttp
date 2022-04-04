@@ -19,7 +19,7 @@ py-cpuinfo = "^8.0.0"
 httpx = ">=0.20.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.1"
+black = "^22.3"
 flake8 = "^4.0.1"
 
 [build-system]
