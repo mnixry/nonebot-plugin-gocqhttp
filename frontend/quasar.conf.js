@@ -9,6 +9,8 @@
 /* eslint-env node */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { configure } = require('quasar/wrappers');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -48,7 +50,7 @@ module.exports = configure(function (ctx) {
     },
 
     // https://quasar.dev/quasar-cli/prefetch-feature
-    // preFetch: true,
+    preFetch: true,
 
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
@@ -112,8 +114,10 @@ module.exports = configure(function (ctx) {
 
       // https://quasar.dev/quasar-cli/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-      chainWebpack(/* chain */) {
-        //
+      chainWebpack(chain) {
+        chain
+          .plugin('monaco-editor-webpack-plugin')
+          .use(MonacoWebpackPlugin, [{ languages: ['yaml', 'json'] }]);
       },
     },
 
