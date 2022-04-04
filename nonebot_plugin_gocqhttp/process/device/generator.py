@@ -1,7 +1,6 @@
 from ipaddress import IPv4Address, IPv4Network
 from random import Random
 from string import ascii_letters, ascii_uppercase, digits, hexdigits
-from typing import Tuple
 from uuid import UUID
 
 from .data_source import load_builds_list, load_devices_list

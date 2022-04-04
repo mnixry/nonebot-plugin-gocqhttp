@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 
 import chevron
-from httpx import delete
 
 from ..plugin_config import AccountConfig, driver_config, onebot_config
 from .device import DeviceInfo, random_device

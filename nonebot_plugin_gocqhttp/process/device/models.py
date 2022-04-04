@@ -1,5 +1,5 @@
 import hashlib
-from typing import List, Tuple
+from typing import List
 
 from pydantic import BaseModel, Field
 
