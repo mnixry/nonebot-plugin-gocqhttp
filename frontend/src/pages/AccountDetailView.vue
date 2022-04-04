@@ -69,6 +69,13 @@
             @click="startProcess"
             >启动</q-btn
           >
+          <q-separator vertical spaced />
+          <q-btn
+            flat
+            label="编辑配置"
+            icon="construction"
+            :to="`/accounts/${uin}/config`"
+          />
         </q-card-actions>
       </q-card>
       <message-sender class="col-12 shadow" :uin="uin" />

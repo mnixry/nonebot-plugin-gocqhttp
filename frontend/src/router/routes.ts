@@ -15,6 +15,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/AccountDetailView.vue'),
         props: true,
       },
+      {
+        path: '/accounts/:uin(\\d+)/config',
+        component: () => import('pages/AccountConfigEditorView.vue'),
+        props: true,
+      },
     ],
   },
 
