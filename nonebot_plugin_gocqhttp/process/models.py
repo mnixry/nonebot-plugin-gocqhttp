@@ -1,19 +1,11 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
 
 from ..log import STDOUT
 from ..plugin_config import AccountConfig
-
-
-class ProcessAccount(BaseModel):
-    source: AccountConfig
-    uin: int
-    password: Optional[SecretStr] = None
-    config: Dict[str, Any] = Field(default_factory=dict)
-    device: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ProcessAccountsStore(BaseModel):

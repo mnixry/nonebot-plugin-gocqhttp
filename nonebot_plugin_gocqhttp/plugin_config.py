@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11.config import Config as OnebotConfig
@@ -16,15 +16,10 @@ class AccountProtocol(IntEnum):
     QiDian = 4
 
 
-ExtraConfigType = Union[Dict[str, Any], str]
-
-
 class AccountConfig(BaseModel):
     uin: int
     password: Optional[str] = None
     protocol: AccountProtocol = AccountProtocol.iPad
-    config_extra: Optional[ExtraConfigType] = None
-    device_extra: Optional[ExtraConfigType] = None
 
 
 class PluginConfig(BaseModel):
