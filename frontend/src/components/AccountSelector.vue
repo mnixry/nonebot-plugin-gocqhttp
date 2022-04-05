@@ -31,13 +31,14 @@
             {{ account.uin }}
           </strong>
         </q-item-label>
-        <q-item-label caption>
-          <span v-if="account.predefined" class="text-orange q-pr-xs"
-            >来自配置文件</span
-          ><span v-else class="text-green q-pr-xs">手动添加</span
-          ><span v-if="!account.process_created" class="text-accent"
-            >未启动</span
-          >
+        <q-item-label caption class="q-gutter-xs">
+          <span v-if="account.predefined" class="text-orange">
+            来自配置文件
+          </span>
+          <span v-else class="text-green"> 手动添加 </span>
+          <span v-if="!account.process_created" class="text-accent">
+            未启动
+          </span>
         </q-item-label>
       </q-item-section>
       <q-item-section side>
@@ -68,19 +69,25 @@ const accounts = ref<AccountListItem[]>([]),
   loading = ref(false);
 
 async function deleteAccount(uin: number) {
-  const confirm = await new Promise<boolean>((resolve) => {
+  const confirm = await new Promise<boolean | undefined>((resolve) => {
     $q.dialog({
       title: '确认删除',
       message: `确认删除帐号${uin}?`,
+      options: {
+        model: [],
+        type: 'checkbox',
+        items: [{ label: '同时删除相关文件', value: true, color: 'negative' }],
+      },
     })
-      .onOk(() => resolve(true))
-      .onCancel(() => resolve(false));
+      .onOk(([withFile]) => resolve(!!withFile))
+      .onCancel(() => resolve(undefined));
   });
-  if (!confirm) return;
+  if (typeof confirm === 'undefined') return;
+
   await $router.push('/');
   try {
     $q.loading.show();
-    await api.deleteAccountApiUinDelete(uin);
+    await api.deleteAccountApiUinDelete(uin, confirm);
   } catch (e) {
     $q.notify({
       color: 'negative',
