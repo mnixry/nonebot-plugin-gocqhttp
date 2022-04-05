@@ -37,7 +37,7 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
   </tr>
   <tr>
     <td>
-      <img src="https://user-images.githubusercontent.com/97567575/159159882-0238833a-8d16-4c8d-8d2a-74fb19cd16d6.png" />
+      <img src="https://user-images.githubusercontent.com/32300164/161667766-2ffdc726-d54f-496c-9e15-d2cc8fce38b7.png" />
       <b>查看状态</b>
     </td>
     <td>
