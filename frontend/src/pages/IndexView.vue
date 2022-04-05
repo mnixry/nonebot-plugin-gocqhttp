@@ -1,7 +1,7 @@
 <template>
   <q-page class="row items-stretch justify-start q-ma-md">
     <div
-      class="q-pa-sm col-12 col-xl-4 q-gutter-y-sm items-baseline justify-evenly"
+      class="q-pa-sm col-12 col-lg-4 col-md-6 q-gutter-y-sm items-baseline justify-evenly"
     >
       <q-card class="col-12 col-lg-6">
         <q-card-section class="card-title">
@@ -178,7 +178,7 @@
     </div>
 
     <logs-console
-      class="col-12 col-xl-8"
+      class="col-12 col-lg-8 col-md-6"
       @reconnect="processLog"
       :logs="logs"
       :connected="!!logConnection"
