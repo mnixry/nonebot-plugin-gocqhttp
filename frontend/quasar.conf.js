@@ -117,7 +117,15 @@ module.exports = configure(function (ctx) {
       chainWebpack(chain) {
         chain
           .plugin('monaco-editor-webpack-plugin')
-          .use(MonacoWebpackPlugin, [{ languages: ['yaml', 'json'] }]);
+          .use(MonacoWebpackPlugin, [{ languages: ['yaml', 'json'] }])
+          .end()
+          .optimization.splitChunks({
+            chunks: 'all',
+            maxSize: 512 * 1024,
+            minSize: 256 * 1024,
+          })
+          .set('chunkIds', 'deterministic')
+          .end();
       },
     },
 
