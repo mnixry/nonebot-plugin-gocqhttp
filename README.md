@@ -56,7 +56,7 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 推荐[使用`nb-cli`进行安装](https://v2.nonebot.dev/docs/start/install-plugin#%E5%AE%89%E8%A3%85)
 
-要求最低 Python 版本为`3.8`
+要求最低 Python 版本为 `3.8`
 
 ### 配置
 
@@ -73,12 +73,6 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
   - `uin`: QQ 账号 **(必填)**
   - `password`: QQ 密码, 不填将使用扫码登录
   - `protocol`: 数字, 是登录使用的[客户端协议](https://docs.go-cqhttp.org/guide/config.html#%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF)
-  - `config_extra`: 配置文件拓展, 用于覆盖默认配置
-    - 由于在每次程序启动时`go-cqhttp`启动配置文件都会被覆盖, 所以请在该项目中设置你要添加的配置项
-      - 当直接填写 json 对象时, 原样传入并更新配置文件
-      - 当传入以`ref:`开头的字符串时, 它将尝试读取之后目录中的文件, 来更改配置文件
-      - 当传入以`override:`开头的字符串时, 它将尝试尝试读取之后目录中的文件, 来覆盖配置文件
-  - `device_extra`: 和`config_extra`类似, 但是是用来覆盖`device.json`中配置的
 
 - 示例:
 
@@ -101,13 +95,13 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 `GOCQ_VERSION`: 要下载的版本, 默认为空, 即下载最新版本
 
-`GOCQ_FORCE_DOWNLOAD`: 强制在启动时下载, 默认为`false`
+`GOCQ_FORCE_DOWNLOAD`: 强制在启动时下载, 默认为 `false`
 
 #### 其他配置
 
 `GOCQ_PROCESS_KWARGS`: 创建进程时的可选参数, 请[参照代码](./nonebot_plugin_gocqhttp/process/process.py)进行修改
 
-`GOCQ_WEBUI_USERNAME`, `GOCQ_WEBUI_PASSWORD`: WebUI 的登录凭证, 不设置即不进行验证
+`GOCQ_WEBUI_USERNAME`/`GOCQ_WEBUI_PASSWORD`: WebUI 的登录凭证, 不设置即不进行验证
 
 ### 开始使用
 
