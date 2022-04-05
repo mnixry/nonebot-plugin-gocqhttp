@@ -3,6 +3,7 @@ import pickletools
 import zlib
 from pathlib import Path
 from typing import Dict, List, Optional
+import shutil
 
 import psutil
 from anyio import open_file
@@ -37,10 +38,13 @@ class ProcessesManager:
         return GoCQProcess(account, predefined, **plugin_config.PROCESS_KWARGS)
 
     @classmethod
-    async def remove(cls, uin: int):
+    async def remove(cls, uin: int, *, with_file: bool = False):
         process = cls._processes.pop(uin)
         process.logs.listeners.clear()
         await process.stop()
+        if with_file:
+            await run_sync(shutil.rmtree)(process.cwd)
+        await cls.save()
         return
 
     @classmethod
@@ -54,13 +58,17 @@ class ProcessesManager:
     @classmethod
     async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH) -> int:
         store = ProcessAccountsStore(
-            accounts=[process.account for process in cls.all(include_predefined=False)]
+            accounts=[
+                parse_obj_as(AccountConfig, process.account)
+                for process in cls.all(include_predefined=False)
+            ]
         )
         dumped = pickle.dumps(store)
         dumped = pickletools.optimize(dumped)
         compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
         async with await open_file(save_path, "wb") as f:
             size = await f.write(compressed)
+        logger.debug(f"Accounts data has been saved: {save_path=} {size=}")
         return size
 
     @classmethod

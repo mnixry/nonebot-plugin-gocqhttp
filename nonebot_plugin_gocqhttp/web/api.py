@@ -112,7 +112,7 @@ async def delete_account(
 ):
     if process.predefined:
         raise RemovePredefinedAccount
-    await ProcessesManager.remove(process.account.uin)
+    await ProcessesManager.remove(process.account.uin, with_file=with_file)
     return
 
 
