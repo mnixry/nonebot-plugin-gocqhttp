@@ -2,11 +2,12 @@
   <q-page class="row q-pa-md justify-center">
     <div class="row col-12 col-md-4">
       <q-card class="col-12 shadow">
-        <q-card-section class="q-pa-md row items-center justify-start">
+        <q-card-section class="row items-center justify-start q-gutter-md">
           <q-avatar>
             <q-img :src="`https://q1.qlogo.cn/g?b=qq&nk=${uin}&s=640`" />
           </q-avatar>
-          <div class="text-h5 q-px-md">进程状态</div>
+          <div class="text-h5">进程状态</div>
+          <q-space />
           <q-chip color="green">
             <q-icon name="person" />帐号: {{ uin }}
           </q-chip>
@@ -71,11 +72,29 @@
           >
           <q-separator vertical spaced />
           <q-btn
+            push
             flat
-            label="编辑配置"
+            color="secondary"
             icon="construction"
-            :to="`/accounts/${uin}/config`"
-          />
+            label="修改设置"
+          >
+            <q-popup-proxy>
+              <div class="column q-gutter-sm q-pa-sm">
+                <q-btn
+                  flat
+                  label="进程配置"
+                  icon="settings"
+                  :to="`/accounts/${uin}/config`"
+                />
+                <q-btn
+                  flat
+                  label="设备信息"
+                  icon="smartphone"
+                  :to="`/accounts/${uin}/device`"
+                />
+              </div>
+            </q-popup-proxy>
+          </q-btn>
         </q-card-actions>
       </q-card>
       <message-sender class="col-12 shadow" :uin="uin" />

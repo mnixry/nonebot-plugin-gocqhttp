@@ -20,6 +20,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/AccountConfigEditorView.vue'),
         props: true,
       },
+      {
+        path: '/accounts/:uin(\\d+)/device',
+        component: () => import('pages/AccountDeviceEditorView.vue'),
+        props: true,
+      },
     ],
   },
 
