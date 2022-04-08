@@ -116,7 +116,7 @@ def kill_duplicated_processes():
         if (
             Path(exe).is_file()
             and BINARY_PATH.samefile(exe)
-            and ACCOUNTS_DATA_PATH in Path(cwd).parents
+            and ACCOUNTS_DATA_PATH.absolute() in Path(cwd).parents
         ):
             process.terminate()
             killed.append(pid)
