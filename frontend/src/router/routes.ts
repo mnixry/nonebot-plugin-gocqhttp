@@ -1,4 +1,26 @@
-import { RouteRecordRaw } from 'vue-router';
+import {
+  RouteRecordRaw,
+  RouteLocationNormalized,
+  RouteParams,
+} from 'vue-router';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor<T = any> = new (...args: any[]) => T;
+type TransformMap<T> = {
+  [K in keyof T]: T[K] extends Constructor<infer S> ? S : never;
+};
+
+const transform =
+  <T extends Record<string, Constructor>>(fields: T) =>
+  (to: RouteLocationNormalized) =>
+    Object.entries(to.params)
+      .map(([key, value]) => ({
+        [key]: (fields[key]
+          ? new fields[key](value)
+          : value) as TransformMap<T>[typeof key],
+      }))
+      .reduce((acc, cur) => ({ ...acc, ...cur }), {}) as TransformMap<T> &
+      RouteParams;
 
 const routes: RouteRecordRaw[] = [
   {
@@ -13,17 +35,17 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/accounts/:uin(\\d+)',
         component: () => import('pages/AccountDetailView.vue'),
-        props: true,
+        props: transform({ uin: Number }),
       },
       {
         path: '/accounts/:uin(\\d+)/config',
         component: () => import('pages/AccountConfigEditorView.vue'),
-        props: true,
+        props: transform({ uin: Number }),
       },
       {
         path: '/accounts/:uin(\\d+)/device',
         component: () => import('pages/AccountDeviceEditorView.vue'),
-        props: true,
+        props: transform({ uin: Number }),
       },
     ],
   },
