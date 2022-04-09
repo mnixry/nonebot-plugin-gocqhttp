@@ -1,6 +1,13 @@
 <template>
-  <div ref="dom" />
+  <div ref="dom" class="editor" />
 </template>
+<style scoped lang="scss">
+@import '~@fontsource/roboto-mono/index.css';
+
+.editor {
+  font-family: 'Roboto Mono', monospace, serif;
+}
+</style>
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { editor } from 'monaco-editor';
@@ -21,6 +28,7 @@ onMounted(() => {
     value: props.modelValue,
     language: props.language,
     theme: props.theme,
+    fontFamily: 'Roboto Mono',
   });
 
   instance.onDidChangeModelContent(() => {
