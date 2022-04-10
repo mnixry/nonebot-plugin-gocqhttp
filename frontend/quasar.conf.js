@@ -116,7 +116,34 @@ module.exports = configure(function (ctx) {
       chainWebpack(chain) {
         chain
           .plugin('monaco-editor-webpack-plugin')
-          .use(MonacoWebpackPlugin, [{ languages: ['yaml', 'json'] }])
+          .use(MonacoWebpackPlugin, [
+            {
+              languages: ['yaml', 'json'],
+              filename: '[name].worker.[contenthash].js',
+              features: [
+                '!accessibilityHelp',
+                '!browser',
+                '!clipboard',
+                '!contextmenu',
+                '!colorPicker',
+                '!find',
+                '!folding',
+                '!gotoError',
+                '!gotoLine',
+                '!inPlaceReplace',
+                '!links',
+                '!parameterHints',
+                '!quickCommand',
+                '!quickOutline',
+                '!referenceSearch',
+                '!rename',
+                '!smartSelect',
+                '!toggleHighContrast',
+                '!toggleTabFocusMode',
+                '!transpose',
+              ],
+            },
+          ])
           .end()
           .optimization.splitChunks({
             chunks: 'all',

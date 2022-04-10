@@ -10,7 +10,7 @@
 </style>
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { editor } from 'monaco-editor';
+import { editor } from 'monaco-editor/esm/vs/editor/editor.api.js';
 
 const props = defineProps<{
     modelValue: string;
