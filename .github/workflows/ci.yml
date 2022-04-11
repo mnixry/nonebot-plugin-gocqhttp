@@ -44,7 +44,7 @@ jobs:
           quasar build
 
       - name: Upload dist
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: frontend/dist
