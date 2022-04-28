@@ -91,6 +91,12 @@ database: # 数据库相关设置
     # 关闭将无法使用 撤回 回复 get_msg 等上下文相关功能
     enable: true
 
+  # 媒体文件缓存， 删除此项则使用缓存文件(旧版行为)
+  # 若需要将所有账号的缓存设置为同一份，可尝试将路径设置为同一个。但可能会带来写冲突问题，请谨慎设置
+  cache:
+    image: data/image.db
+    video: data/video.db
+
 servers:
   - ws-reverse:
       universal: "{{{server_address}}}"
