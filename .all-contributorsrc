@@ -31,6 +31,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "MistEO",
+      "name": "MistEO",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18511905?v=4",
+      "profile": "https://www.misteo.top/",
+      "contributions": [
+        "bug",
+        "example"
+      ]
     }
   ],
   "contributorsPerLine": 7,
