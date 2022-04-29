@@ -1,6 +1,6 @@
 <!--cSpell:disable -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # nonebot-plugin-gocqhttp
@@ -161,6 +161,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Well2333"><img src="https://avatars.githubusercontent.com/u/40534114?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Well404</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3AWell2333" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/pthmz"><img src="https://avatars.githubusercontent.com/u/97567575?v=4?s=100" width="100px;" alt=""/><br /><sub><b>pthmz</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/commits?author=pthmz" title="Documentation">📖</a></td>
     <td align="center"><a href="http://sk415.icu"><img src="https://avatars.githubusercontent.com/u/36433929?v=4?s=100" width="100px;" alt=""/><br /><sub><b>SK</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3ASK-415" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://www.misteo.top/"><img src="https://avatars.githubusercontent.com/u/18511905?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MistEO</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3AMistEO" title="Bug reports">🐛</a> <a href="#example-MistEO" title="Examples">💡</a></td>
   </tr>
 </table>
 
