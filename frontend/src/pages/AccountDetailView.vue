@@ -51,25 +51,28 @@
 
         <q-separator />
         <q-card-actions class="justify-center">
-          <q-btn flat color="primary" icon="refresh" @click="updateStatus"
-            >刷新</q-btn
-          >
+          <q-btn
+            flat
+            color="primary"
+            icon="refresh"
+            @click="updateStatus"
+            label="刷新"
+          />
           <q-btn
             flat
             color="red"
-            icon="stop"
-            v-if="status?.status == 'running'"
+            :icon="status?.status === 'running' ? 'stop' : 'dangerous'"
             @click="stopProcess"
-            >停止</q-btn
-          >
+            :label="status?.status === 'running' ? '停止' : '强行停止'"
+          />
           <q-btn
             flat
             color="green"
             icon="play_arrow"
-            v-else
+            v-if="status?.status === 'stopped'"
             @click="startProcess"
-            >启动</q-btn
-          >
+            label="启动"
+          />
           <q-separator vertical spaced />
           <q-btn
             push
