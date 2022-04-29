@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11 import Adapter
 from nonebot.drivers import ReverseDriver
+from nonebot.log import default_filter, default_format
 
 from . import plugin, web  # noqa: F401
 from .log import LOG_STORAGE, logger
@@ -35,7 +36,7 @@ async def startup():
             LOG_STORAGE.add(message.rstrip("\n")), loop=loop
         )
 
-    logger.add(log_sink, colorize=True)
+    logger.add(log_sink, colorize=True, filter=default_filter, format=default_format)
 
     if config.FORCE_DOWNLOAD or not BINARY_PATH.is_file():
         await download_gocq()
