@@ -11,7 +11,7 @@
     "dev": "quasar dev"
   },
   "dependencies": {
-    "@quasar/extras": "^1.13.5",
+    "@quasar/extras": "^1.13.6",
     "axios": "^0.27.2",
     "core-js": "^3.22.3",
     "quasar": "^2.6.6",
