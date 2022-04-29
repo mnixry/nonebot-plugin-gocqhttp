@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 
 import chevron
+import yaml
+from nonebot_plugin_gocqhttp.exceptions import BadConfigFormat
 
 from ..plugin_config import AccountConfig, driver_config, onebot_config
 from .device import DeviceInfo, random_device
@@ -30,6 +32,11 @@ class AccountConfigHelper:
         return self.template_path.read_text(encoding="utf-8")
 
     def write(self, content: str) -> int:
+        try:
+            yaml.safe_load(content)
+        except yaml.YAMLError as e:
+            raise BadConfigFormat(BadConfigFormat.message + str(e)) from e
+
         return self.template_path.write_text(content, encoding="utf-8")
 
     def delete(self):

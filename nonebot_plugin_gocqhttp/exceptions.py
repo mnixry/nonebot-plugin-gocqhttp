@@ -43,3 +43,8 @@ class AccountAlreadyExists(PluginGoCQException):
 class RemovePredefinedAccount(PluginGoCQException):
     message = "Predefined account cannot be removed"
     code = 403
+
+
+class BadConfigFormat(PluginGoCQException):
+    message = "Bad config format"
+    code = 400
