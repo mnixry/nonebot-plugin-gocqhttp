@@ -11,8 +11,8 @@ driver = get_driver()
 class AccountProtocol(IntEnum):
     iPad = 0
     AndroidPhone = 1
-    AndroidWatch = 2
-    MacOS = 3
+    MacOS = 2
+    AndroidWatch = 3
     QiDian = 4
 
 
