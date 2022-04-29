@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-gocqhttp"
-version = "0.5.2"
+version = "0.5.3"
 description = "A plugin to run go-cqhttp directly in NoneBot2, without additional download and installation."
 authors = ["Mix <mnixry@users.noreply.github.com>"]
 license = "AGPL-3.0"
