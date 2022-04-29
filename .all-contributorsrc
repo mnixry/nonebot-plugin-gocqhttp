@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Well2333",
+      "name": "Well404",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40534114?v=4",
+      "profile": "https://github.com/Well2333",
+      "contributions": [
+        "bug"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "nonebot-plugin-gocqhttp",
+  "projectOwner": "mnixry",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
