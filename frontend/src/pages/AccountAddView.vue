@@ -72,12 +72,13 @@ const $q = useQuasar(),
   $router = useRouter();
 
 const protocols = Object.entries({
-  iPad: AccountProtocol.NUMBER_0,
-  Phone: AccountProtocol.NUMBER_1,
-  Mac: AccountProtocol.NUMBER_2,
-  Watch: AccountProtocol.NUMBER_3,
-  QiDian: AccountProtocol.NUMBER_4,
-}).map(([label, value]) => ({ label, value }));
+  [AccountProtocol.NUMBER_0]: 'Default/Unset',
+  [AccountProtocol.NUMBER_1]: 'Android Phone',
+  [AccountProtocol.NUMBER_2]: 'Android Watch',
+  [AccountProtocol.NUMBER_3]: 'MacOS',
+  [AccountProtocol.NUMBER_4]: '企点',
+  [AccountProtocol.NUMBER_5]: 'iPad',
+}).map(([value, label]) => ({ value: +value, label }));
 
 const uin = ref<number>(),
   password = ref<string>(),
