@@ -1,7 +1,4 @@
 <!--cSpell:disable -->
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # nonebot-plugin-gocqhttp
 
@@ -125,6 +122,35 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 - [`koishijs/koishi-plugin-gocqhttp`](https://github.com/koishijs/koishi-plugin-gocqhttp/): 本项目直接参考 ~~(直接开抄)~~
 - [`Mrs4s/gocqhttp`](https://github.com/Mrs4s/go-cqhttp/), [`nonebot/nonebot2`](https://github.com/nonebot/nonebot2): ~~(看看项目名, 什么成分不用多说了吧)~~ 本项目的套壳的核心
 
+### 贡献者们
+
+<!-- prettier-ignore-start -->
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+<!-- prettier-ignore-end -->
+
+感谢这些大佬对本项目作出的贡献:
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/Well2333"><img src="https://avatars.githubusercontent.com/u/40534114?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Well404</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3AWell2333" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/pthmz"><img src="https://avatars.githubusercontent.com/u/97567575?v=4?s=100" width="100px;" alt=""/><br /><sub><b>pthmz</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/commits?author=pthmz" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://sk415.icu"><img src="https://avatars.githubusercontent.com/u/36433929?v=4?s=100" width="100px;" alt=""/><br /><sub><b>SK</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3ASK-415" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://www.misteo.top/"><img src="https://avatars.githubusercontent.com/u/18511905?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MistEO</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3AMistEO" title="Bug reports">🐛</a> <a href="#example-MistEO" title="Examples">💡</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+_本段符合 [all-contributors](https://github.com/all-contributors/all-contributors) 规范_
+
 ## 开源许可证
 
 由于`go-cqhttp`使用了[AGPL-3.0](https://github.com/Mrs4s/go-cqhttp/blob/master/LICENSE)许可证, 本项目也同样使用该许可
@@ -148,26 +174,3 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/Well2333"><img src="https://avatars.githubusercontent.com/u/40534114?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Well404</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3AWell2333" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/pthmz"><img src="https://avatars.githubusercontent.com/u/97567575?v=4?s=100" width="100px;" alt=""/><br /><sub><b>pthmz</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/commits?author=pthmz" title="Documentation">📖</a></td>
-    <td align="center"><a href="http://sk415.icu"><img src="https://avatars.githubusercontent.com/u/36433929?v=4?s=100" width="100px;" alt=""/><br /><sub><b>SK</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3ASK-415" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://www.misteo.top/"><img src="https://avatars.githubusercontent.com/u/18511905?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MistEO</b></sub></a><br /><a href="https://github.com/mnixry/nonebot-plugin-gocqhttp/issues?q=author%3AMistEO" title="Bug reports">🐛</a> <a href="#example-MistEO" title="Examples">💡</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
