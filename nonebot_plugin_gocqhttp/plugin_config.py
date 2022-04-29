@@ -9,17 +9,18 @@ driver = get_driver()
 
 
 class AccountProtocol(IntEnum):
-    iPad = 0
+    Default = 0
     AndroidPhone = 1
-    MacOS = 2
-    AndroidWatch = 3
+    AndroidWatch = 2
+    MacOS = 3
     QiDian = 4
+    iPad = 5
 
 
 class AccountConfig(BaseModel):
     uin: int
     password: Optional[str] = None
-    protocol: AccountProtocol = AccountProtocol.iPad
+    protocol: AccountProtocol = AccountProtocol.Default
 
 
 class PluginConfig(BaseModel):
