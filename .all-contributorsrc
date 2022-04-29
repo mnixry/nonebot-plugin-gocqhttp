@@ -22,6 +22,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "SK-415",
+      "name": "SK",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36433929?v=4",
+      "profile": "http://sk415.icu",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
