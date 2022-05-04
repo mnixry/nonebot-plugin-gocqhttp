@@ -77,11 +77,15 @@ async function updateConfig() {
   if (!content.value) return;
   try {
     loading.value = true;
-    await api.accountConfigWriteApiUinConfigPatch(props.uin, {
+
+    const { data } = await api.accountConfigWriteApiUinConfigPatch(props.uin, {
       content: content.value,
     });
-  } catch {
-    $q.notify({ message: '配置文件保存失败', color: 'negative' });
+    content.value = data.content;
+
+    $q.notify({ message: '配置文件修改成功', color: 'positive' });
+  } catch (err) {
+    $q.notify({ message: '配置文件修改失败', color: 'negative' });
   } finally {
     loading.value = false;
   }
@@ -91,6 +95,8 @@ async function deleteConfig() {
   try {
     loading.value = true;
     await api.accountConfigDeleteApiUinConfigDelete(props.uin);
+    await loadConfig();
+    $q.notify({ message: '配置文件删除成功', color: 'positive' });
   } catch {
     $q.notify({ message: '配置文件删除失败', color: 'negative' });
   } finally {

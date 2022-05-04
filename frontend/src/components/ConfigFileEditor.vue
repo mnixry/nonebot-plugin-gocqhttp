@@ -39,10 +39,14 @@ onMounted(() => {
 
 watch(
   () => props.theme,
-  (value) => {
+  (value) =>
     instance.updateOptions({
       theme: value,
-    });
-  }
+    })
+);
+
+watch(
+  () => props.modelValue,
+  (value) => instance.setValue(value)
 );
 </script>

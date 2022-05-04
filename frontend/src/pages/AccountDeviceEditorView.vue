@@ -78,13 +78,20 @@ async function updateConfig() {
   if (!content.value) return;
   try {
     loading.value = true;
-    await api.accountDeviceWriteApiUinDevicePatch(
-      props.uin,
-      JSON.parse(content.value) as DeviceInfo
+    content.value = JSON.stringify(
+      await api
+        .accountDeviceWriteApiUinDevicePatch(
+          props.uin,
+          JSON.parse(content.value) as DeviceInfo
+        )
+        .then((res) => res.data),
+      null,
+      2
     );
+    $q.notify({ message: '设备信息修改成功', color: 'positive' });
   } catch (e) {
     $q.notify({
-      message: `配置文件保存失败: ${(e as Error).message}`,
+      message: `设备信息修改失败: ${(e as Error).message}`,
       color: 'negative',
     });
   } finally {
@@ -96,8 +103,10 @@ async function deleteConfig() {
   try {
     loading.value = true;
     await api.accountConfigDeleteApiUinConfigDelete(props.uin);
+    await loadConfig();
+    $q.notify({ message: '设备信息删除成功', color: 'positive' });
   } catch {
-    $q.notify({ message: '配置文件删除失败', color: 'negative' });
+    $q.notify({ message: '设备信息删除失败', color: 'negative' });
   } finally {
     loading.value = false;
   }
