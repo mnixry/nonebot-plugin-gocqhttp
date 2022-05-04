@@ -131,7 +131,7 @@ def account_config_write(
 
 @router.delete("/{uin}/config", status_code=204)
 def account_config_delete(process: GoCQProcess = RunningProcess()):
-    process.config.delete()
+    process.config.generate()
 
 
 @router.get("/{uin}/device", response_model=DeviceInfo)
@@ -147,7 +147,7 @@ def account_device_write(data: DeviceInfo, process: GoCQProcess = RunningProcess
 
 @router.delete("/{uin}/device", status_code=204)
 def account_device_delete(process: GoCQProcess = RunningProcess()):
-    process.device.delete()
+    process.device.generate()
 
 
 @router.post("/{uin}/api")

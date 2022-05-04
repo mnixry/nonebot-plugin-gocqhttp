@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 
 import chevron
-import yaml
 from nonebot_plugin_gocqhttp.exceptions import BadConfigFormat
 
 from ..plugin_config import AccountConfig, driver_config, onebot_config
@@ -32,15 +31,7 @@ class AccountConfigHelper:
         return self.template_path.read_text(encoding="utf-8")
 
     def write(self, content: str) -> int:
-        try:
-            yaml.safe_load(content)
-        except yaml.YAMLError as e:
-            raise BadConfigFormat(BadConfigFormat.message + str(e)) from e
-
         return self.template_path.write_text(content, encoding="utf-8")
-
-    def delete(self):
-        self.template_path.rmdir()
 
     def generate(self):
         return self.template_path.write_text(
@@ -76,16 +67,16 @@ class AccountDeviceHelper:
 
     def read(self) -> DeviceInfo:
         with self.device_path.open("rt", encoding="utf-8") as f:
-            content = json.load(f)
+            try:
+                content = json.load(f)
+            except json.JSONDecodeError as e:
+                raise BadConfigFormat(BadConfigFormat.message + str(e)) from None
         return DeviceInfo.parse_obj(content)
 
     def write(self, content: DeviceInfo) -> int:
         return self.device_path.write_text(
             content.json(indent=4, ensure_ascii=False), encoding="utf-8"
         )
-
-    def delete(self):
-        self.device_path.rmdir()
 
     def generate(self):
         generated_device = random_device(self.account.uin, self.account.protocol)
