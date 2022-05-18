@@ -1,5 +1,7 @@
+import asyncio
 import hashlib
 import shutil
+import time
 from base64 import b64decode
 from contextlib import AsyncExitStack
 from pathlib import Path
@@ -28,10 +30,9 @@ def unarchive_file(path: Path):
     assert BINARY_PATH.exists(), "go-cqhttp binary not found"
 
 
-def construct_download_url() -> str:
+def construct_download_url(domain: str) -> str:
     return config.DOWNLOAD_URL or (
-        f"https://{config.DOWNLOAD_DOMAIN}/"
-        + f"{config.DOWNLOAD_REPO}/releases/"
+        f"https://{domain}/{config.DOWNLOAD_REPO}/releases/"
         + (
             f"download/{config.DOWNLOAD_VERSION}/"
             if config.DOWNLOAD_VERSION
@@ -39,6 +40,57 @@ def construct_download_url() -> str:
         )
         + f"go-cqhttp_{GOOS}_{GOARCH}{ARCHIVE_EXT}"
     )
+
+
+async def get_fastest_mirror(client: AsyncClient):
+    if config.DOWNLOAD_URL:
+        logger.debug("Download URL has been overridden, skip speed checking.")
+        return config.DOWNLOAD_URL
+
+    assert config.DOWNLOAD_DOMAINS, "No download domain specified."
+
+    async def head_mirror(client: AsyncClient, domain: str):
+        begin_time = time.time()
+
+        response = await client.head(url := construct_download_url(domain), timeout=6)
+        response.raise_for_status()
+
+        elapsed_time = (time.time() - begin_time) * 1000
+        content_length = int(response.headers["content-length"])
+        content_md5 = b64decode(response.headers["content-md5"]).hex().casefold()
+
+        return url, elapsed_time, content_length, content_md5
+
+    results = zip(
+        config.DOWNLOAD_DOMAINS,
+        await asyncio.gather(
+            *(head_mirror(client, domain) for domain in config.DOWNLOAD_DOMAINS),
+            return_exceptions=True,
+        ),
+    )
+
+    lowest_latency, fastest_url = None, None
+
+    for domain, result in results:
+        if isinstance(result, BaseException):
+            logger.opt(colors=True).debug(
+                f"<r>Failed to check</r> speed of {domain!r}: {result!r}"
+            )
+            continue
+
+        url, elapsed_time, content_length, content_md5 = result
+        logger.debug(
+            f"Checked latency of {url} in {elapsed_time:.2f}ms, "
+            f"content length: {content_length}, content md5: {content_md5}"
+        )
+
+        if lowest_latency is None or elapsed_time < lowest_latency:
+            fastest_url = url
+            lowest_latency = elapsed_time
+
+    assert lowest_latency and fastest_url, "No download domain available."
+
+    return fastest_url
 
 
 @logger.catch(reraise=True)
@@ -52,7 +104,8 @@ async def download_gocq():
             AsyncClient(follow_redirects=True)  # type:ignore
         )  # NOTE: see https://github.com/encode/httpx/pull/2096
 
-        url = construct_download_url()
+        url = await get_fastest_mirror(client)
+
         logger.info(f"Begin to Download binary from <u>{url}</u>")
         response = await stack.enter_async_context(client.stream("GET", url))
         response.raise_for_status()
@@ -80,9 +133,7 @@ async def download_gocq():
             )
         elif (actual_md5 := hasher.hexdigest().casefold()) != content_md5:
             raise RuntimeError(
-                f"Content MD5 validation failed! "
-                f"Expected: {content_md5} "
-                f"Actual: {actual_md5}"
+                f"Downloaded file md5 mismatch: {actual_md5=} {content_md5=}"
             )
 
         logger.debug(f"Unarchive binary file to <e>{BINARY_PATH}</e>")

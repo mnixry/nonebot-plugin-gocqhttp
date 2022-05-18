@@ -26,7 +26,15 @@ class AccountConfig(BaseModel):
 class PluginConfig(BaseModel):
     ACCOUNTS: List[AccountConfig] = Field(default_factory=list, alias="gocq_accounts")
 
-    DOWNLOAD_DOMAIN: str = Field("download.fastgit.org", alias="gocq_download_domain")
+    DOWNLOAD_DOMAINS: List[str] = Field(
+        [
+            "download.fastgit.org",  # Download mirror provided by FastGit
+            "ghdown.obfs.dev",  # Download mirror over Cloudflare worker
+            "github.com",  # Official GitHub download
+        ],
+        alias="gocq_download_domains",
+    )
+
     DOWNLOAD_REPO: str = Field("Mrs4s/go-cqhttp", alias="gocq_repo")
     DOWNLOAD_VERSION: Optional[str] = Field(None, alias="gocq_version")
     DOWNLOAD_URL: Optional[HttpUrl] = Field(None, alias="gocq_url")
