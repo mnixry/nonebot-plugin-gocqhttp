@@ -89,7 +89,17 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 `GOCQ_URL`: 下载 URL, 默认为空, 设置该项目后以下几个与下载有关的配置项目将失效
 
-`GOCQ_DOWNLOAD_DOMAIN`: 下载域名, 默认为[`download.fastgit.org`](https://download.fastgit.org/)
+`GOCQ_DOWNLOAD_DOMAINS`: 下载域名列表, 会从中选取延迟最低的进行下载
+
+- 默认值
+
+  ```python
+  [
+    "download.fastgit.org",  # Download mirror provided by FastGit
+    "ghdown.obfs.dev",  # Download mirror over Cloudflare worker
+    "github.com",  # Official GitHub download
+  ]
+  ```
 
 `GOCQ_REPO`: 要下载的仓库, 默认为[`Mrs4s/gocqhttp`](https://github.com/Mrs4s/go-cqhttp/)
 
