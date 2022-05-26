@@ -19,7 +19,7 @@
     "vue-router": "^4.0.15"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.17.0",
+    "@babel/eslint-parser": "^7.18.2",
     "@fontsource/dseg14": "^4.5.3",
     "@fontsource/roboto-mono": "^4.5.7",
     "@quasar/app": "^3.3.3",
