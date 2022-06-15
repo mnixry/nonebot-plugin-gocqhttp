@@ -190,9 +190,8 @@
 <script setup lang="ts">
 import { api } from 'src/boot/axios';
 import type { SystemStatus } from 'src/api';
-import { ref } from '@vue/reactivity';
 import { useQuasar } from 'quasar';
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { onBeforeUnmount, onMounted, watch, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import type { VueApexChartsComponent } from 'vue3-apexcharts';
 import LogsConsole from 'src/components/LogsConsole.vue';
