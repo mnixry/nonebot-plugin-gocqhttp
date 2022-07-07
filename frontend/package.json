@@ -16,14 +16,14 @@
     "core-js": "^3.23.3",
     "quasar": "^2.7.3",
     "vue": "^3.2.37",
-    "vue-router": "^4.0.16"
+    "vue-router": "^4.1.1"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.18.2",
     "@fontsource/dseg14": "^4.5.3",
     "@fontsource/roboto-mono": "^4.5.7",
     "@quasar/app": "^3.3.3",
-    "@types/node": "^18.0.0",
+    "@types/node": "^18.0.3",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
     "ansi_up": "^5.1.0",
