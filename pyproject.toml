@@ -19,7 +19,7 @@ httpx = ">=0.20.0"
 chevron = "^0.14.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.3"
+black = "^22.6"
 flake8 = "^4.0.1"
 
 [build-system]
