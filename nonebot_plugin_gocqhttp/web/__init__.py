@@ -9,11 +9,13 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
 from ..exceptions import PluginGoCQException
-from ..log import logger
 from ..plugin_config import config as plugin_config
 from .api import router as api_router
 
 DIST_PATH = Path(__file__).parent / "dist"
+
+if not DIST_PATH.is_dir():
+    raise FileNotFoundError("WebUI dist directory not found")
 
 
 async def security_dependency(
@@ -53,7 +55,5 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(api_router, prefix="/api")
 
-if DIST_PATH.is_dir():
-    app.mount("/", StaticFiles(directory=DIST_PATH, html=True), name="frontend")
-else:
-    logger.warning("WebUI dist directory not found, WebUI will not be available.")
+
+app.mount("/", StaticFiles(directory=DIST_PATH, html=True), name="frontend")

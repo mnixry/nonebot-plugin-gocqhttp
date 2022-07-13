@@ -32,9 +32,7 @@ async def startup():
     loop = asyncio.get_running_loop()
 
     def log_sink(message: str):
-        asyncio.run_coroutine_threadsafe(
-            LOG_STORAGE.add(message.rstrip("\n")), loop=loop
-        )
+        loop.create_task(LOG_STORAGE.add(message.rstrip("\n")))
 
     logger.add(log_sink, colorize=True, filter=default_filter, format=default_format)
 
@@ -52,11 +50,10 @@ async def startup():
         return_exceptions=True,
     )
 
-    if web.DIST_PATH.is_dir():
-        logger.info(
-            "Startup complete, Web UI has served to "
-            f"<u><e>http://127.0.0.1:{driver.config.port}/go-cqhttp/</e></u>"
-        )
+    logger.info(
+        "Startup complete, Web UI has served to "
+        f"<u><e>http://{driver.config.host}:{driver.config.port}/go-cqhttp/</e></u>"
+    )
 
     return
 
