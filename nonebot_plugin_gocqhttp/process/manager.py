@@ -3,7 +3,6 @@ import pickletools
 import zlib
 from pathlib import Path
 from typing import Dict, List, Optional
-import shutil
 
 import psutil
 from anyio import open_file
@@ -34,17 +33,13 @@ class ProcessesManager:
         cls._processes[uin] = process
 
     @classmethod
-    def create(cls, account: AccountConfig, *, predefined: bool = False):
+    def create_instance(cls, account: AccountConfig, *, predefined: bool = False):
         return GoCQProcess(account, predefined, **plugin_config.PROCESS_KWARGS)
 
     @classmethod
-    async def remove(cls, uin: int, *, with_file: bool = False):
+    def remove(cls, uin: int):
         process = cls._processes.pop(uin)
         process.logs.listeners.clear()
-        await process.stop()
-        if with_file:
-            await run_sync(shutil.rmtree)(process.cwd)
-        await cls.save()
         return
 
     @classmethod
@@ -74,7 +69,7 @@ class ProcessesManager:
     @classmethod
     def load_config(cls, *, ignore_loaded: bool = False) -> List[GoCQProcess]:
         return [
-            cls.create(account, predefined=True)
+            cls.create_instance(account, predefined=True)
             for account in plugin_config.ACCOUNTS
             if not ignore_loaded or account.uin not in cls._processes
         ]
@@ -95,7 +90,7 @@ class ProcessesManager:
                 f"Failed to load saved accounts from {save_path!r}"
             ) from e
         return [
-            cls.create(account)
+            cls.create_instance(account)
             for account in store.accounts
             if not ignore_loaded or account.uin not in cls._processes
         ]

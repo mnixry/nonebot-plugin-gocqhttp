@@ -1,18 +1,19 @@
 import os
+import shutil
 from typing import Any, Dict, List, Optional, cast
 
 import psutil
 from fastapi import APIRouter, Depends
 from nonebot import get_bots
 from nonebot.adapters.onebot.v11 import ActionFailed, Bot
-from nonebot.utils import escape_tag
-from nonebot_plugin_gocqhttp.process.device.models import DeviceInfo
+from nonebot.utils import escape_tag, run_sync
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from ..exceptions import BotNotFound, ProcessNotFound, RemovePredefinedAccount
 from ..log import LOG_STORAGE, logger
 from ..plugin_config import AccountConfig
 from ..process import GoCQProcess, ProcessesManager, ProcessInfo, ProcessLog
+from ..process.device.models import DeviceInfo
 from . import models
 
 router = APIRouter(tags=["api"])
@@ -99,7 +100,7 @@ async def system_logs_realtime(websocket: WebSocket):
     status_code=201,
 )
 async def create_account(uin: int, account: Optional[models.AccountCreation] = None):
-    process = ProcessesManager.create(
+    process = ProcessesManager.create_instance(
         account=AccountConfig(uin=uin, **account.dict() if account else {})
     )
     await ProcessesManager.save()
@@ -112,8 +113,13 @@ async def delete_account(
 ):
     if process.predefined:
         raise RemovePredefinedAccount
-    await ProcessesManager.remove(process.account.uin, with_file=with_file)
-    return
+
+    await process.stop()
+    if with_file:
+        await run_sync(shutil.rmtree)(process.cwd)
+    ProcessesManager.remove(process.account.uin)
+
+    await ProcessesManager.save()
 
 
 @router.get("/{uin}/config", response_model=models.AccountConfigFile)
