@@ -1,7 +1,7 @@
 <template>
   <q-page class="row q-pa-md justify-center">
     <div class="row col-12 col-md-4">
-      <q-card class="col-12 shadow">
+      <q-card class="col-12 column justify-between">
         <q-card-section class="row items-center justify-start q-gutter-md">
           <q-avatar>
             <q-img :src="`https://q1.qlogo.cn/g?b=qq&nk=${uin}&s=640`" />
@@ -12,7 +12,6 @@
             <q-icon name="person" />帐号: {{ uin }}
           </q-chip>
         </q-card-section>
-        <q-separator />
 
         <q-slide-transition>
           <q-card-section v-if="status" class="row justify-center items-center">
@@ -46,11 +45,27 @@
                 </q-popup-proxy>
               </q-btn>
             </q-slide-transition>
+
+            <q-card-actions>
+              <q-btn
+                flat
+                color="red"
+                icon="stop"
+                @click="stopProcess"
+                label="停止"
+              />
+              <q-btn
+                flat
+                color="green"
+                icon="play_arrow"
+                @click="startProcess"
+                label="启动"
+              />
+            </q-card-actions>
           </q-card-section>
         </q-slide-transition>
 
-        <q-separator />
-        <q-card-actions class="justify-center">
+        <q-card-actions class="row justify-center q-gutter-sm">
           <q-btn
             flat
             color="primary"
@@ -58,22 +73,6 @@
             @click="updateStatus"
             label="刷新"
           />
-          <q-btn
-            flat
-            color="red"
-            :icon="status?.status === 'running' ? 'stop' : 'dangerous'"
-            @click="stopProcess"
-            :label="status?.status === 'running' ? '停止' : '强行停止'"
-          />
-          <q-btn
-            flat
-            color="green"
-            icon="play_arrow"
-            v-if="status?.status === 'stopped'"
-            @click="startProcess"
-            label="启动"
-          />
-          <q-separator vertical spaced />
           <q-btn
             push
             flat
