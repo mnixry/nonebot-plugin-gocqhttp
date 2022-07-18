@@ -21,6 +21,11 @@ class AccountConfigFile(BaseModel):
     content: str
 
 
+class StdinInputContent(BaseModel):
+    input: str
+    linesep: bool = True
+
+
 class SystemMemoryDetail(BaseModel):
     total: int
     available: int

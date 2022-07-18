@@ -180,7 +180,6 @@ async def process_start(process: GoCQProcess = RunningProcess()):
 @router.delete("/{uin}/process", status_code=204)
 async def process_stop(process: GoCQProcess = RunningProcess()):
     await process.stop()
-    return
 
 
 @router.get("/{uin}/process/status", response_model=ProcessInfo)
@@ -194,6 +193,16 @@ async def process_logs_history(
     process: GoCQProcess = RunningProcess(),
 ):
     return process.logs.list(reverse=reverse)
+
+
+@router.post("/{uin}/process/logs", status_code=204)
+async def process_input_line(
+    content: models.StdinInputContent,
+    process: GoCQProcess = RunningProcess(),
+):
+    assert process.process and process.process.stdin
+    input_ = (content.input + os.linesep) if content.linesep else content.input
+    process.process.stdin.write(input_)
 
 
 @router.websocket("/{uin}/process/logs")
