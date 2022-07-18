@@ -55,15 +55,10 @@ async def startup():
         f"<u><e>http://{driver.config.host}:{driver.config.port}/go-cqhttp/</e></u>"
     )
 
-    return
-
 
 @driver.on_shutdown
 async def shutdown():
-    await ProcessesManager.save()
-
     await asyncio.gather(
         *map(lambda process: process.stop(), ProcessesManager.all()),
         return_exceptions=True,
     )
-    return
