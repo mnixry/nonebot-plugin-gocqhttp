@@ -106,7 +106,33 @@
       @reconnect="processLog"
       :logs="logs"
       :connected="!!logConnection"
-    />
+    >
+      <template v-slot:top-trailing>
+        <q-checkbox
+          v-model="enableInput"
+          checked-icon="menu_open"
+          unchecked-icon="menu"
+          color="secondary"
+        />
+      </template>
+      <template v-slot:top>
+        <q-slide-transition>
+          <q-card-section v-show="enableInput">
+            <q-input v-model="stdinInput" filled dense label="传入文字到进程">
+              <template v-slot:after>
+                <q-btn
+                  icon="input"
+                  flat
+                  color="accent"
+                  round
+                  @click="sendStdin"
+                />
+              </template>
+            </q-input>
+          </q-card-section>
+        </q-slide-transition>
+      </template>
+    </logs-console>
   </q-page>
 </template>
 <script setup lang="ts">
@@ -125,7 +151,9 @@ const $q = useQuasar();
 const props = defineProps<{ uin: number }>(),
   status = ref<ProcessInfo>(),
   logs = ref<ProcessLog[]>([]),
-  logConnection = ref<WebSocket>();
+  logConnection = ref<WebSocket>(),
+  enableInput = ref(false),
+  stdinInput = ref('');
 
 async function updateStatus() {
   logConnection.value?.send('heartbeat');
@@ -157,6 +185,19 @@ async function startProcess() {
     $q.loading.show();
     await api.processStartApiUinProcessPut(props.uin);
     await updateStatus();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    $q.loading.hide();
+  }
+}
+
+async function sendStdin() {
+  try {
+    $q.loading.show();
+    await api.processInputLineApiUinProcessLogsPost(props.uin, {
+      input: stdinInput.value,
+    });
   } catch (err) {
     console.error(err);
   } finally {

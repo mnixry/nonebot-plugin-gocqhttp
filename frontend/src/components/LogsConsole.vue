@@ -19,7 +19,9 @@
         icon="move_down"
         label="跳转底部"
       />
+      <slot name="top-trailing" />
     </q-card-section>
+    <slot name="top" />
     <q-scroll-area
       ref="scroll"
       class="page-logs"
