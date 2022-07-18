@@ -3,9 +3,9 @@ import mimetypes
 import re
 import subprocess
 import threading
+import time
 from base64 import b64encode
 from itertools import count
-from time import sleep
 from typing import Any, Awaitable, Callable, Optional, TypeVar
 
 import psutil
@@ -45,8 +45,8 @@ class LogStorage(BaseLogStorage[ProcessLog]):
 
 class GoCQProcess:
     process: Optional[subprocess.Popen] = None
-    daemon_thread: Optional[threading.Thread] = None
-    daemon_thread_running = False
+    worker_thread: Optional[threading.Thread] = None
+    worker_thread_running = False
 
     def __init__(
         self,
@@ -96,15 +96,25 @@ class GoCQProcess:
     def __repr__(self):
         return f"<{type(self).__name__} {self.account} process={self.process}>"
 
-    def _daemon_thread_runner(self):
+    @staticmethod
+    def _terminate_process(process: subprocess.Popen, *, timeout: float):
+        process.terminate()
+        try:
+            return process.wait(timeout)
+        except subprocess.TimeoutExpired:
+            process.kill()
+
+    def _process_executor(self) -> int:
         self.process = subprocess.Popen(
             [BINARY_PATH.absolute(), "-faststart"],
             cwd=self.cwd.absolute(),
             encoding="utf-8",
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        assert self.process.stdout is not None
+        assert self.process.stdout and self.process.stdin
+
         for output in iter(self.process.stdout.readline, ""):
             output = output.strip()
             if STARTUP_FINISH_PROMPT in output:
@@ -121,15 +131,35 @@ class GoCQProcess:
             )
             asyncio.run_coroutine_threadsafe(self.logs.add(log_model), loop=self.loop)
 
-        if self.process.returncode is None:
-            self.process.terminate()
-            self.process.wait(timeout=self.kill_timeout)
+        if self.process.poll() is None:
+            self._terminate_process(self.process, timeout=self.post_delay)
 
         return self.process.returncode
 
-    @run_sync
-    def start(self):
-        if self.daemon_thread_running:
+    def _process_worker(self):
+        for restarted in count():
+            if not self.worker_thread_running:
+                break
+            if self.max_restarts >= 0 and restarted >= self.max_restarts:
+                break
+
+            code = None
+            try:
+                code = self._process_executor()
+            except Exception:
+                logger.exception(
+                    f"Thread {self.worker_thread!r} raised unknown exception:"
+                )
+            logger.warning(
+                f"<b>Process for <e>{self.account.uin}</e> exited</b> "
+                f"with code <r>{code}</r>, retrying to restart... "
+                f"<y>({restarted}/{self.max_restarts})</y>"
+            )
+            self.restart_count += 1
+            time.sleep(self.restart_interval)
+
+    async def start(self):
+        if self.worker_thread_running:
             raise ProcessAlreadyStarted
 
         if not self.config.exists:
@@ -140,44 +170,21 @@ class GoCQProcess:
             self.device.generate()
         self.device.before_run()
 
-        def runner():
-            for restarted in count():
-                if not self.daemon_thread_running:
-                    break
-                if self.max_restarts >= 0 and restarted >= self.max_restarts:
-                    break
-                code = 0
-                try:
-                    code = self._daemon_thread_runner()
-                except Exception:
-                    logger.exception(
-                        f"Thread {self.daemon_thread!r} raised unknown exception:"
-                    )
-                logger.warning(
-                    f"<b>Process for <e>{self.account.uin}</e> exited</b> with code "
-                    f"<r>{code}</r>, retrying to restart... "
-                    f"<y>({restarted}/{self.max_restarts})</y>"
-                )
-                self.restart_count += 1
-                sleep(self.restart_interval)
-            return
+        self.worker_thread_running = True
+        self.worker_thread = threading.Thread(target=self._process_worker, daemon=True)
+        self.worker_thread.name = f"daemon-thread-{self.account.uin}"
+        self.worker_thread.start()
 
-        self.daemon_thread_running = True
-        self.daemon_thread = threading.Thread(target=runner, daemon=True)
-        self.daemon_thread.name = f"daemon-thread-{self.account.uin}"
-        self.daemon_thread.start()
-
-        sleep(self.post_delay)
-        return
+        await asyncio.sleep(self.post_delay)
 
     @run_sync
     def stop(self):
-        self.daemon_thread_running = False
+        self.worker_thread_running = False
         if self.process is not None:
-            self.process.terminate()
-        if self.daemon_thread and self.daemon_thread.is_alive():
-            self.daemon_thread.join(self.stop_timeout)
-        return
+            self._terminate_process(self.process, timeout=self.post_delay)
+        if self.worker_thread and self.worker_thread.is_alive():
+            self.worker_thread.join(self.stop_timeout)
+            self.worker_thread = None
 
     @run_sync
     def status(self) -> ProcessInfo:
@@ -192,31 +199,30 @@ class GoCQProcess:
         else:
             qr_uri = None
 
-        if self.process.returncode is None:
-            process = psutil.Process(self.process.pid)
-            with process.oneshot():
-                cpu = process.cpu_percent()
-                status = process.status()
-                memory = process.memory_info()
-                create_time = process.create_time()
-            return ProcessInfo(
-                status=ProcessStatus.running,
-                total_logs=self.logs.count,
-                restarts=self.restart_count,
-                qr_uri=qr_uri,
-                details=RunningProcessDetail(
-                    pid=self.process.pid,
-                    status=status,
-                    memory_used=memory.rss,
-                    cpu_percent=cpu,
-                    start_time=create_time,
-                ),
-            )
-        else:
+        if self.process.returncode is not None:
             return ProcessInfo(
                 status=ProcessStatus.stopped,
                 total_logs=self.logs.count,
                 restarts=self.restart_count,
                 details=StoppedProcessDetail(code=self.process.returncode),
             )
-        return
+
+        with (ps := psutil.Process(self.process.pid)).oneshot():
+            cpu = ps.cpu_percent()
+            status = ps.status()
+            memory = ps.memory_info()
+            create_time = ps.create_time()
+
+        return ProcessInfo(
+            status=ProcessStatus.running,
+            total_logs=self.logs.count,
+            restarts=self.restart_count,
+            qr_uri=qr_uri,
+            details=RunningProcessDetail(
+                pid=self.process.pid,
+                status=status,
+                memory_used=memory.rss,
+                cpu_percent=cpu,
+                start_time=create_time,
+            ),
+        )
