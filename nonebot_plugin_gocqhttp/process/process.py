@@ -59,6 +59,7 @@ class GoCQProcess:
         restart_interval: float = 3,
         print_process_log: bool = True,
         log_rotation: float = 5 * 60,
+        post_delay: float = 3,
     ):
         from .manager import ProcessesManager
 
@@ -79,6 +80,7 @@ class GoCQProcess:
 
         self.stop_timeout, self.kill_timeout = stop_timeout, kill_timeout
         self.max_restarts, self.restart_interval = max_restarts, restart_interval
+        self.post_delay = post_delay
 
         self.logs, self.restart_count = LogStorage(log_rotation), 0
 
@@ -165,7 +167,7 @@ class GoCQProcess:
         self.daemon_thread.name = f"daemon-thread-{self.account.uin}"
         self.daemon_thread.start()
 
-        sleep(self.restart_interval)
+        sleep(self.post_delay)
         return
 
     @run_sync
