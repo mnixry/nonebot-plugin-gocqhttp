@@ -11,7 +11,7 @@ from typing import Any, Awaitable, Callable, Optional, TypeVar
 import psutil
 from nonebot.utils import escape_tag, run_sync
 
-from ..exceptions import ProcessAlreadyStarted, ProcessNotStarted
+from ..exceptions import ProcessAlreadyStarted
 from ..log import LogStorage as BaseLogStorage
 from ..log import logger
 from ..plugin_config import AccountConfig
@@ -188,9 +188,6 @@ class GoCQProcess:
 
     @run_sync
     def status(self) -> ProcessInfo:
-        if self.process is None:
-            raise ProcessNotStarted
-
         qr_path = self.cwd / "qrcode.png"
         if qr_path.exists():
             mimetype, _ = mimetypes.guess_type(qr_path)
@@ -199,12 +196,16 @@ class GoCQProcess:
         else:
             qr_uri = None
 
-        if self.process.returncode is not None:
+        if not self.process or self.process.returncode is not None:
             return ProcessInfo(
                 status=ProcessStatus.stopped,
                 total_logs=self.logs.count,
                 restarts=self.restart_count,
-                details=StoppedProcessDetail(code=self.process.returncode),
+                details=(
+                    StoppedProcessDetail(code=self.process.returncode)
+                    if self.process
+                    else None
+                ),
             )
 
         with (ps := psutil.Process(self.process.pid)).oneshot():

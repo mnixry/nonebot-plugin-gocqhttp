@@ -51,4 +51,4 @@ class ProcessInfo(BaseModel):
     total_logs: int
     restarts: int
     qr_uri: Optional[str] = None
-    details: Union[RunningProcessDetail, StoppedProcessDetail]
+    details: Optional[Union[RunningProcessDetail, StoppedProcessDetail]]

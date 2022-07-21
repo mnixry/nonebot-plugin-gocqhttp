@@ -15,11 +15,6 @@ class PluginGoCQException(Exception):
         super().__init__(self.message, *args)
 
 
-class ProcessNotStarted(PluginGoCQException):
-    message = "Process not started yet"
-    code = 409
-
-
 class ProcessAlreadyStarted(PluginGoCQException):
     message = "Process already started"
     code = 409

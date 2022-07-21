@@ -49,7 +49,9 @@ async def _(bot: Bot, event: MessageEvent):
                 ),
             )
             if isinstance(status.details, RunningProcessDetail)
-            else STOPPED_MESSAGE_TEMPLATE.format(code=status.details.code)
+            else STOPPED_MESSAGE_TEMPLATE.format(
+                code=status.details.code if status.details else None
+            )
         )
 
     await bot.send(event, messages)
