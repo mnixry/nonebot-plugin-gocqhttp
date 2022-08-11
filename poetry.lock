@@ -217,7 +217,7 @@ python-versions = "*"
 
 [[package]]
 name = "nonebot-adapter-onebot"
-version = "2.1.1"
+version = "2.1.2"
 description = "OneBot(CQHTTP) adapter for nonebot2"
 category = "main"
 optional = false
@@ -709,8 +709,8 @@ mypy-extensions = [
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 nonebot-adapter-onebot = [
-    {file = "nonebot-adapter-onebot-2.1.1.tar.gz", hash = "sha256:d00036883dd8b8685f0eea68b7ada9c3b1ba9de8b39f5c33e81d36a444afe02a"},
-    {file = "nonebot_adapter_onebot-2.1.1-py3-none-any.whl", hash = "sha256:1a825b21fc7315c11d335276a932811352ac70e7031e86b5595121185c951c77"},
+    {file = "nonebot-adapter-onebot-2.1.2.tar.gz", hash = "sha256:13132ca916c35a1bc5c9b9b0c0effa8bd66b711ba070016115f61b557cc60b2f"},
+    {file = "nonebot_adapter_onebot-2.1.2-py3-none-any.whl", hash = "sha256:9669d3c8ac1b18fe172641c9cfe7e49840a125cad0c59125bb808dc4617d2b84"},
 ]
 nonebot2 = [
     {file = "nonebot2-2.0.0b5-py3-none-any.whl", hash = "sha256:5cfbfcd62ffcf55f884f9fb750a71cd92c97e347c99e891ef617da4d445a1f22"},
