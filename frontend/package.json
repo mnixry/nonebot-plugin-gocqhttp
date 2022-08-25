@@ -24,7 +24,7 @@
     "@fontsource/roboto-mono": "^4.5.8",
     "@quasar/app": "^3.3.3",
     "@types/node": "^18.7.11",
-    "@typescript-eslint/eslint-plugin": "^5.34.0",
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/parser": "^5.35.1",
     "ansi_up": "^5.1.0",
     "apexcharts": "^3.35.5",
