@@ -23,7 +23,7 @@
     "@fontsource/dseg14": "^4.5.3",
     "@fontsource/roboto-mono": "^4.5.8",
     "@quasar/app": "^3.3.3",
-    "@types/node": "^18.7.14",
+    "@types/node": "^18.7.16",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/parser": "^5.36.2",
     "ansi_up": "^5.1.0",
