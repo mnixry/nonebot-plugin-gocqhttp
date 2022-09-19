@@ -16,10 +16,10 @@
         <q-slide-transition>
           <q-card-section v-if="status" class="row justify-center items-center">
             <running-process-status
-              v-if="'pid' in status.details"
+              v-if="status.status == 'running' && status.details"
               :status="status.details"
             />
-            <div v-else>
+            <div v-else-if="status.details">
               <q-chip>
                 <q-avatar icon="error" color="red" text-color="white" />
                 <strong>退出代码:</strong><code>{{ status.details.code }}</code>
