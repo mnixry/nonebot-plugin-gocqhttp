@@ -47,6 +47,8 @@ class PluginConfig(BaseModel):
     WEBUI_USERNAME: Optional[str] = Field(None, alias="gocq_webui_username")
     WEBUI_PASSWORD: Optional[str] = Field(None, alias="gocq_webui_password")
 
+    TUNNEL_PORT: Optional[int] = Field(None, alias="gocq_tunnel_port")
+
 
 driver_config = driver.config
 onebot_config = OnebotConfig.parse_obj(driver_config.dict())

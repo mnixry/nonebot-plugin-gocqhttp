@@ -6,16 +6,17 @@ from nonebot.adapters.onebot.v11 import Adapter
 from nonebot.drivers import ReverseDriver
 from nonebot.log import default_filter, default_format
 
-from . import plugin, web  # noqa: F401
-from .log import LOG_STORAGE, logger
-from .plugin_config import config
-from .process import (
+from nonebot_plugin_gocqhttp import web  # noqa: F401
+from nonebot_plugin_gocqhttp.log import LOG_STORAGE, logger
+from nonebot_plugin_gocqhttp.plugin_config import config
+from nonebot_plugin_gocqhttp.process import (
     ACCOUNTS_SAVE_PATH,
     BINARY_PATH,
     ProcessesManager,
     download_gocq,
     kill_duplicated_processes,
 )
+from nonebot_plugin_gocqhttp.proxy import ProxyServiceManager
 
 driver = get_driver()
 
@@ -49,6 +50,13 @@ async def startup():
         *map(lambda process: process.start(), ProcessesManager.all()),
         return_exceptions=True,
     )
+
+    if tunnel_port := config.TUNNEL_PORT:
+        try:
+            import proxy  # noqa:F401
+        except ImportError as e:
+            logger.warning(f"Tunnel configured but required dependencies missing: {e}")
+        await ProxyServiceManager.start(tunnel_port)
 
     logger.info(
         "Startup complete, Web UI has served to "
