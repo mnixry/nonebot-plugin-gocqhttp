@@ -18,7 +18,7 @@ class ProxyServiceManager:
     @classmethod
     def _start(cls, port: int):
         cls.process = subprocess.Popen(
-            [sys.executable, "-m", "proxy", f"--port={port}"],
+            [sys.executable, "-m", "proxy", f"--port={port}", "--hostname=0.0.0.0"],
             cwd=os.getcwd(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
