@@ -17,10 +17,14 @@ nonebot-adapter-onebot = "^2.0.0-beta.1"
 py-cpuinfo = "^8.0.0"
 httpx = ">=0.20.0"
 chevron = "^0.14.0"
+"proxy.py" = { version = "^2.4.3", optional = true }
 
 [tool.poetry.dev-dependencies]
 black = "^22.8"
 flake8 = "^5.0.4"
+
+[tool.poetry.extras]
+proxy = ["proxy.py"]
 
 [tool.pyright]
 
