@@ -76,3 +76,5 @@ jobs:
       - uses: suo/flake8-github-action@v1
 
       - uses: jakebailey/pyright-action@v1
+        with:
+          python-version: 3.8
