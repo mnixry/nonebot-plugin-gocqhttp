@@ -25,7 +25,7 @@
     "@quasar/app": "^3.3.3",
     "@types/node": "^18.8.0",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.1",
     "ansi_up": "^5.1.0",
     "apexcharts": "^3.35.5",
     "eslint": "^8.24.0",
