@@ -6,18 +6,21 @@ import threading
 import time
 from base64 import b64encode
 from itertools import count
+from pathlib import Path
 from typing import Any, Awaitable, Callable, Optional, TypeVar
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
-
-from ..exceptions import ProcessAlreadyStarted
-from ..log import LogStorage as BaseLogStorage
-from ..log import logger
-from ..plugin_config import AccountConfig
-from .config import AccountConfigHelper, AccountDeviceHelper
-from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
-from .models import (
+from nonebot_plugin_gocqhttp.exceptions import ProcessAlreadyStarted
+from nonebot_plugin_gocqhttp.log import LogStorage as BaseLogStorage
+from nonebot_plugin_gocqhttp.log import logger
+from nonebot_plugin_gocqhttp.plugin_config import AccountConfig
+from nonebot_plugin_gocqhttp.process.config import (
+    AccountConfigHelper,
+    AccountDeviceHelper,
+)
+from nonebot_plugin_gocqhttp.process.download import ACCOUNTS_DATA_PATH, BINARY_PATH
+from nonebot_plugin_gocqhttp.process.models import (
     ProcessInfo,
     ProcessLog,
     ProcessStatus,
@@ -65,7 +68,7 @@ class GoCQProcess:
 
         ProcessesManager.add(self, account.uin)
 
-        self.cwd = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.cwd = (ACCOUNTS_DATA_PATH / str(account.uin)).absolute()
         self.cwd.mkdir(parents=True, exist_ok=True)
 
         self.config = AccountConfigHelper(account)
@@ -158,9 +161,31 @@ class GoCQProcess:
             self.restart_count += 1
             time.sleep(self.restart_interval)
 
+    async def _find_duplicate_process(self):
+        for process in psutil.process_iter():
+            try:
+                with process.oneshot():
+                    pid = process.pid
+                    cwd = Path(process.cwd()).absolute()
+                    exe = Path(process.exe()).absolute()
+            except psutil.Error:
+                continue
+
+            if (
+                Path(exe).is_file()
+                and BINARY_PATH.samefile(exe)
+                and (self.cwd == cwd or self.cwd in cwd.parents)
+            ):
+                process.terminate()
+                return pid
+        return
+
     async def start(self):
         if self.worker_thread_running:
             raise ProcessAlreadyStarted
+
+        if duplicate_pid := await self._find_duplicate_process():
+            logger.warning(f"Possible {duplicate_pid=} found, terminated.")
 
         if not self.config.exists:
             self.config.generate()

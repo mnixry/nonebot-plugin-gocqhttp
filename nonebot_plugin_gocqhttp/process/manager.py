@@ -4,18 +4,15 @@ import zlib
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import psutil
 from anyio import open_file
 from loguru import logger
-from nonebot.utils import run_sync
+from nonebot_plugin_gocqhttp.exceptions import AccountAlreadyExists
+from nonebot_plugin_gocqhttp.plugin_config import AccountConfig
+from nonebot_plugin_gocqhttp.plugin_config import config as plugin_config
+from nonebot_plugin_gocqhttp.process.download import BINARY_DIR
+from nonebot_plugin_gocqhttp.process.models import ProcessAccountsStore
+from nonebot_plugin_gocqhttp.process.process import GoCQProcess
 from pydantic import parse_obj_as
-
-from ..exceptions import AccountAlreadyExists
-from ..plugin_config import AccountConfig
-from ..plugin_config import config as plugin_config
-from .download import ACCOUNTS_DATA_PATH, BINARY_DIR, BINARY_PATH
-from .models import ProcessAccountsStore
-from .process import GoCQProcess
 
 ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.pkl"
 
@@ -94,27 +91,3 @@ class ProcessesManager:
             for account in store.accounts
             if not ignore_loaded or account.uin not in cls._processes
         ]
-
-
-@run_sync
-def kill_duplicated_processes():
-    killed: List[int] = []
-    for process in psutil.process_iter():
-        try:
-            with process.oneshot():
-                pid = process.pid
-                cwd = process.cwd()
-                exe = process.exe()
-        except psutil.Error:
-            continue
-
-        if (
-            Path(exe).is_file()
-            and BINARY_PATH.samefile(exe)
-            and ACCOUNTS_DATA_PATH.absolute() in Path(cwd).parents
-        ):
-            process.terminate()
-            killed.append(pid)
-            logger.warning(f"Duplicate running process {pid=} detected, killed.")
-
-    return killed

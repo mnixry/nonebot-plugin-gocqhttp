@@ -14,7 +14,6 @@ from nonebot_plugin_gocqhttp.process import (
     BINARY_PATH,
     ProcessesManager,
     download_gocq,
-    kill_duplicated_processes,
 )
 from nonebot_plugin_gocqhttp.proxy import ProxyServiceManager
 
@@ -39,8 +38,6 @@ async def startup():
 
     if config.FORCE_DOWNLOAD or not BINARY_PATH.is_file():
         await download_gocq()
-
-    await kill_duplicated_processes()
 
     ProcessesManager.load_config()
     if ACCOUNTS_SAVE_PATH.is_file():
