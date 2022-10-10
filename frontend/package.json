@@ -30,7 +30,7 @@
     "apexcharts": "^3.35.5",
     "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.4.0",
-    "eslint-plugin-vue": "^9.4.0",
+    "eslint-plugin-vue": "^9.6.0",
     "monaco-editor": "^0.34.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
     "vue3-apexcharts": "^1.4.1"
