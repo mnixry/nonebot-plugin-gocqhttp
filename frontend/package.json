@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.15.4",
-    "axios": "^0.27.2",
+    "axios": "^1.1.2",
     "core-js": "^3.25.3",
-    "quasar": "^2.8.4",
+    "quasar": "^2.9.2",
     "vue": "^3.2.40",
     "vue-router": "^4.1.5"
   },
@@ -25,7 +25,7 @@
     "@quasar/app-webpack": "^3.6.1",
     "@types/node": "^18.8.0",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.38.0",
+    "@typescript-eslint/parser": "^5.40.0",
     "ansi_up": "^5.1.0",
     "apexcharts": "^3.35.5",
     "eslint": "^8.24.0",
