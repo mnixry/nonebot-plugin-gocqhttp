@@ -293,8 +293,8 @@ test = ["enum34", "ipaddress", "mock", "pywin32", "wmi"]
 
 [[package]]
 name = "py-cpuinfo"
-version = "8.0.0"
-description = "Get CPU info with pure Python 2 & 3"
+version = "9.0.0"
+description = "Get CPU info with pure Python"
 category = "main"
 optional = false
 python-versions = "*"
@@ -502,7 +502,7 @@ proxy = ["proxy.py"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "a4eeb1cab40683ea7ea8a118066198fe1e3157877123696f179a99a9ba6a5e97"
+content-hash = "8adf87ef4c356ad3778639271e9173d3ab524f4f5a6fea8f5d936ff0f77f63ed"
 
 [metadata.files]
 anyio = [
@@ -801,7 +801,8 @@ psutil = [
     {file = "psutil-5.9.3.tar.gz", hash = "sha256:7ccfcdfea4fc4b0a02ca2c31de7fcd186beb9cff8207800e14ab66f79c773af6"},
 ]
 py-cpuinfo = [
-    {file = "py-cpuinfo-8.0.0.tar.gz", hash = "sha256:5f269be0e08e33fd959de96b34cd4aeeeacac014dd8305f70eb28d06de2345c5"},
+    {file = "py-cpuinfo-9.0.0.tar.gz", hash = "sha256:3cdbbf3fac90dc6f118bfd64384f309edeadd902d7c8fb17f02ffa1fc3f49690"},
+    {file = "py_cpuinfo-9.0.0-py3-none-any.whl", hash = "sha256:859625bc251f64e21f077d099d4162689c762b5d6a4c3c97553d56241c9674d5"},
 ]
 pycodestyle = [
     {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
