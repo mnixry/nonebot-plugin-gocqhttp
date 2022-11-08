@@ -27,7 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.41.0",
     "ansi_up": "^5.1.0",
-    "apexcharts": "^3.36.0",
+    "apexcharts": "^3.36.3",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-vue": "^9.6.0",
