@@ -11,6 +11,7 @@ from typing import Any, Awaitable, Callable, Optional, TypeVar
 
 import psutil
 from nonebot.utils import escape_tag, run_sync
+
 from nonebot_plugin_gocqhttp.exceptions import ProcessAlreadyStarted
 from nonebot_plugin_gocqhttp.log import LogStorage as BaseLogStorage
 from nonebot_plugin_gocqhttp.log import logger
@@ -111,15 +112,15 @@ class GoCQProcess:
         self.process = subprocess.Popen(
             [BINARY_PATH.absolute(), "-faststart"],
             cwd=self.cwd.absolute(),
-            encoding="utf-8",
+            text=False,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
         assert self.process.stdout and self.process.stdin
 
-        for output in iter(self.process.stdout.readline, ""):
-            output = output.strip()
+        for output in iter(self.process.stdout.readline, b""):
+            output = output.strip().decode("utf-8", "replace")
             if STARTUP_FINISH_PROMPT in output:
                 logger.info(
                     "go-cqhttp for "
@@ -171,10 +172,9 @@ class GoCQProcess:
             except psutil.Error:
                 continue
 
-            if (
-                Path(exe).is_file()
-                and BINARY_PATH.samefile(exe)
-                and (self.cwd == cwd or self.cwd in cwd.parents)
+            if Path(exe).is_file() and (
+                BINARY_PATH.absolute().samefile(exe)
+                or self.cwd.absolute().samefile(cwd)
             ):
                 process.terminate()
                 return pid
