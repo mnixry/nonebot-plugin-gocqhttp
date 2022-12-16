@@ -171,20 +171,18 @@ class GoCQProcess:
                     exe = Path(process.exe()).absolute()
             except psutil.Error:
                 continue
-
-            if Path(exe).is_file() and (
-                BINARY_PATH.absolute().samefile(exe)
-                or self.cwd.absolute().samefile(cwd)
-            ):
+            if not (exe.is_file() and cwd.is_dir()):
+                continue
+            if BINARY_PATH.absolute().samefile(exe) and self.cwd.samefile(cwd):
                 process.terminate()
-                return pid
+                yield pid
         return
 
     async def start(self):
         if self.worker_thread_running:
             raise ProcessAlreadyStarted
 
-        if duplicate_pid := await self._find_duplicate_process():
+        async for duplicate_pid in self._find_duplicate_process():
             logger.warning(f"Possible {duplicate_pid=} found, terminated.")
 
         if not self.config.exists:
