@@ -208,7 +208,7 @@ async def process_input_line(
 ):
     assert process.process and process.process.stdin
     input_ = (content.input + os.linesep) if content.linesep else content.input
-    process.process.stdin.write(input_)
+    await process.write_stdin(input_.encode())
 
 
 @router.websocket("/{uin}/process/logs")

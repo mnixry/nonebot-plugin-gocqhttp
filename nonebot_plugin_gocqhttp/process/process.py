@@ -65,9 +65,6 @@ class GoCQProcess:
         log_rotation: float = 5 * 60,
         post_delay: float = 3,
     ):
-        from .manager import ProcessesManager
-
-        ProcessesManager.add(self, account.uin)
 
         self.cwd = (ACCOUNTS_DATA_PATH / str(account.uin)).absolute()
         self.cwd.mkdir(parents=True, exist_ok=True)
@@ -96,6 +93,10 @@ class GoCQProcess:
 
         if print_process_log:
             self.logs.listeners.add(process_log)
+
+        from .manager import ProcessesManager
+
+        ProcessesManager.add(self, account.uin)
 
     def __repr__(self):
         return f"<{type(self).__name__} {self.account} process={self.process}>"
@@ -250,3 +251,10 @@ class GoCQProcess:
                 start_time=create_time,
             ),
         )
+
+    @run_sync
+    def write_stdin(self, data: bytes):
+        assert self.process and self.process.stdin
+        wrote = self.process.stdin.write(data)
+        self.process.stdin.flush()
+        return wrote
