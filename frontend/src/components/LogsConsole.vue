@@ -71,12 +71,13 @@ const START_LINE_MARK = '当前版本:',
 const converter = new AnsiUp();
 converter.use_classes = true;
 
+const reconnect = defineEmits(['reconnect']);
+
 const props = defineProps<{
     logs: ProcessLog[] | string[];
     connected?: boolean;
     height?: string;
   }>(),
-  reconnect = defineEmits(['reconnect']),
   root = ref<HTMLElement>(),
   scroll = ref<QScrollArea>();
 

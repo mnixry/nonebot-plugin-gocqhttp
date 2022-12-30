@@ -12,13 +12,13 @@
 import { onMounted, ref, watch } from 'vue';
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api.js';
 
-const props = defineProps<{
+const dom = ref<HTMLElement>(),
+  props = defineProps<{
     modelValue: string;
     language: string;
     theme?: string;
   }>(),
-  emit = defineEmits(['update:modelValue']),
-  dom = ref<HTMLElement>();
+  emit = defineEmits(['update:modelValue']);
 
 let instance: editor.IStandaloneCodeEditor;
 
