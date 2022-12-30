@@ -6,7 +6,8 @@ from nonebot.adapters.onebot.v11 import Adapter
 from nonebot.drivers import ReverseDriver
 from nonebot.log import default_filter, default_format
 
-from nonebot_plugin_gocqhttp import web  # noqa: F401
+import nonebot_plugin_gocqhttp.plugin  # noqa: F401
+from nonebot_plugin_gocqhttp import web
 from nonebot_plugin_gocqhttp.log import LOG_STORAGE, logger
 from nonebot_plugin_gocqhttp.plugin_config import config
 from nonebot_plugin_gocqhttp.process import (
