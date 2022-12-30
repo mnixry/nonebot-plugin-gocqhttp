@@ -51,7 +51,7 @@ async def startup():
 
     if tunnel_port := config.TUNNEL_PORT:
         try:
-            import proxy  # noqa:F401
+            import nonebot_plugin_gocqhttp.proxy  # noqa: F401
         except ImportError as e:
             logger.warning(f"Tunnel configured but required dependencies missing: {e}")
         await ProxyServiceManager.start(tunnel_port)
