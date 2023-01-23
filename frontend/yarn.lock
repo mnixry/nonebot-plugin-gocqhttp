@@ -1000,10 +1000,10 @@
   resolved "https://registry.yarnpkg.com/@fontsource/dseg14/-/dseg14-4.5.3.tgz#16b244357eed81413a35cce8a04d6c5a9d44ad75"
   integrity sha512-6/xJ5bCsDE9vZXfqKvskhqCxHWA0MTsw99p0FmMGqCwmrjSbPZXUJa7fAm/LgSKn0dnWDC9uc13RYrPiSy9tVw==
 
-"@fontsource/roboto-mono@^4.5.8":
-  version "4.5.8"
-  resolved "https://registry.yarnpkg.com/@fontsource/roboto-mono/-/roboto-mono-4.5.8.tgz#f3a48195528b10e154c98365671de14e27605bdb"
-  integrity sha512-AW44UkbQD0w1CT5mzDbsvhGZ6/bb0YmZzoELj6Sx8vcVEzcbYGUdt2Dtl5zqlOuYMWQFY1mniwWyVv+Bm/lVxw==
+"@fontsource/roboto-mono@^4.5.10":
+  version "4.5.10"
+  resolved "https://registry.yarnpkg.com/@fontsource/roboto-mono/-/roboto-mono-4.5.10.tgz#197fc2d5fa9c25fd7ad9dcccb2705663f2409850"
+  integrity sha512-KrJdmkqz6DszT2wV/bbhXef4r0hV3B0vw2mAqei8A2kRnvq+gcJLmmIeQ94vu9VEXrUQzos5M9lH1TAAXpRphw==
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
