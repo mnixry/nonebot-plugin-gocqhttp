@@ -21,7 +21,7 @@ fastapi = ">=0.70.0"
 "proxy.py" = { version = "^2.4.3", optional = true }
 
 [tool.poetry.dev-dependencies]
-black = "^22.12"
+black = "^23.1"
 flake8 = "^5.0.4"
 
 [tool.poetry.extras]
