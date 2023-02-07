@@ -8,8 +8,10 @@ from ..process import RunningProcessDetail
 
 class AccountListItem(BaseModel):
     uin: int
-    predefined: bool = False
-    process_created: bool = False
+    predefined: bool
+    process_created: bool
+    process_running: bool
+    process_connected: bool
 
 
 class AccountCreation(BaseModel):

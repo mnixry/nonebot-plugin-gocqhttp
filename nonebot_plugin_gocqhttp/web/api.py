@@ -35,7 +35,14 @@ async def all_accounts():
         models.AccountListItem(
             uin=process.account.uin,
             predefined=process.predefined,
-            process_created=not not process.process,
+            process_created=process.process is not None,
+            process_running=(
+                process.process is not None and process.process.returncode is None
+            ),
+            process_connected=any(
+                isinstance(bot, Bot) and bot.self_id.endswith(f"{process.account.uin}")
+                for bot in get_bots().values()
+            ),
         )
         for process in ProcessesManager.all()
     ]
