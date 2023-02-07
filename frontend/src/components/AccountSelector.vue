@@ -36,8 +36,16 @@
             来自配置文件
           </span>
           <span v-else class="text-green"> 手动添加 </span>
-          <span v-if="!account.process_created" class="text-accent">
-            未启动
+          <span class="text-accent">
+            {{
+              !account.process_created
+                ? account.process_running
+                  ? account.process_connected
+                    ? '已连接主进程'
+                    : '已启动未连接'
+                  : '进程未启动'
+                : '进程未创建'
+            }}
           </span>
         </q-item-label>
       </q-item-section>
