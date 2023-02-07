@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import chevron
+
 from nonebot_plugin_gocqhttp.exceptions import BadConfigFormat
 
 from ..plugin_config import AccountConfig, driver_config, onebot_config
@@ -40,11 +41,16 @@ class AccountConfigHelper:
 
     def before_run(self):
         template_string = self.read()
+        host = (
+            "127.0.0.1"
+            if driver_config.host.is_loopback or driver_config.host.is_unspecified
+            else driver_config.host
+        )
         rendered_string = chevron.render(
             template_string,
             data={
                 "account": self.account,
-                "server_address": f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws",
+                "server_address": f"ws://{host}:{driver_config.port}/onebot/v11/ws",
                 "access_token": onebot_config.onebot_access_token or "",
             },
         )
