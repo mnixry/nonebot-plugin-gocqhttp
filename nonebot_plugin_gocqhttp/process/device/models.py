@@ -26,7 +26,7 @@ class ShortDeviceInfo(BaseModel):
     mac_address: str
     ip_address: List[int] = Field(max_items=4, min_items=4)
     imei: str
-    incremental: str
+    incremental: str = ""
 
     protocol: AccountProtocol
 
