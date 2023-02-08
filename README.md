@@ -103,6 +103,8 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 `GOCQ_WEBUI_USERNAME`/`GOCQ_WEBUI_PASSWORD`: WebUI 的登录凭证, 不设置即不进行验证
 
+`GOCQ_CONFIG_TEMPLATE_PATH`: 自定义默认模板配置文件路径
+
 `GOCQ_TUNNEL_PORT`: 可以用此项配置指定端口创建一个 HTTP 代理服务器, 以便于使用服务器的网络环境进行连接, 在使用二维码登录的时候可能有用. 默认为空, 即不创建
 
 - 此功能为可选功能
