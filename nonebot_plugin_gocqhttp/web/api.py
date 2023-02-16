@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 from typing import Any, Dict, List, Optional, cast
@@ -31,6 +32,17 @@ def RunningProcess():
 
 @router.get("/accounts", response_model=List[models.AccountListItem])
 async def all_accounts():
+    nickname_map: Dict[int, str] = {}
+
+    async def get_nickname(bot: Bot):
+        login_info = await bot.get_login_info()
+        nickname_map[login_info["user_id"]] = login_info["nickname"]
+
+    await asyncio.gather(
+        *[get_nickname(bot) for bot in get_bots().values() if isinstance(bot, Bot)],
+        return_exceptions=True,
+    )
+
     return [
         models.AccountListItem(
             uin=process.account.uin,
@@ -43,6 +55,7 @@ async def all_accounts():
                 isinstance(bot, Bot) and bot.self_id.endswith(f"{process.account.uin}")
                 for bot in get_bots().values()
             ),
+            nickname=nickname_map.get(process.account.uin),
         )
         for process in ProcessesManager.all()
     ]

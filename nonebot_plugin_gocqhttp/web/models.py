@@ -12,6 +12,7 @@ class AccountListItem(BaseModel):
     process_created: bool
     process_running: bool
     process_connected: bool
+    nickname: Optional[str] = None
 
 
 class AccountCreation(BaseModel):
