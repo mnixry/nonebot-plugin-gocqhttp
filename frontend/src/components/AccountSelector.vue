@@ -26,10 +26,11 @@
         </q-avatar>
       </q-item-section>
       <q-item-section>
+        <q-item-label outline v-if="account.nickname">
+          {{ account.nickname }}
+        </q-item-label>
         <q-item-label>
-          <strong>
-            {{ account.uin }}
-          </strong>
+          <strong>{{ account.uin }}</strong>
         </q-item-label>
         <q-item-label caption class="q-gutter-xs">
           <span v-if="account.predefined" class="text-orange">
