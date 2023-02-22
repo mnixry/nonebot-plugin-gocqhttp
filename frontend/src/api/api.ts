@@ -116,6 +116,12 @@ export interface AccountListItem {
      * @memberof AccountListItem
      */
     'process_connected': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof AccountListItem
+     */
+    'nickname'?: string;
 }
 /**
  * An enumeration.
@@ -261,7 +267,7 @@ export interface DeviceInfo {
      * @type {string}
      * @memberof DeviceInfo
      */
-    'incremental': string;
+    'incremental'?: string;
     /**
      * 
      * @type {AccountProtocol}
