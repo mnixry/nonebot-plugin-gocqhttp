@@ -3,11 +3,11 @@ from datetime import datetime
 from nonebot.adapters import MessageTemplate
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent
 from nonebot.permission import SUPERUSER
-from nonebot.plugin import on_command
+from nonebot.plugin import on_fullmatch
 
 from .process import ProcessesManager, RunningProcessDetail
 
-handler = on_command("gocq", aliases={"gocq状态"}, permission=SUPERUSER)
+handler = on_fullmatch(("gocq", "gocq状态"), permission=SUPERUSER)
 
 STATUS_MESSAGE_TEMPLATE = MessageTemplate(
     "帐号{account}统计数据:\n" "日志条数: {total_logs}\n" "重启次数: {restarts}\n",
