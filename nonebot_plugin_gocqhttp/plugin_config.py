@@ -15,6 +15,7 @@ class AccountProtocol(IntEnum):
     MacOS = 3
     QiDian = 4
     iPad = 5
+    aPad = 6
 
 
 class AccountConfig(BaseModel):
@@ -47,8 +48,7 @@ class PluginConfig(BaseModel):
     WEBUI_USERNAME: Optional[str] = Field(None, alias="gocq_webui_username")
     WEBUI_PASSWORD: Optional[str] = Field(None, alias="gocq_webui_password")
 
-    CONFIG_TEMPLATE_PATH: Optional[str] = Field(
-        None, alias="gocq_config_template_path")
+    CONFIG_TEMPLATE_PATH: Optional[str] = Field(None, alias="gocq_config_template_path")
 
     TUNNEL_PORT: Optional[int] = Field(None, alias="gocq_tunnel_port")
 
