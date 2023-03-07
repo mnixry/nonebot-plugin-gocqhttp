@@ -78,6 +78,7 @@ const protocols = Object.entries({
   [AccountProtocol.NUMBER_3]: 'MacOS',
   [AccountProtocol.NUMBER_4]: '企点',
   [AccountProtocol.NUMBER_5]: 'iPad',
+  [AccountProtocol.NUMBER_6]: 'aPad',
 }).map(([value, label]) => ({ value: +value, label }));
 
 const uin = ref<number>(),
