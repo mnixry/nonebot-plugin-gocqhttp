@@ -167,6 +167,9 @@ def account_device_read(process: GoCQProcess = RunningProcess()):
 
 @router.patch("/{uin}/device", response_model=DeviceInfo)
 def account_device_write(data: DeviceInfo, process: GoCQProcess = RunningProcess()):
+    if process.account.protocol != data.protocol:
+        process.account.protocol = data.protocol
+    asyncio.create_task(ProcessesManager.save())
     process.device.write(data)
     return process.device.read()
 
