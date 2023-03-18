@@ -37,6 +37,7 @@ class DeviceInfo(ShortDeviceInfo):
     proc_version: str
     baseband: str = ""
     sim: str = "T-Mobile"
+    sim_info: str = "T-Mobile"
     os_type: str = "android"
     bootloader: str = "U-boot"
     wifi_bssid: str
