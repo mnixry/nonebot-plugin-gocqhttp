@@ -10,12 +10,9 @@ import nonebot_plugin_gocqhttp.plugin  # noqa: F401
 from nonebot_plugin_gocqhttp import web
 from nonebot_plugin_gocqhttp.log import LOG_STORAGE, logger
 from nonebot_plugin_gocqhttp.plugin_config import config
-from nonebot_plugin_gocqhttp.process import (
-    ACCOUNTS_SAVE_PATH,
-    BINARY_PATH,
-    ProcessesManager,
-    download_gocq,
-)
+from nonebot_plugin_gocqhttp.process import (ACCOUNTS_OLD_SAVE_PATH, ACCOUNTS_SAVE_PATH,
+                                             BINARY_PATH, ProcessesManager,
+                                             download_gocq)
 from nonebot_plugin_gocqhttp.proxy import ProxyServiceManager
 
 driver = get_driver()
@@ -41,8 +38,11 @@ async def startup():
         await download_gocq()
 
     ProcessesManager.load_config()
+    
     if ACCOUNTS_SAVE_PATH.is_file():
-        await ProcessesManager.load_saved(ignore_loaded=True)
+        await ProcessesManager.load_saved(ACCOUNTS_SAVE_PATH, is_dumps=False, ignore_loaded=True)
+    elif ACCOUNTS_OLD_SAVE_PATH.is_file():
+        await ProcessesManager.load_saved(ACCOUNTS_OLD_SAVE_PATH, is_dumps=True, ignore_loaded=True)
 
     await asyncio.gather(
         *map(lambda process: process.start(), ProcessesManager.all()),

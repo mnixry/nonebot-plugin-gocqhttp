@@ -1,20 +1,23 @@
 import pickle
 import pickletools
 import zlib
+import jsonpickle
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from anyio import open_file
 from loguru import logger
+from pydantic import parse_obj_as
+
 from nonebot_plugin_gocqhttp.exceptions import AccountAlreadyExists
 from nonebot_plugin_gocqhttp.plugin_config import AccountConfig
 from nonebot_plugin_gocqhttp.plugin_config import config as plugin_config
 from nonebot_plugin_gocqhttp.process.download import BINARY_DIR
 from nonebot_plugin_gocqhttp.process.models import ProcessAccountsStore
 from nonebot_plugin_gocqhttp.process.process import GoCQProcess
-from pydantic import parse_obj_as
 
-ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.pkl"
+ACCOUNTS_OLD_SAVE_PATH = BINARY_DIR / "accounts.pkl"
+ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.json"
 
 
 class ProcessesManager:
@@ -48,18 +51,28 @@ class ProcessesManager:
         ]
 
     @classmethod
-    async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH) -> int:
-        store = ProcessAccountsStore(
-            accounts=[
-                parse_obj_as(AccountConfig, process.account)
-                for process in cls.all(include_predefined=False)
-            ]
-        )
-        dumped = pickle.dumps(store)
-        dumped = pickletools.optimize(dumped)
-        compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
-        async with await open_file(save_path, "wb") as f:
-            size = await f.write(compressed)
+    async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH, dumps: bool = False) -> int:
+        if dumps:
+            store = ProcessAccountsStore(
+                accounts=[
+                    parse_obj_as(AccountConfig, process.account)
+                    for process in cls.all(include_predefined=False)
+                ]
+            )
+            dumped = pickle.dumps(store)
+            dumped = pickletools.optimize(dumped)
+            compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
+            async with await open_file(save_path, "wb") as f:
+                size = await f.write(compressed)
+        else:
+            store = ProcessAccountsStore(
+                accounts=[
+                    parse_obj_as(AccountConfig, process.account)
+                    for process in cls.all(include_predefined=False)
+                ]
+            )
+            async with await open_file(save_path, "w") as f:
+                size = await f.write(jsonpickle.encode(store))
         logger.debug(f"Accounts data has been saved: {save_path=} {size=}")
         return size
 
@@ -74,18 +87,30 @@ class ProcessesManager:
     @classmethod
     async def load_saved(
         cls,
-        save_path: Path = ACCOUNTS_SAVE_PATH,
+        save_path: Path,
+        is_dumps: bool = False,
         ignore_loaded: bool = False,
     ) -> List[GoCQProcess]:
-        try:
-            async with await open_file(save_path, "rb") as f:
-                compressed = await f.read()
-            decompressed = zlib.decompress(compressed)
-            store = parse_obj_as(ProcessAccountsStore, pickle.loads(decompressed))
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to load saved accounts from {save_path!r}"
-            ) from e
+        if is_dumps:
+            try:
+                async with await open_file(save_path, "rb") as f:
+                    compressed = await f.read()
+                decompressed = zlib.decompress(compressed)
+                store = parse_obj_as(ProcessAccountsStore, pickle.loads(decompressed))
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to load saved accounts from {save_path!r}"
+                ) from e
+        else:
+            try:
+                async with await open_file(save_path, "r") as f:
+                    content = await f.read()
+                store = jsonpickle.decode(content)
+
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to load saved accounts from {save_path!r}"
+                ) from e
         return [
             cls.create_instance(account)
             for account in store.accounts
