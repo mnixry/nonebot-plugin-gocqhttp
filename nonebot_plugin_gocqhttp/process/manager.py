@@ -52,25 +52,19 @@ class ProcessesManager:
 
     @classmethod
     async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH, dumps: bool = False) -> int:
+        store = ProcessAccountsStore(
+            accounts=[
+                parse_obj_as(AccountConfig, process.account)
+                for process in cls.all(include_predefined=False)
+            ]
+        )
         if dumps:
-            store = ProcessAccountsStore(
-                accounts=[
-                    parse_obj_as(AccountConfig, process.account)
-                    for process in cls.all(include_predefined=False)
-                ]
-            )
             dumped = pickle.dumps(store)
             dumped = pickletools.optimize(dumped)
             compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
             async with await open_file(save_path, "wb") as f:
                 size = await f.write(compressed)
         else:
-            store = ProcessAccountsStore(
-                accounts=[
-                    parse_obj_as(AccountConfig, process.account)
-                    for process in cls.all(include_predefined=False)
-                ]
-            )
             async with await open_file(save_path, "w") as f:
                 size = await f.write(jsonpickle.encode(store))
         logger.debug(f"Accounts data has been saved: {save_path=} {size=}")

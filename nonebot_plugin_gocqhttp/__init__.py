@@ -38,11 +38,12 @@ async def startup():
         await download_gocq()
 
     ProcessesManager.load_config()
-    
+
     if ACCOUNTS_SAVE_PATH.is_file():
         await ProcessesManager.load_saved(ACCOUNTS_SAVE_PATH, is_dumps=False, ignore_loaded=True)
     elif ACCOUNTS_OLD_SAVE_PATH.is_file():
         await ProcessesManager.load_saved(ACCOUNTS_OLD_SAVE_PATH, is_dumps=True, ignore_loaded=True)
+        await ProcessesManager.save()   # update to new format
 
     await asyncio.gather(
         *map(lambda process: process.start(), ProcessesManager.all()),
