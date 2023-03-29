@@ -1,7 +1,3 @@
-import pickle
-import pickletools
-import zlib
-import jsonpickle
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -16,8 +12,8 @@ from nonebot_plugin_gocqhttp.process.download import BINARY_DIR
 from nonebot_plugin_gocqhttp.process.models import ProcessAccountsStore
 from nonebot_plugin_gocqhttp.process.process import GoCQProcess
 
-ACCOUNTS_OLD_SAVE_PATH = BINARY_DIR / "accounts.pkl"
 ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.json"
+ACCOUNTS_LEGACY_SAVE_PATH = BINARY_DIR / "accounts.pkl"
 
 
 class ProcessesManager:
@@ -51,22 +47,17 @@ class ProcessesManager:
         ]
 
     @classmethod
-    async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH, dumps: bool = False) -> int:
+    async def save(cls, save_path: Path = ACCOUNTS_SAVE_PATH) -> int:
         store = ProcessAccountsStore(
             accounts=[
                 parse_obj_as(AccountConfig, process.account)
                 for process in cls.all(include_predefined=False)
             ]
         )
-        if dumps:
-            dumped = pickle.dumps(store)
-            dumped = pickletools.optimize(dumped)
-            compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
-            async with await open_file(save_path, "wb") as f:
-                size = await f.write(compressed)
-        else:
-            async with await open_file(save_path, "w") as f:
-                size = await f.write(jsonpickle.encode(store))
+        async with await open_file(save_path, "wb") as f:
+            size = await f.write(
+                store.json(sort_keys=True, indent=4, ensure_ascii=False).encode()
+            )
         logger.debug(f"Accounts data has been saved: {save_path=} {size=}")
         return size
 
@@ -85,26 +76,25 @@ class ProcessesManager:
         is_dumps: bool = False,
         ignore_loaded: bool = False,
     ) -> List[GoCQProcess]:
-        if is_dumps:
-            try:
-                async with await open_file(save_path, "rb") as f:
-                    compressed = await f.read()
-                decompressed = zlib.decompress(compressed)
-                store = parse_obj_as(ProcessAccountsStore, pickle.loads(decompressed))
-            except Exception as e:
-                raise RuntimeError(
-                    f"Failed to load saved accounts from {save_path!r}"
-                ) from e
-        else:
-            try:
-                async with await open_file(save_path, "r") as f:
-                    content = await f.read()
-                store = jsonpickle.decode(content)
+        async with await open_file(save_path, "rb") as f:
+            binary_dump = await f.read()
+        try:
+            if is_dumps:
+                import pickle
+                import zlib
 
-            except Exception as e:
-                raise RuntimeError(
-                    f"Failed to load saved accounts from {save_path!r}"
-                ) from e
+                try:
+                    loaded = pickle.loads(binary_dump)
+                except pickle.UnpicklingError:
+                    binary_dump = zlib.decompress(binary_dump)
+                    loaded = pickle.loads(binary_dump)
+                store = parse_obj_as(ProcessAccountsStore, loaded)
+            else:
+                store = ProcessAccountsStore.parse_raw(binary_dump)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to load saved accounts from {save_path!r}"
+            ) from e
         return [
             cls.create_instance(account)
             for account in store.accounts
