@@ -1,5 +1,6 @@
 import asyncio
 import mimetypes
+import os
 import re
 import subprocess
 import threading
@@ -113,7 +114,11 @@ class GoCQProcess:
         self.process = subprocess.Popen(
             [BINARY_PATH.absolute(), "-faststart"],
             cwd=self.cwd.absolute(),
-            text=False,
+            env={
+                **os.environ,
+                "FORCE_TTY": "true",
+            },  # see: https://github.com/ifrstr/isatty#using-force_tty
+            text=False,  # fix possible encoding error, see: #341
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -123,7 +128,7 @@ class GoCQProcess:
         for output in iter(self.process.stdout.readline, b""):
             output = output.strip().decode("utf-8", "replace")
             if STARTUP_FINISH_PROMPT in output:
-                logger.info(
+                logger.success(
                     "go-cqhttp for "
                     f"<e>{self.account.uin}</e> has successfully started."
                 )
