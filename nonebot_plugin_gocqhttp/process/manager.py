@@ -1,20 +1,19 @@
-import pickle
-import pickletools
-import zlib
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from anyio import open_file
 from loguru import logger
+from pydantic import parse_obj_as
+
 from nonebot_plugin_gocqhttp.exceptions import AccountAlreadyExists
 from nonebot_plugin_gocqhttp.plugin_config import AccountConfig
 from nonebot_plugin_gocqhttp.plugin_config import config as plugin_config
 from nonebot_plugin_gocqhttp.process.download import BINARY_DIR
 from nonebot_plugin_gocqhttp.process.models import ProcessAccountsStore
 from nonebot_plugin_gocqhttp.process.process import GoCQProcess
-from pydantic import parse_obj_as
 
-ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.pkl"
+ACCOUNTS_SAVE_PATH = BINARY_DIR / "accounts.json"
+ACCOUNTS_LEGACY_SAVE_PATH = BINARY_DIR / "accounts.pkl"
 
 
 class ProcessesManager:
@@ -55,11 +54,10 @@ class ProcessesManager:
                 for process in cls.all(include_predefined=False)
             ]
         )
-        dumped = pickle.dumps(store)
-        dumped = pickletools.optimize(dumped)
-        compressed = zlib.compress(dumped, level=zlib.Z_BEST_COMPRESSION)
         async with await open_file(save_path, "wb") as f:
-            size = await f.write(compressed)
+            size = await f.write(
+                store.json(sort_keys=True, indent=4, ensure_ascii=False).encode()
+            )
         logger.debug(f"Accounts data has been saved: {save_path=} {size=}")
         return size
 
@@ -74,14 +72,25 @@ class ProcessesManager:
     @classmethod
     async def load_saved(
         cls,
-        save_path: Path = ACCOUNTS_SAVE_PATH,
+        save_path: Path,
+        is_dumps: bool = False,
         ignore_loaded: bool = False,
     ) -> List[GoCQProcess]:
+        async with await open_file(save_path, "rb") as f:
+            binary_dump = await f.read()
         try:
-            async with await open_file(save_path, "rb") as f:
-                compressed = await f.read()
-            decompressed = zlib.decompress(compressed)
-            store = parse_obj_as(ProcessAccountsStore, pickle.loads(decompressed))
+            if is_dumps:
+                import pickle
+                import zlib
+
+                try:
+                    loaded = pickle.loads(binary_dump)
+                except pickle.UnpicklingError:
+                    binary_dump = zlib.decompress(binary_dump)
+                    loaded = pickle.loads(binary_dump)
+                store = parse_obj_as(ProcessAccountsStore, loaded)
+            else:
+                store = ProcessAccountsStore.parse_raw(binary_dump)
         except Exception as e:
             raise RuntimeError(
                 f"Failed to load saved accounts from {save_path!r}"

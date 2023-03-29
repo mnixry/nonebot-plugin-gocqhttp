@@ -1,6 +1,6 @@
 # flake8:noqa:F401
 from .download import BINARY_DIR, BINARY_PATH, download_gocq
-from .manager import ACCOUNTS_SAVE_PATH, ProcessesManager
+from .manager import ACCOUNTS_LEGACY_SAVE_PATH, ACCOUNTS_SAVE_PATH, ProcessesManager
 from .models import (
     ProcessInfo,
     ProcessLog,

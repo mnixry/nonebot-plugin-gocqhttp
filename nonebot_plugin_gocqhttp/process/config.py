@@ -12,9 +12,11 @@ from .download import ACCOUNTS_DATA_PATH
 
 
 class AccountConfigHelper:
-    CONFIG_TEMPLATE_PATH = Path(config.CONFIG_TEMPLATE_PATH) \
-        if config.CONFIG_TEMPLATE_PATH \
+    CONFIG_TEMPLATE_PATH = (
+        Path(config.CONFIG_TEMPLATE_PATH)
+        if config.CONFIG_TEMPLATE_PATH
         else Path(__file__).parent / "config-template.yml"
+    )
 
     TEMPLATE_FILE_NAME = "config-template.yml"
     CONFIG_FILE_NAME = "config.yml"
