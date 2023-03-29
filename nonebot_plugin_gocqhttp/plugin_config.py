@@ -30,7 +30,8 @@ class PluginConfig(BaseModel):
     DOWNLOAD_DOMAINS: List[str] = Field(
         [
             "ghdown.obfs.dev",  # Download mirror over Cloudflare worker
-            "download.fgit.ml",  # Download mirror provided by FastGit
+            "download.fgit.ml",
+            "download.fgit.gq",  # Download mirror provided by FastGit
             "github.com",  # Official GitHub download
         ],
         alias="gocq_download_domains",
