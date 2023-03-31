@@ -1,6 +1,7 @@
-import secrets
 from importlib.metadata import version
 from pathlib import Path
+from secrets import compare_digest as compare_digest_secure
+from typing import Any, Awaitable, Callable
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.gzip import GZipMiddleware
@@ -9,6 +10,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
 from ..exceptions import PluginGoCQException
+from ..log import AccessLogFilter
 from ..plugin_config import config as plugin_config
 from .api import router as api_router
 
@@ -23,8 +25,8 @@ async def security_dependency(
 ):
     assert plugin_config.WEBUI_USERNAME and plugin_config.WEBUI_PASSWORD
     if not (
-        secrets.compare_digest(credentials.username, plugin_config.WEBUI_USERNAME)
-        and secrets.compare_digest(credentials.password, plugin_config.WEBUI_PASSWORD)
+        compare_digest_secure(credentials.username, plugin_config.WEBUI_USERNAME)
+        and compare_digest_secure(credentials.password, plugin_config.WEBUI_PASSWORD)
     ):
         raise HTTPException(
             status_code=401,
@@ -46,6 +48,14 @@ app = FastAPI(
 )
 
 
+@app.middleware("http")
+async def add_filterable_log(
+    request: Request, call_next: Callable[[Request], Awaitable[Any]]
+):
+    AccessLogFilter.filterable_paths.add(request.scope["path"])
+    return await call_next(request)
+
+
 @app.exception_handler(PluginGoCQException)
 async def handle_plugin_exception(request: Request, exc: PluginGoCQException):
     return JSONResponse(content={"detail": exc.message}, status_code=exc.code)
@@ -54,6 +64,5 @@ async def handle_plugin_exception(request: Request, exc: PluginGoCQException):
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(api_router, prefix="/api")
-
 
 app.mount("/", StaticFiles(directory=DIST_PATH, html=True), name="frontend")

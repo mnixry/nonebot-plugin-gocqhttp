@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11.config import Config as OnebotConfig
@@ -52,6 +52,8 @@ class PluginConfig(BaseModel):
     CONFIG_TEMPLATE_PATH: Optional[str] = Field(None, alias="gocq_config_template_path")
 
     TUNNEL_PORT: Optional[int] = Field(None, alias="gocq_tunnel_port")
+
+    MUTE_ACCESS_LOG: Union[int, bool] = Field(5, alias="gocq_mute_access_log")
 
 
 driver_config = driver.config

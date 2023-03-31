@@ -1,8 +1,11 @@
 import asyncio
 import logging
-from typing import Awaitable, Callable, Dict, Generic, List, Set, TypeVar
+import re
+from typing import Awaitable, Callable, ClassVar, Dict, Generic, List, Set, TypeVar
 
 from nonebot.log import logger as _logger
+
+from .plugin_config import config as plugin_config
 
 _T = TypeVar("_T")
 LogListener = Callable[[_T], Awaitable[None]]
@@ -30,6 +33,34 @@ class LogStorage(Generic[_T]):
 
     def list(self, reverse: bool = False) -> List[_T]:
         return [self.logs[seq] for seq in sorted(self.logs, reverse=reverse)]
+
+
+class AccessLogFilter(logging.Filter):
+    log_match_re = re.compile(
+        r"\"(?P<method>\w+)\s+(?P<path>/\S+)\s(?P<protocol>\S+)\""
+    )
+    filterable_paths: ClassVar[Set[str]] = set()
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if plugin_config.MUTE_ACCESS_LOG is False:
+            return True
+
+        message = record.getMessage()
+        match = self.log_match_re.search(message)
+        if not match:
+            return True
+
+        if match.group("path") in self.filterable_paths:
+            record.levelno = (
+                5
+                if plugin_config.MUTE_ACCESS_LOG is True
+                else plugin_config.MUTE_ACCESS_LOG
+            )
+            record.levelname = "MUTED ACCESS"
+        return True
+
+
+logging.getLogger("uvicorn.access").addFilter(AccessLogFilter())
 
 
 STDOUT = _logger.level("STDOUT", no=logging.INFO)
