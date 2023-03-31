@@ -37,7 +37,13 @@
             :filled="(password?.length ?? 0) > 0"
             clearable
             label="密码"
-            hint="留空以使用二维码登录"
+            hint="手表协议可以留空以使用二维码登录"
+            :rules="[
+              (v) =>
+                typeof v === 'string' && v.length > 0
+                  ? true
+                  : protocol === AccountProtocol.NUMBER_2 || '请输入密码',
+            ]"
           >
             <template v-slot:prepend><q-icon name="password" /></template>
           </q-input>
