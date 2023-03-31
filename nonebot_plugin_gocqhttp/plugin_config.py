@@ -1,9 +1,9 @@
 from enum import IntEnum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11.config import Config as OnebotConfig
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, FilePath, HttpUrl
 
 driver = get_driver()
 
@@ -44,6 +44,9 @@ class PluginConfig(BaseModel):
 
     PROCESS_KWARGS: Dict[str, Any] = Field(
         default_factory=dict, alias="gocq_process_kwargs"
+    )
+    PROCESS_EXECUTABLE: Optional[Union[Literal["@PATH"], FilePath]] = Field(
+        None, alias="gocq_process_executable"
     )
 
     WEBUI_USERNAME: Optional[str] = Field(None, alias="gocq_webui_username")
