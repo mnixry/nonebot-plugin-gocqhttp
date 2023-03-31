@@ -24,6 +24,10 @@ class AccountConfigFile(BaseModel):
     content: str
 
 
+class SessionTokenFile(BaseModel):
+    base64_content: str
+
+
 class StdinInputContent(BaseModel):
     input: str
     linesep: bool = True

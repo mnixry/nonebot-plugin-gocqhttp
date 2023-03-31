@@ -30,6 +30,11 @@ class BotNotFound(PluginGoCQException):
     code = 404
 
 
+class SessionTokenNotFound(PluginGoCQException):
+    message = "File session.token not found"
+    code = 404
+
+
 class AccountAlreadyExists(PluginGoCQException):
     message = "Account already exists"
     code = 409

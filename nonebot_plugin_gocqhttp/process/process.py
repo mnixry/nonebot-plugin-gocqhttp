@@ -19,7 +19,7 @@ from ..log import LogStorage as BaseLogStorage
 from ..log import logger
 from ..plugin_config import AccountConfig
 from ..plugin_config import config as plugin_config
-from .config import AccountConfigHelper, AccountDeviceHelper
+from .config import AccountConfigHelper, AccountDeviceHelper, SessionTokenHelper
 from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
 from .models import (
     ProcessInfo,
@@ -74,6 +74,8 @@ class GoCQProcess:
         self.device = AccountDeviceHelper(account)
         if not self.device.exists:
             self.device.generate()
+        self.session = SessionTokenHelper(account)
+
         self.account, self.predefined = account, predefined
 
         self.loop = asyncio.get_running_loop()

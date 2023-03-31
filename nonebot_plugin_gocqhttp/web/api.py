@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import os
 import shutil
 from datetime import datetime, timedelta
@@ -11,7 +12,12 @@ from nonebot.adapters.onebot.v11 import ActionFailed, Bot
 from nonebot.utils import escape_tag, run_sync
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from ..exceptions import BotNotFound, ProcessNotFound, RemovePredefinedAccount
+from ..exceptions import (
+    BotNotFound,
+    ProcessNotFound,
+    RemovePredefinedAccount,
+    SessionTokenNotFound,
+)
 from ..log import LOG_STORAGE, logger
 from ..plugin_config import AccountConfig
 from ..process import GoCQProcess, ProcessesManager, ProcessInfo, ProcessLog
@@ -191,6 +197,30 @@ def account_device_write(data: DeviceInfo, process: GoCQProcess = RunningProcess
 @router.delete("/{uin}/device", status_code=204)
 def account_device_delete(process: GoCQProcess = RunningProcess()):
     process.device.generate()
+
+
+@router.get("/{uin}/session", response_model=models.SessionTokenFile)
+def account_session_read(process: GoCQProcess = RunningProcess()):
+    if not process.session.exists:
+        raise SessionTokenNotFound
+    return models.SessionTokenFile(
+        base64_content=base64.b64encode(process.session.read()).decode()
+    )
+
+
+@router.patch("/{uin}/session", response_model=models.SessionTokenFile)
+def account_session_write(
+    data: models.SessionTokenFile, process: GoCQProcess = RunningProcess()
+):
+    process.session.write(base64.b64decode(data.base64_content))
+    return models.SessionTokenFile(
+        base64_content=base64.b64encode(process.session.read()).decode()
+    )
+
+
+@router.delete("/{uin}/session", status_code=204)
+def account_session_delete(process: GoCQProcess = RunningProcess()):
+    process.session.delete()
 
 
 @router.post("/{uin}/api")

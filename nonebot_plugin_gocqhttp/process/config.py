@@ -97,3 +97,27 @@ class AccountDeviceHelper:
         device_content = self.read()
         device_content.protocol = self.account.protocol
         return self.write(device_content)
+
+
+class SessionTokenHelper:
+    SESSION_FILE_NAME = "session.token"
+
+    def __init__(self, account: AccountConfig):
+        self.account = account
+        self.account_path = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.account_path.mkdir(parents=True, exist_ok=True)
+
+        self.session_path = self.account_path / self.SESSION_FILE_NAME
+
+    @property
+    def exists(self):
+        return self.session_path.is_file()
+
+    def read(self) -> bytes:
+        return self.session_path.read_bytes()
+
+    def write(self, content: bytes) -> int:
+        return self.session_path.write_bytes(content)
+
+    def delete(self):
+        return self.session_path.unlink()
