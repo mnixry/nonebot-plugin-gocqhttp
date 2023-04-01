@@ -1,7 +1,7 @@
 <template>
   <q-page class="row q-pa-md justify-center">
     <q-card class="shadow col-12" style="height: calc(100vh - 5rem)">
-      <q-card-section class="row justify-start items-center">
+      <q-card-section class="row items-center">
         <q-btn
           @click="$router.back"
           flat
@@ -10,7 +10,89 @@
           icon="arrow_back"
         />
         <div class="text-h5">编辑设备信息文件</div>
+        <q-space />
+        <div class="column">
+          <div class="text-body">
+            <a href="https://qdvc.ilharp.cc/">QDVC</a>
+            导入导出
+          </div>
+          <div class="q-gutter-md">
+            <q-btn
+              class="q-ml-md"
+              @click="importDialog = true"
+              flat
+              round
+              color="primary"
+              icon="login"
+            />
+            <q-btn
+              class="q-ml-md"
+              @click="exportDialog = true"
+              flat
+              round
+              color="secondary"
+              icon="logout"
+            />
+          </div>
+        </div>
       </q-card-section>
+      <q-dialog v-model="exportDialog">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">导出 QDVC</div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section>
+            <div style="max-height: 30vh; font-family: monospace">
+              <q-input
+                v-model="qdvcUri"
+                :loading="qdvcUri.length <= 0"
+                readonly
+                type="textarea"
+                label="QDVC分享连接"
+              />
+            </div>
+          </q-card-section>
+          <q-card-actions class="row justify-center">
+            <q-btn
+              @click="writeQdvcUri"
+              flat
+              label="复制到剪贴板"
+              color="primary"
+              icon="content_copy"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <q-dialog v-model="importDialog">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">导入 QDVC</div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section>
+            <div style="max-height: 30vh; font-family: monospace">
+              <q-input
+                v-model="qdvcUri"
+                :loading="qdvcApplying"
+                :disable="qdvcApplying"
+                :rules="[(val) => QDVC_RE.test(val) || '不是有效的 QDVC 链接']"
+                type="textarea"
+                label="QDVC分享连接"
+              />
+            </div>
+          </q-card-section>
+          <q-card-actions class="row justify-center">
+            <q-btn
+              @click="applyQdvcUri"
+              flat
+              label="应用 QDVC 配置"
+              color="primary"
+              icon="login"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
       <q-separator />
       <q-card-actions class="q-gutter-md q-mx-md">
         <q-btn
@@ -49,7 +131,7 @@
   </q-page>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 
 import ConfigFileEditor from 'src/components/ConfigFileEditor.vue';
@@ -58,9 +140,16 @@ import { api } from 'boot/axios';
 
 const $q = useQuasar();
 
+const QDVC_RE =
+  /^qdvc:(?<device>[A-Za-z0-9+/=]+),?(?<session>[A-Za-z0-9+/=]+)?$/;
+
 const props = defineProps<{ uin: number }>(),
   content = ref<string>(),
-  loading = ref(true);
+  loading = ref(true),
+  exportDialog = ref(false),
+  importDialog = ref(false),
+  qdvcUri = ref(''),
+  qdvcApplying = ref(false);
 
 async function loadConfig() {
   try {
@@ -113,4 +202,60 @@ async function deleteConfig() {
 }
 
 onMounted(loadConfig);
+
+watch(exportDialog, async (val) => {
+  if (val)
+    try {
+      qdvcUri.value = '';
+      const device = await api
+          .accountDeviceReadApiUinDeviceGet(props.uin)
+          .then(({ data }) => JSON.stringify(data)),
+        session = await api
+          .accountSessionReadApiUinSessionGet(props.uin)
+          .then(({ data }) => window.atob(data.base64_content));
+      qdvcUri.value = `qdvc:${window.btoa(device)},${window.btoa(session)}`;
+    } catch (e) {
+      $q.notify({
+        message: `设备信息导入失败: ${(e as Error).message}`,
+        color: 'negative',
+      });
+    }
+  else qdvcUri.value = '';
+});
+
+async function writeQdvcUri() {
+  if (navigator.clipboard) {
+    await navigator.clipboard.writeText(qdvcUri.value);
+    $q.notify({ message: '已复制到剪贴板', color: 'positive' });
+  }
+}
+
+async function applyQdvcUri() {
+  const matched = QDVC_RE.exec(qdvcUri.value);
+  if (!matched) {
+    $q.notify({ message: '无效的 QDVC 链接', color: 'negative' });
+    return;
+  }
+  const { device, session } = matched.groups!;
+  try {
+    qdvcApplying.value = true;
+    if (device)
+      await api.accountDeviceWriteApiUinDevicePatch(
+        props.uin,
+        JSON.parse(window.atob(device)) as DeviceInfo
+      );
+    if (session)
+      await api.accountSessionWriteApiUinSessionPatch(props.uin, {
+        base64_content: window.btoa(window.atob(session)),
+      });
+    $q.notify({ message: '设备信息导入成功', color: 'positive' });
+  } catch (e) {
+    $q.notify({
+      message: `设备信息导入失败: ${(e as Error).message}`,
+      color: 'negative',
+    });
+  } finally {
+    qdvcApplying.value = false;
+  }
+}
 </script>
