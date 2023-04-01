@@ -41,7 +41,7 @@
               <q-btn push icon="qr_code" color="accent">
                 显示登录二维码
                 <q-popup-proxy>
-                  <q-img width="40vh" :src="status.qr_uri" />
+                  <q-img width="30vh" :src="status.qr_uri" />
                 </q-popup-proxy>
               </q-btn>
             </q-slide-transition>
@@ -74,29 +74,19 @@
             label="刷新"
           />
           <q-btn
-            push
             flat
             color="secondary"
-            icon="construction"
-            label="修改设置"
-          >
-            <q-popup-proxy>
-              <div class="column q-gutter-sm q-pa-sm">
-                <q-btn
-                  flat
-                  label="进程配置"
-                  icon="settings"
-                  :to="`/accounts/${uin}/config`"
-                />
-                <q-btn
-                  flat
-                  label="设备信息"
-                  icon="smartphone"
-                  :to="`/accounts/${uin}/device`"
-                />
-              </div>
-            </q-popup-proxy>
-          </q-btn>
+            label="修改配置"
+            icon="settings"
+            :to="`/accounts/${uin}/config`"
+          />
+          <q-btn
+            flat
+            color="accent"
+            label="修改设备"
+            icon="smartphone"
+            :to="`/accounts/${uin}/device`"
+          />
         </q-card-actions>
       </q-card>
       <message-sender class="col-12 shadow" :uin="uin" />
@@ -139,7 +129,7 @@
 import { onBeforeUnmount, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 
-import { api } from 'src/boot/axios';
+import { api } from 'boot/axios';
 import type { ProcessInfo, ProcessLog } from 'src/api';
 
 import RunningProcessStatus from 'components/RunningProcessStatus.vue';
