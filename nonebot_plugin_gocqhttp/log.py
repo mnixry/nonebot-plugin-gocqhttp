@@ -2,6 +2,7 @@ import asyncio
 import logging
 import re
 from typing import Awaitable, Callable, ClassVar, Dict, Generic, List, Set, TypeVar
+from urllib.parse import urlparse
 
 from nonebot.log import logger as _logger
 
@@ -45,18 +46,13 @@ class AccessLogFilter(logging.Filter):
         if plugin_config.MUTE_ACCESS_LOG is False:
             return True
 
-        message = record.getMessage()
-        match = self.log_match_re.search(message)
+        match = self.log_match_re.search(record.getMessage())
         if not match:
             return True
 
-        if match.group("path") in self.filterable_paths:
-            record.levelno = (
-                5
-                if plugin_config.MUTE_ACCESS_LOG is True
-                else plugin_config.MUTE_ACCESS_LOG
-            )
-            record.levelname = "MUTED ACCESS"
+        if urlparse(match.group("path")).path in self.filterable_paths:
+            record.levelno = 0
+            record.levelname = "TRACE"
         return True
 
 

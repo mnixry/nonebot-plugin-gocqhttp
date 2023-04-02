@@ -56,7 +56,7 @@ class PluginConfig(BaseModel):
 
     TUNNEL_PORT: Optional[int] = Field(None, alias="gocq_tunnel_port")
 
-    MUTE_ACCESS_LOG: Union[int, bool] = Field(5, alias="gocq_mute_access_log")
+    MUTE_ACCESS_LOG: bool = Field(True, alias="gocq_mute_access_log")
 
 
 driver_config = driver.config
