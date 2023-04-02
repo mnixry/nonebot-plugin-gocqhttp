@@ -4,6 +4,7 @@ import sys
 from threading import Thread
 from typing import Optional
 
+import proxy  # type: ignore # noqa: F401
 from nonebot.utils import escape_tag, run_sync
 
 from nonebot_plugin_gocqhttp.log import logger

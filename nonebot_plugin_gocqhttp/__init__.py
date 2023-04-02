@@ -17,7 +17,6 @@ from nonebot_plugin_gocqhttp.process import (
     ProcessesManager,
     download_gocq,
 )
-from nonebot_plugin_gocqhttp.proxy import ProxyServiceManager
 
 driver = get_driver()
 
@@ -61,10 +60,14 @@ async def startup():
 
     if tunnel_port := config.TUNNEL_PORT:
         try:
-            import nonebot_plugin_gocqhttp.proxy  # noqa: F401
+            from .external_proxy import ProxyServiceManager
+
+            await ProxyServiceManager.start(tunnel_port)
         except ImportError as e:
-            logger.warning(f"Tunnel configured but required dependencies missing: {e}")
-        await ProxyServiceManager.start(tunnel_port)
+            logger.opt(colors=True).error(
+                "Tunnel configured but required dependencies missing: "
+                f"<r><b>{e}</b></r>"
+            )
 
     logger.info(
         "Startup complete, Web UI has served to "
