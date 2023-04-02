@@ -54,6 +54,15 @@
             </div>
           </q-card-section>
           <q-card-actions class="row justify-center">
+            <q-btn-toggle
+              v-model="qdvcEncoding"
+              toggle-color="secondary"
+              flat
+              :options="[
+                { label: 'Base64', value: 'base64' },
+                { label: 'Base16384', value: 'base16384' },
+              ]"
+            />
             <q-btn
               @click="writeQdvcUri"
               flat
@@ -76,7 +85,7 @@
                 v-model="qdvcUri"
                 :loading="qdvcApplying"
                 :disable="qdvcApplying"
-                :rules="[(val) => QDVC_RE.test(val) || '不是有效的 QDVC 链接']"
+                :rules="[(val) => QDVC.RE.test(val) || '不是有效的 QDVC 链接']"
                 type="textarea"
                 label="QDVC分享连接"
               />
@@ -137,11 +146,9 @@ import { useQuasar } from 'quasar';
 import ConfigFileEditor from 'src/components/ConfigFileEditor.vue';
 import type { DeviceInfo } from 'src/api';
 import { api } from 'boot/axios';
+import { QDVC } from './qdvc-utils';
 
 const $q = useQuasar();
-
-const QDVC_RE =
-  /^qdvc:(?<device>[A-Za-z0-9+/=]+),?(?<session>[A-Za-z0-9+/=]+)?$/;
 
 const props = defineProps<{ uin: number }>(),
   content = ref<string>(),
@@ -149,7 +156,8 @@ const props = defineProps<{ uin: number }>(),
   exportDialog = ref(false),
   importDialog = ref(false),
   qdvcUri = ref(''),
-  qdvcApplying = ref(false);
+  qdvcApplying = ref(false),
+  qdvcEncoding = ref<'base64' | 'base16384'>('base64');
 
 async function loadConfig() {
   try {
@@ -212,8 +220,9 @@ watch(exportDialog, async (val) => {
           .then(({ data }) => JSON.stringify(data)),
         session = await api
           .accountSessionReadApiUinSessionGet(props.uin)
-          .then(({ data }) => window.atob(data.base64_content));
-      qdvcUri.value = `qdvc:${window.btoa(device)},${window.btoa(session)}`;
+          .then(({ data }) => QDVC.decodeBase64(data.base64_content, false))
+          .catch(() => undefined);
+      qdvcUri.value = QDVC.stringify({ device, session }, qdvcEncoding.value);
     } catch (e) {
       $q.notify({
         message: `设备信息导入失败: ${(e as Error).message}`,
@@ -231,22 +240,18 @@ async function writeQdvcUri() {
 }
 
 async function applyQdvcUri() {
-  const matched = QDVC_RE.exec(qdvcUri.value);
-  if (!matched) {
-    $q.notify({ message: '无效的 QDVC 链接', color: 'negative' });
-    return;
-  }
-  const { device, session } = matched.groups!;
+  const parsed = QDVC.parse(qdvcUri.value);
+  if (!parsed) return;
   try {
     qdvcApplying.value = true;
-    if (device)
+    if (parsed.device)
       await api.accountDeviceWriteApiUinDevicePatch(
         props.uin,
-        JSON.parse(window.atob(device)) as DeviceInfo
+        JSON.parse(parsed.device) as DeviceInfo
       );
-    if (session)
+    if (parsed.session)
       await api.accountSessionWriteApiUinSessionPatch(props.uin, {
-        base64_content: window.btoa(window.atob(session)),
+        base64_content: QDVC.encodeBase64(parsed.session),
       });
     $q.notify({ message: '设备信息导入成功', color: 'positive' });
   } catch (e) {
@@ -258,4 +263,10 @@ async function applyQdvcUri() {
     qdvcApplying.value = false;
   }
 }
+
+watch(qdvcEncoding, (val) => {
+  qdvcUri.value = QDVC.parse(qdvcUri.value)
+    ? QDVC.stringify(QDVC.parse(qdvcUri.value)!, val)
+    : '';
+});
 </script>
