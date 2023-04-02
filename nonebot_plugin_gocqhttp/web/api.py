@@ -2,8 +2,8 @@ import asyncio
 import base64
 import os
 import shutil
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple, cast
+from datetime import timedelta
+from typing import Any, Dict, List, Optional, cast
 
 import psutil
 from fastapi import APIRouter, Depends
@@ -25,7 +25,6 @@ from ..process.device.models import DeviceInfo
 from . import models
 
 router = APIRouter(tags=["api"])
-nickname_cache_map: Dict[int, Tuple[str, datetime]] = {}
 
 
 def RunningProcess():
@@ -38,20 +37,18 @@ def RunningProcess():
     return Depends(dependency)
 
 
+nickname_map: Dict[int, str] = {}
+
+
 @router.get("/accounts", response_model=List[models.AccountListItem])
 async def all_accounts(nickname_cache: timedelta = timedelta(minutes=5)):
-    nickname_map: Dict[int, str] = {}
-
-    now_time = datetime.now()
-    for user_id, (nickname, cache_time) in nickname_cache_map.items():
-        if now_time - cache_time < nickname_cache:
-            nickname_map[user_id] = nickname
-
     async def get_nickname(bot: Bot):
         login_info = await bot.get_login_info()
         user_id, nickname = login_info["user_id"], login_info["nickname"]
         nickname_map[user_id] = nickname
-        nickname_cache_map[user_id] = nickname, now_time
+        asyncio.get_running_loop().call_later(
+            nickname_cache.total_seconds(), lambda: nickname_map.pop(user_id)
+        )
 
     await asyncio.gather(
         *[
