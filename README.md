@@ -54,7 +54,7 @@ _A plugin to run go-cqhttp directly in NoneBot2, without additional download and
 
 ### 安装
 
-推荐[使用`nb-cli`进行安装](https://v2.nonebot.dev/docs/start/install-plugin#%E5%AE%89%E8%A3%85)
+推荐[使用`nb-cli`进行安装](https://v2.nonebot.dev/docs/tutorial/store#%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6)
 
 要求最低 Python 版本为 `3.8`
 
