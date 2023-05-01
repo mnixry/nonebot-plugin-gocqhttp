@@ -433,14 +433,14 @@ files = [
 
 [[package]]
 name = "nonebot-adapter-onebot"
-version = "2.2.2"
+version = "2.2.3"
 description = "OneBot(CQHTTP) adapter for nonebot2"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "nonebot_adapter_onebot-2.2.2-py3-none-any.whl", hash = "sha256:1ee231cacfd47afcc0b77a67c8bc56440f33750b2d976139a20732e023cb79b9"},
-    {file = "nonebot_adapter_onebot-2.2.2.tar.gz", hash = "sha256:0c7340dbc075f25bdb7e5cb0575e5758155b3939f77c36f5b51440e24c155306"},
+    {file = "nonebot_adapter_onebot-2.2.3-py3-none-any.whl", hash = "sha256:e715e05578cb58cf42adddb0bac6c060a6ea7c9b2f18e6f011786bbc2bc8d0bd"},
+    {file = "nonebot_adapter_onebot-2.2.3.tar.gz", hash = "sha256:e0ac165536a24f7c5e620092ab596022e8f85d462c17ec8d7a17b191093b4859"},
 ]
 
 [package.dependencies]
