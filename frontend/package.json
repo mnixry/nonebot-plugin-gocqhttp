@@ -23,7 +23,7 @@
     "@babel/eslint-parser": "^7.21.8",
     "@fontsource/dseg14": "^4.5.3",
     "@fontsource/roboto-mono": "^4.5.10",
-    "@quasar/app-webpack": "^3.7.2",
+    "@quasar/app-webpack": "^3.9.2",
     "@types/node": "^18.16.3",
     "@typescript-eslint/eslint-plugin": "^5.59.6",
     "@typescript-eslint/parser": "^5.59.5",
