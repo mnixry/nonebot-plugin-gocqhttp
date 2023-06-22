@@ -120,7 +120,7 @@ class GoCQProcess:
             executable_path = plugin_config.PROCESS_EXECUTABLE
 
         self.process = subprocess.Popen(
-            [executable_path.absolute(), "-faststart"],
+            [executable_path.absolute(), "-faststart", "-update-protocol"],
             cwd=self.cwd.absolute(),
             env={
                 **os.environ,
@@ -143,7 +143,7 @@ class GoCQProcess:
 
             log_matched = LOG_REGEX.match(output)
             log_model = (
-                ProcessLog(**log_matched.groupdict())
+                ProcessLog.parse_obj(log_matched.groupdict())
                 if log_matched
                 else ProcessLog(message=output)
             )
