@@ -3,7 +3,7 @@ from .generator import RandomDeviceInfoGenerator
 from .models import DeviceInfo, ShortDeviceInfo
 
 
-def random_device(uin: int, protocol: AccountProtocol) -> DeviceInfo:
+def random_device(uin: int, protocol: AccountProtocol, **override) -> DeviceInfo:
     randomer = RandomDeviceInfoGenerator(uin)
 
     imei, ssid = randomer.imei(), randomer.ssid()
@@ -12,21 +12,24 @@ def random_device(uin: int, protocol: AccountProtocol) -> DeviceInfo:
     mac_address, ip_address = randomer.mac_address(), randomer.ip_address()
     incremental = randomer.incremental()
 
-    short = ShortDeviceInfo(
-        product=device.name,
-        device=device.device,
-        board=device.device,
-        brand=device.branding,
-        model=device.model,
-        wifi_ssid=ssid,
-        android_id=android_id,
-        boot_id=boot_id,
-        proc_version=proc_version,
-        mac_address=mac_address,
-        ip_address=ip_address,
-        imei=imei,
-        incremental=incremental,
-        protocol=protocol,
+    short = ShortDeviceInfo.parse_obj(
+        {
+            "product": device.name,
+            "device": device.device,
+            "board": device.device,
+            "brand": device.branding,
+            "model": device.model,
+            "wifi_ssid": ssid,
+            "android_id": android_id,
+            "boot_id": boot_id,
+            "proc_version": proc_version,
+            "mac_address": mac_address,
+            "ip_address": ip_address,
+            "imei": imei,
+            "incremental": incremental,
+            "protocol": protocol,
+            **override,
+        }
     )
 
     return DeviceInfo.from_short(short)

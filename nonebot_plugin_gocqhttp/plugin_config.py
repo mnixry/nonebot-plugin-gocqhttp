@@ -27,6 +27,10 @@ class AccountConfig(BaseModel):
 class PluginConfig(BaseModel):
     ACCOUNTS: List[AccountConfig] = Field(default_factory=list, alias="gocq_accounts")
 
+    DEVICE_OVERRIDE: Dict[str, Any] = Field(
+        default_factory=dict, alias="gocq_device_override"
+    )
+
     DOWNLOAD_DOMAINS: List[str] = Field(
         [
             "ghdown.obfs.dev",  # Download mirror over Cloudflare worker

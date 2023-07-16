@@ -90,7 +90,9 @@ class AccountDeviceHelper:
         )
 
     def generate(self):
-        generated_device = random_device(self.account.uin, self.account.protocol)
+        generated_device = random_device(
+            self.account.uin, self.account.protocol, **config.DEVICE_OVERRIDE
+        )
         return self.write(generated_device)
 
     def before_run(self):
