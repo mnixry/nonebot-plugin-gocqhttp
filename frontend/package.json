@@ -34,7 +34,7 @@
     "eslint-plugin-vue": "^9",
     "monaco-editor": "^0.38.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
-    "vue3-apexcharts": "^1.4.1"
+    "vue3-apexcharts": "^1.4.4"
   },
   "browserslist": [
     "last 10 Chrome versions",
