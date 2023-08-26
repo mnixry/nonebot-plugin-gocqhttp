@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { nextTick, watch, ref } from 'vue';
 import { QScrollArea } from 'quasar';
-import AnsiUp from 'ansi_up';
+import { AnsiUp } from 'ansi_up';
 
 import { type ProcessLog, ProcessLogLevel } from 'src/api';
 
