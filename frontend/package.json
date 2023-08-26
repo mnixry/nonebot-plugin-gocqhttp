@@ -29,7 +29,7 @@
     "ansi_up": "^6.0.2",
     "apexcharts": "^3.40.0",
     "eslint": "^8",
-    "eslint-config-prettier": "^8",
+    "eslint-config-prettier": "^9",
     "eslint-plugin-vue": "^9",
     "monaco-editor": "^0.38.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
