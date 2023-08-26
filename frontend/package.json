@@ -1,14 +1,13 @@
 {
-  "name": "nonebot-plugin-gocqhttp-frontend",
+  "name": "frontend",
   "version": "0.0.1",
-  "description": "A plugin to run go-cqhttp directly in NoneBot2, without additional download and installation.",
   "productName": "NoneBot Plugin Go-CQHTTP",
-  "author": "Mix <mnixry@users.noreply.github.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev"
+    "dev": "quasar dev",
+    "build": "quasar build"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.5",
