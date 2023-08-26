@@ -1,13 +1,15 @@
 from importlib.metadata import version
 from pathlib import Path
 from secrets import compare_digest as compare_digest_secure
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, cast
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketException
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.requests import HTTPConnection, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
+from starlette.status import WS_1008_POLICY_VIOLATION
 
 from ..exceptions import PluginGoCQException
 from ..log import AccessLogFilter
@@ -20,8 +22,21 @@ if not DIST_PATH.is_dir():
     raise FileNotFoundError("WebUI dist directory not found")
 
 
+class WSCompatibleHTTPBasic(HTTPBasic):
+    async def __call__(self, request: HTTPConnection):
+        try:
+            return await super().__call__(cast(Request, request))
+        except HTTPException as e:
+            if not isinstance(request, WebSocket):
+                raise
+            await request.accept()
+            raise WebSocketException(
+                code=WS_1008_POLICY_VIOLATION, reason=e.detail
+            ) from None
+
+
 async def security_dependency(
-    credentials: HTTPBasicCredentials = Depends(HTTPBasic()),
+    credentials: HTTPBasicCredentials = Depends(WSCompatibleHTTPBasic()),
 ):
     assert plugin_config.WEBUI_USERNAME and plugin_config.WEBUI_PASSWORD
     if not (
