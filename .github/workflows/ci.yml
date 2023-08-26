@@ -10,17 +10,13 @@ jobs:
     name: Build frontend
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - uses: actions/checkout@v3
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v3.8.1
         with:
-          node-version: 16.x
+          node-version: lts/*
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -34,14 +30,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Run a multi-line script
+      - name: Install dependencies
         run: |
           yarn global add @quasar/cli
           yarn install
 
       - name: Build dist files
         run: |
-          quasar build
+          yarn build
 
       - name: Upload dist
         uses: actions/upload-artifact@v3
@@ -74,6 +70,8 @@ jobs:
           poetry install -vvv
 
       - uses: suo/flake8-github-action@v1
+        with:
+          checkName: ${{ github.workflow }}
 
       - uses: jakebailey/pyright-action@v1
         with:
