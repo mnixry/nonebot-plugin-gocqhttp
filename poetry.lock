@@ -1091,4 +1091,4 @@ proxy = ["proxy.py"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "6ea415aabd731c951110a8699ce136778a51ea0386dcadb1809ea753650493b6"
+content-hash = "f94be6cf4402a6bec85016fcda89a4d5393c7f04a9cd967a3aae0a2c9f78b031"
