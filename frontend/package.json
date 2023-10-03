@@ -10,7 +10,7 @@
     "build": "quasar build"
   },
   "dependencies": {
-    "@quasar/extras": "^1.16.5",
+    "@quasar/extras": "^1.16.7",
     "axios": "^1.5.0",
     "base16384": "^1.0.0",
     "core-js": "^3.30.2",
