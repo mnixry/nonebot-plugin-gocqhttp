@@ -1199,10 +1199,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quasar/app-webpack@^3.9.2":
-  version "3.9.6"
-  resolved "https://registry.yarnpkg.com/@quasar/app-webpack/-/app-webpack-3.9.6.tgz#b54a96e16d315c64fcf5cfddf1ac9767634c2754"
-  integrity sha512-RBeawdJmbD3dyYkICdSJ1bN5GU2FQ1t50nQLf5iR3twuDRnGuUPKdiJSXTzFrCgZC73jEVaDTv/4QQ4sn3iszw==
+"@quasar/app-webpack@^3.11.2":
+  version "3.11.2"
+  resolved "https://registry.yarnpkg.com/@quasar/app-webpack/-/app-webpack-3.11.2.tgz#485720cef1383c333ad80bff67f025e86a24c769"
+  integrity sha512-ZTrs3pcnT5qtFaX5lhGBKcEkWEZAJrNw2t9NyZCHyes+Ajyvk9/a1eyCJJW7gVlbXjXeRTGNEY3hGw/k5fOgGg==
   dependencies:
     "@quasar/babel-preset-app" "2.0.2"
     "@quasar/render-ssr-error" "^1.0.1"
